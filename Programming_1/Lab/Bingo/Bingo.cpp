@@ -6,25 +6,26 @@
 using   std::cout, std::endl, std::setw, std::fill_n,
         std::any_of, std::begin, std::end;
 
+void DrawTables(int playerCard[][5], bool markedCard[][5]);
 void ClrScr();
 
 int main(){
     //      B       I       N       G       O
-    //    1-15    16-30   31-45   46-60   61-75    < -- number range for each row
-    // testmsg
-    // SET UP VARIABLES, ARRAYS, AND RAND() SEED
+    //    1-15    16-30   31-45   46-60   61-75    < -- number range for each column
+
+    // *** SET UP VARIABLES, ARRAYS, AND RAND() SEED ***
     srand(time(NULL));
     int currBall;
+    char skipFlag;
+    bool currSkip;
     int playerCard[5][5] = {};
-    int playerrCard[4];
     bool markedCard[5][5] = {}; markedCard[2][2] = 1;
-    char title[5] = {'B','I','N','G','O'};
-    bool usedNum[75] = {};                      // array to keep track of already used numbers/balls
-    int countCol[5] = {0, 0, 1, 0, 0};          // array to keep the sum of the '1's in each column
-    int countRow[5] = {0, 0, 1, 0, 0};          // array to keep the sum of the '1's in each row
+    bool usedNum[75] = {};                                  // to keep track of already used numbers/balls
+    int countCol[5] = {0, 0, 1, 0, 0};                      // to keep the sum of the '1's in each column
+    int countRow[5] = {0, 0, 1, 0, 0};                      // to keep the sum of the '1's in each row
     int countDiagP = 0, countDiagS = 0;
 
-    // ASSIGN PLAYER CARD NUMBERS
+    // *** ASSIGN PLAYER CARD NUMBERS ***
     for(int i = 0; i < 5; i++){
         for(int j = 0; j < 5; j++){
             do{
@@ -36,10 +37,26 @@ int main(){
     }
     playerCard[2][2] = 0;
 
-    // RESET usedNum AND START THE GAME
-    fill_n(usedNum, 75, false);
+    // *** RESET usedNum AND START THE GAME ***
+    do{
+        cout.flush();                                       // need to flush the stdout on POSIX
+        ClrScr();
+        DrawTables(playerCard, markedCard);
+        cout << setw(30)    << "--- Juego de Bingo ---\n"
+             << setw(34)    << "Tabla izquierda: Numeros del jugador\n"
+             << setw(34)    << "Tabla derecha: Numeros marcados\n"
+             << setw(31)    << "Desea saltar los turnos\n"
+             << setw(31)    << "en donde no marque? (y/n): ";
+        skipFlag = getchar();
+    }while(skipFlag != 'y' && skipFlag != 'n');
+    cout << setw(32) << "Presione Enter para jugar...";
+    getchar();
+    cout.flush();
     ClrScr();
+    fill_n(usedNum, 75, false);
     for(int i = 1; i <= 71; i++){ 
+        currSkip = 1;
+        
         // get the ball for the current iteration
         do{
             // keep generating the ball until the current ball hasn't been used yet
@@ -55,18 +72,37 @@ int main(){
                     countRow[j] += 1; countCol[k] += 1;
                     if(j == k) countDiagP++;                // element in 1st Diagonal: if currRow == currCol
                     if((5 - 1) == (j + k)) countDiagS++;    // element in 2nd Diagonal: if number of col - 1 == currRow + currCol
-                    goto EndCheck;                          // stop the search after the ball has been found
+                    // check if the player won
+                    if( any_of(begin(countRow), end(countRow), [](int n){return n == 5;}) ||
+                        any_of(begin(countCol), end(countCol), [](int n){return n == 5;}) ||
+                        countDiagP == 4 || countDiagS == 4){
+                        DrawTables(playerCard, markedCard);
+                        cout << setw(24) << "BINGO! :)\n";
+                        cout << setw(24) << "Turnos totales: " << i << endl;
+                        return 0;
+                    }
+                    currSkip = 0;                           // when currSkip is 0, the draw phase won't be skipped
+                    j = 5;                                  // stop the player card search after the pos has been found
+                    break;
                 }
             }
         }
-        EndCheck:
 
+        if(skipFlag == 'y' && currSkip == 1) continue;
+        DrawTables(playerCard, markedCard);
+
+        // otherwise, print the current ball and wait for keypress
+        cout << setw(20) << "Turno " << i << endl;
+        cout << setw(26) << "La bola actual es: " << currBall << endl;
+        cout << setw(26) << "Presione Enter..."; getchar();
+        ClrScr();
+    }
+}
+
+void DrawTables(int playerCard[5][5], bool markedCard[5][5]){
         // print "BINGO"
-        cout << setw(3) << title[0];
-        for(int i = 1; i < 5; i++){
-            cout << setw(4) << title[i];
-        }
-        cout << endl;
+        cout    << setw(3) << 'B' << setw(4) << 'I' << setw(4) << 'N'
+                << setw(4) << 'G' << setw(5) << "O\n"; 
         
         // print the player card & marked card
         for(int j = 0; j < 5; j++){
@@ -81,21 +117,6 @@ int main(){
             }
             cout << endl;
         }
-        
-        // check if the player won
-        if( any_of(begin(countRow), end(countRow), [](int n){return n == 5;}) ||
-            any_of(begin(countCol), end(countCol), [](int n){return n == 5;}) ||
-            countDiagP == 4 || countDiagS == 4){
-                cout << setw(24) << "BINGO! :)\n";
-                cout << setw(24) << "Turnos totales: " << i << endl;
-                return 0;
-        }
-
-        // otherwise, print the current ball and wait for keypress
-        cout << setw(26) << "La bola actual es: " << currBall << endl;
-        cout << setw(26) << "Presione Enter..."; getchar();
-        ClrScr();
-    }
 }
 
 void ClrScr(){
