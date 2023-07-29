@@ -6,21 +6,22 @@
 using   std::cout, std::endl, std::setw, std::fill_n,
         std::any_of, std::begin, std::end;
 
-void clrscr();
+void ClrScr();
 
 int main(){
     //      B       I       N       G       O
     //    1-15    16-30   31-45   46-60   61-75    < -- number range for each row
-
+    // testmsg
     // SET UP VARIABLES, ARRAYS, AND RAND() SEED
     srand(time(NULL));
-    int currBall, currRow, currCol;
+    int currBall;
     int playerCard[5][5] = {};
-    bool markedCard[5][5] = {};
+    int playerrCard[4];
+    bool markedCard[5][5] = {}; markedCard[2][2] = 1;
     char title[5] = {'B','I','N','G','O'};
-    bool usedNum[75] = {};      // array to keep track of already used numbers/balls
-    int countCol[5] = {};       // array to keep the sum of the '1's in each column
-    int countRow[5] = {};       // array to keep the sum of the '1's in each row
+    bool usedNum[75] = {};                      // array to keep track of already used numbers/balls
+    int countCol[5] = {0, 0, 1, 0, 0};          // array to keep the sum of the '1's in each column
+    int countRow[5] = {0, 0, 1, 0, 0};          // array to keep the sum of the '1's in each row
     int countDiagP = 0, countDiagS = 0;
 
     // ASSIGN PLAYER CARD NUMBERS
@@ -33,22 +34,33 @@ int main(){
             usedNum[playerCard[i][j] - 1] = true;           // set the current number as used
         }
     }
-    //playerCard[2][2] = 00;
+    playerCard[2][2] = 0;
+
     // RESET usedNum AND START THE GAME
     fill_n(usedNum, 75, false);
-    for(int i = 1; i <= 21; i++){ 
+    ClrScr();
+    for(int i = 1; i <= 71; i++){ 
         // get the ball for the current iteration
         do{
             // keep generating the ball until the current ball hasn't been used yet
-            currRow = rand() % 5; currCol = rand() % 5;
-            currBall = playerCard[currRow][currCol];
+            currBall = (rand() % 75) + 1;
         }while(usedNum[currBall - 1]);
-        usedNum[currBall - 1] = true;                       // set the currBall as used
-        markedCard[currRow][currCol] = 1;
-        countRow[currRow] += 1; countCol[currCol] += 1;
-        if(currRow == currCol) countDiagP++;                // element in 1st Diagonal: if currRow == currCol
-        if((5 - 1) == (currCol + currRow)) countDiagS++;    // element in 2nd Diagonal: if number of col - 1 == currCol + currRow
+        usedNum[currBall - 1] = 1;                          // set the ball as used
         
+        // check if the ball is in the player card
+        for(int j = 0; j < 5; j++){
+            for(int k = 0; k < 5; k++){
+                if(playerCard[j][k] == currBall){
+                    markedCard[j][k] = 1;
+                    countRow[j] += 1; countCol[k] += 1;
+                    if(j == k) countDiagP++;                // element in 1st Diagonal: if currRow == currCol
+                    if((5 - 1) == (j + k)) countDiagS++;    // element in 2nd Diagonal: if number of col - 1 == currRow + currCol
+                    goto EndCheck;                          // stop the search after the ball has been found
+                }
+            }
+        }
+        EndCheck:
+
         // print "BINGO"
         cout << setw(3) << title[0];
         for(int i = 1; i < 5; i++){
@@ -73,7 +85,7 @@ int main(){
         // check if the player won
         if( any_of(begin(countRow), end(countRow), [](int n){return n == 5;}) ||
             any_of(begin(countCol), end(countCol), [](int n){return n == 5;}) ||
-            countDiagP == 5 || countDiagS == 5){
+            countDiagP == 4 || countDiagS == 4){
                 cout << setw(24) << "BINGO! :)\n";
                 cout << setw(24) << "Turnos totales: " << i << endl;
                 return 0;
@@ -81,12 +93,12 @@ int main(){
 
         // otherwise, print the current ball and wait for keypress
         cout << setw(26) << "La bola actual es: " << currBall << endl;
-        cout << setw(28) << "Presione una tecla..."; getchar();      // wait until user presses a key
-        clrscr();
+        cout << setw(26) << "Presione Enter..."; getchar();
+        ClrScr();
     }
 }
 
-void clrscr(){
+void ClrScr(){
     #ifdef _WIN32
         // if on Windows OS
         std::system("cls");
