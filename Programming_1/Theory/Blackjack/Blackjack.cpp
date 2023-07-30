@@ -1,20 +1,21 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <limits>
 
 using   std::cout, std::cin, std::endl, std::copy,
         std::begin, std::end;
 
 int DrawCard(int deckCards[], int deckNew[], int &cardCount);
-//int DrawCard();
+void ClrScr();
 
 int main(){
-    int playerCards[24] = {};
+    int cardsSum[4] = {};
     int deckCards[52] = {};
-    int deckNew[52] = { 1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,
-                        9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13 };
-    int currCard, cardCount = 52, playerMoney, minBet, playerBet;
-    int temp = 100;
+    const int deckNew[52] = {   1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,
+                                9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13 };
+    int nextCard, cardCount = 52, playerMoney = 100, minBet, playerBet;
+    char flagSplit;
     
     srand(time(NULL));
     copy(deckNew, deckNew + 52, deckCards);         // get a new deck
@@ -26,14 +27,42 @@ int main(){
     if(minBet > playerMoney){ cout  << "Lo siento, no tiene suficiente"
                                     << "\ndinero para jugar :("; return 0; }
     */
-    while(temp > 0){
-        playerCards[0] = DrawCard(deckCards, deckNew, cardCount);
-        cout << playerCards[0] << endl;
-        cout << "amount: " << cardCount << endl;
-        temp--;
+    while(playerMoney > 0){
+        ClrScr();
+        cardsSum[0] = (rand()%3+1);     //DrawCard(deckCards, deckNew, cardCount);
+     
+        // *** SET UP THE HAND SPLIT ***
+        for(int i = 0; i < 3; i++){
+            cout << "iteration: " << i << endl;
+            cout << "card[i]: " << cardsSum[i] << endl;
+            nextCard = (rand()%3)+1;
+            cout << "nextCard: " << nextCard << endl;
+            if(cardsSum[i] == nextCard){
+                do{
+                    cout << "Desea dividir? (y/n): ";
+                    flagSplit = getchar();
+                    // to remove the "\n" left after getchar()
+                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+                    cout << "flagSplit: " << flagSplit << endl;
+                }while(flagSplit != 'y' && flagSplit != 'n');
+                if(flagSplit == 'n') break;
+            }
+            else { cardsSum[i] += nextCard; break; }
+            cardsSum[i+1] = nextCard;
+        }
+
+        // *** PRINT THE CURRENT CARDS SUM
+        for(int i = 0; i < 4; i++) cout << cardsSum[i] << " ";
+        // cout << "amount: " << cardCount << endl;
+        getchar();
+        cout << "\n*** RESET ***\n";
+        for(int i = 0; i < 4; i++) cardsSum[i] = 0;
+        playerMoney--;
     }
 }
 
+//  *** DRAW A CARD FROM THE CURRENT DECK AND GET A NEW ***
+//  *** DECK IF THE CURRENT ONE IS EMPTY                ***
 int DrawCard(int deckCards[], int deckNew[], int &cardCount){
     int pos, drawnCard;
     
@@ -48,4 +77,14 @@ int DrawCard(int deckCards[], int deckNew[], int &cardCount){
     deckCards[pos] = 0;
     cardCount--;
     return drawnCard;
+}
+
+void ClrScr(){
+    #ifdef _WIN32
+        // if on Windows OS
+        std::system("cls");
+    #else
+        // assuming POSIX OS
+        std::system("clear");
+    #endif
 }
