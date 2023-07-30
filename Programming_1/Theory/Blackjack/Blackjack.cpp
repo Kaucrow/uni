@@ -14,7 +14,7 @@ int main(){
     int deckCards[52] = {};
     const int deckNew[52] = {   1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,
                                 9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13 };
-    int nextCard, cardCount = 52, playerMoney = 100, minBet, playerBet;
+    int nextCard, cardCount = 52, placedCardCount = 1, playerMoney = 100, minBet, playerBet;
     char flagSplit;
     
     srand(time(NULL));
@@ -31,25 +31,33 @@ int main(){
         ClrScr();
         cardsSum[0] = (rand()%3+1);     //DrawCard(deckCards, deckNew, cardCount);
      
-        // *** SET UP THE HAND SPLIT ***
-        for(int i = 0; i < 3; i++){
-            cout << "iteration: " << i << endl;
-            cout << "card[i]: " << cardsSum[i] << endl;
-            nextCard = (rand()%3)+1;
-            cout << "nextCard: " << nextCard << endl;
-            if(cardsSum[i] == nextCard){
-                do{
-                    cout << "Desea dividir? (y/n): ";
-                    flagSplit = getchar();
-                    // to remove the "\n" left after getchar()
-                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-                    cout << "flagSplit: " << flagSplit << endl;
-                }while(flagSplit != 'y' && flagSplit != 'n');
-                if(flagSplit == 'n') break;
+        // *** SET UP THE STARTING HAND(s) ***
+        for(int splitCount = 0; splitCount <= 3; splitCount++){
+            cout << "outer iteration: " << splitCount << endl;
+            for(int i = 0; i < 4; i++) cout << cardsSum[i] << " ";
+            cout << endl;
+            for(int temp = (placedCardCount - splitCount - 1); temp < 4; temp++){
+                if(!cardsSum[temp]){ splitCount = 4; break; }
+                nextCard = (rand()%3)+1;
+                placedCardCount++;
+                cout << "nextCard: " << nextCard << endl;
+                if(cardsSum[temp] == nextCard){
+                    do{
+                        cout << "Desea dividir? (y/n): ";
+                        flagSplit = getchar();
+                        // to remove the "\n" left after getchar()
+                        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+                        cout << "flagSplit: " << flagSplit << endl;
+                    }while(flagSplit != 'y' && flagSplit != 'n'); 
+                    if(flagSplit == 'y'){ cardsSum[splitCount+1] = nextCard; break; }
+                }
+                cardsSum[temp] += nextCard;
+                cout << "inner iteration: " << temp << endl;
+                for(int i = 0; i < 4; i++) cout << cardsSum[i] << " ";
+                cout << endl;
             }
-            else { cardsSum[i] += nextCard; break; }
-            cardsSum[i+1] = nextCard;
         }
+        cout << "\nEXIT\n";
 
         // *** PRINT THE CURRENT CARDS SUM
         for(int i = 0; i < 4; i++) cout << cardsSum[i] << " ";
@@ -57,6 +65,7 @@ int main(){
         getchar();
         cout << "\n*** RESET ***\n";
         for(int i = 0; i < 4; i++) cardsSum[i] = 0;
+        placedCardCount = 1;
         playerMoney--;
     }
 }
