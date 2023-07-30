@@ -92,9 +92,9 @@ int main(){
         }
 
         if(skipFlag == 'y' && currSkip == 1) continue;
-        DrawTables(playerCard, markedCard);
 
-        // otherwise, print the current ball and wait for keypress
+        // print the current tables, turn, and ball number. Then wait for keypress
+        DrawTables(playerCard, markedCard);
         cout << setw(20) << "Turno " << i << endl;
         cout << setw(26) << "La bola actual es: " << currBall << endl;
         cout << setw(26) << "Presione Enter..."; getchar();
@@ -104,9 +104,7 @@ int main(){
 
 void DrawTables(int playerCard[5][5], bool markedCard[5][5]){
         // print "BINGO"
-        cout    << setw(3) << 'B' << setw(4) << 'I' << setw(4) << 'N'
-                << setw(4) << 'G' << setw(5) << "O\n"; 
-        
+        cout << "  B   I   N   G   O\n"; 
         // print the player card & marked card
         for(int j = 0; j < 5; j++){
             for(int k = 0; k < 5; k++){
@@ -115,8 +113,7 @@ void DrawTables(int playerCard[5][5], bool markedCard[5][5]){
             }
             cout << "|";
             for(int k = 0; k < 5; k++){
-                cout << setw(2);
-                cout << markedCard[j][k] << " ";
+                cout << " " << markedCard[j][k] << " ";
             }
             cout << endl;
         }
