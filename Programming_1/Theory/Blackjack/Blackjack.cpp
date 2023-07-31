@@ -59,17 +59,16 @@ int main(){
                     if(flagSplit == 'y'){ playerHands[splitCount+1] = nextCard; break; }
                 }
                 // executes if the player can't split or doesn't want to
-                playerHands[temp] += nextCard;    
+                playerHands[temp] += nextCard;
+                DrawHands(playerHands);
+                cout << endl;    
             }
         }
-        cout << "\nEXIT\n";                                         // marker
-        cout << "HANDS: " << availHands << endl;
-        // *** PRINT THE CURRENT CARDS SUM ***
-        DrawHands(playerHands);
         
         // *** USER INPUT ***
         // [<- : 75] [-> : 77] [Enter : 13]
         do{
+            ClrScr();
             if(handSelect != 99){
                 DrawHands(playerHands);
                 cout << setw(33 - 4*availHands) << "[SURRENDER]" << endl;
@@ -84,18 +83,13 @@ int main(){
                 if(handSelect > 0) handSelect--;
                 if(handSelect == 5) handSelect = availHands - 1;
                 cout << "handSelect: " << handSelect << endl;
-                cout << " 75A";
             }
             else if(currKey == 77){
-                cout << "handSelectBefore: " << handSelect << endl;
-                cout << "availHands: " << availHands << endl;
                 if(handSelect == availHands - 1) handSelect = 6;
                 if(handSelect < availHands - 1) handSelect++;
                 cout << "handSelect: " << handSelect << endl;
-                cout << " 77B";
             }
             else{
-                cout << " EnterC";
                 cout << "handSelect: " << handSelect << endl;
                 if(handSelect == 6) break;          // replace by actions on surrender
                 do{
