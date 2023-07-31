@@ -13,16 +13,24 @@ void DrawHands(int playerHands[]);
 void ClrScr();
 
 int main(){
-    int playerHands[4] = {};                       // sum of the cards in each of the player's hands. One element for each hand
-    int deckCards[52] = {};
+    // CONSTANTS
     const int deckNew[52] = {   1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,
                                 9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13 };
-    int nextCard, cardCount = 52, availHands = 4, placedCardCount = 1, playerMoney = 100,
-        minBet, playerBet, dealerSum = 0, handSelect = 0, currKey;
+    // MULTI-USE VARIABLES
+    int nextCard, cardCount = 52, playerMoney = 100,
+        minBet, playerBet;
+    int playerHands[4] = {};                        // sum of the cards in each of the player's hands. One element for each hand
+    int deckCards[52] = {};
+    // STARTING HAND SETUP VARIABLES
+    int placedCardCount = 1; 
+    // USER INPUT AND GAME VARIABLES
+    int availHands = 4, handSelect = 0, actSelect = 0, dealerSum = 0,
+        currKey;
+
     char flagSplit;
     
     srand(time(NULL));
-    copy(deckNew, deckNew + 52, deckCards);     // get a new deck
+    copy(deckNew, deckNew + 52, deckCards);         // get a new deck
     
     /*cout << "Cuanto dinero tiene?: ";
     cin >> playerMoney;
@@ -68,17 +76,19 @@ int main(){
         // *** USER INPUT ***
         // [<- : 75] [-> : 77] [Enter : 13]
         do{
-            ClrScr();
+        ClrScr();
             if(handSelect != 99){
                 DrawHands(playerHands);
-                cout << setw(33 - 4*availHands) << "[SURRENDER]" << endl;
-                cout << setw((handSelect*4) + 4) << '*' << endl;
+                cout << setw(33 - (4 * availHands)) << "[RENDIRSE]" << endl;
+                cout << setw((handSelect * 4) + 4) << '*' << endl;
             }
             cout << "Cual mano? (<-/->/Enter): ";
             do{
                 currKey = getch();
             }while(currKey != 75 && currKey != 77 && currKey != 13);
-            cout << '\n' << currKey;
+            
+            cout << "\ncurrKey: " << currKey << endl;
+            
             if(currKey == 75){
                 if(handSelect > 0) handSelect--;
                 if(handSelect == 5) handSelect = availHands - 1;
@@ -93,9 +103,21 @@ int main(){
                 cout << "handSelect: " << handSelect << endl;
                 if(handSelect == 6) break;          // replace by actions on surrender
                 do{
-                    cout << "Current hand sum: " << playerHands[handSelect] << endl;
-                    cout << setw(10);
+                    ClrScr();
+                    cout << setw(28) << "MANO [" << handSelect + 1 << "]: " << playerHands[handSelect] << "\n\n";
+                    cout << "[PLANTARSE]" << setw((actSelect * 15) + 2) << "*" << setw(38 - 15 * actSelect)<< "[PEDIR]" << endl;
+                    cout << setw(31) << "[ATRAS]" << endl;
+                    do{
+                        currKey = getch();
+                    }while(currKey != 75 && currKey != 77 && currKey != 13);
+                    
+                    cout << "\ncurrKey: " << currKey << endl;
+
+                    if(currKey == 75 && actSelect > 0){ actSelect--; }
+                    if(currKey == 77 && actSelect < 2){ actSelect++; }
+                    if(currKey == 13 && actSelect == 1){ break; }
                 }while(currKey != 80);
+                actSelect = 0;
             }
         cout << "\n*** RESET ***\n";
         }while(availHands > 0);
@@ -104,6 +126,7 @@ int main(){
         cout << "\n*** RESET ***\n";
         for(int i = 0; i < 4; i++) playerHands[i] = 0;
         placedCardCount = 1;
+        handSelect = 0;
         playerMoney--;
     }
 }
@@ -127,7 +150,7 @@ int GetCard(int deckCards[], int deckNew[], int &cardCount){
 }
 
 void DrawHands(int playerHands[]){
-    cout << " *** PLAYER HANDS ***\n";
+    cout << " *** MANOS ACTUALES ***\n\n";
     for(int i = 0; i < 4; i++){ if(!playerHands[i]) break; cout << setw(4) << playerHands[i]; }
 }
 
