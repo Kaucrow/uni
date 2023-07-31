@@ -3,3 +3,4 @@
 
 ## Programming 1
 - Bingo
+- Blackjack
