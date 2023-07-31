@@ -72,31 +72,36 @@ int main(){
         do{
             if(handSelect != 99){
                 DrawHands(playerHands);
+                cout << setw(33 - 4*availHands) << "[SURRENDER]" << endl;
                 cout << setw((handSelect*4) + 4) << '*' << endl;
             }
             cout << "Cual mano? (<-/->/Enter): ";
             do{
                 currKey = getch();
-                //cout << "\ncurrKey: " << currKey;
             }while(currKey != 75 && currKey != 77 && currKey != 13);
             cout << '\n' << currKey;
-            switch(currKey)
-            {
-                case 75:
-                    if(handSelect > 0) handSelect--;
-                    cout << "handSelect: " << handSelect << endl;
-                    cout << " 75A";
-                    break;
-                case 77:
-                    if(handSelect < availHands - 1) handSelect++;
-                    cout << "handSelect: " << handSelect << endl;
-                    cout << " 77B";
-                    break;
-                case 13:
-                    cout << " EnterC";
-                    cout << "handSelect: " << handSelect << endl;
-                    handSelect = 99;
-                    break;
+            if(currKey == 75){
+                if(handSelect > 0) handSelect--;
+                if(handSelect == 5) handSelect = availHands - 1;
+                cout << "handSelect: " << handSelect << endl;
+                cout << " 75A";
+            }
+            else if(currKey == 77){
+                cout << "handSelectBefore: " << handSelect << endl;
+                cout << "availHands: " << availHands << endl;
+                if(handSelect == availHands - 1) handSelect = 6;
+                if(handSelect < availHands - 1) handSelect++;
+                cout << "handSelect: " << handSelect << endl;
+                cout << " 77B";
+            }
+            else{
+                cout << " EnterC";
+                cout << "handSelect: " << handSelect << endl;
+                if(handSelect == 6) break;          // replace by actions on surrender
+                do{
+                    cout << "Current hand sum: " << playerHands[handSelect] << endl;
+                    cout << setw(10);
+                }while(currKey != 80);
             }
         cout << "\n*** RESET ***\n";
         }while(availHands > 0);
@@ -130,8 +135,8 @@ int GetCard(int deckCards[], int deckNew[], int &cardCount){
 void DrawHands(int playerHands[]){
     cout << " *** PLAYER HANDS ***\n";
     for(int i = 0; i < 4; i++){ if(!playerHands[i]) break; cout << setw(4) << playerHands[i]; }
-    cout << endl;
 }
+
 void ClrScr(){
     #ifdef _WIN32
         // if on Windows OS
