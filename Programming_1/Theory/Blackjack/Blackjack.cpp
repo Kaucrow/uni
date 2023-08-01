@@ -9,7 +9,7 @@ using   std::cout, std::cin, std::endl, std::setw,
         std::begin, std::end;
 
 int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bool onlyGetDeck);
-void HandleCard(int &drawnCard);
+void PrintCard(int &drawnCard);
 void DrawHands(int playerHands[], int availHands);
 void ClrScr();
 
@@ -84,8 +84,9 @@ int main(){
         }
 
         // get the dealer's initial hand
-        cout << "CRUPIER: ";
+        cout << "\n* El crupier toma una carta y la coloca frente a el."; getchar();
         dealerHand[0] = GetCard(deckCards, cardCount, dealerSum, 1, 0);
+        cout << "* El crupier coloca una carta boca abajo."; getchar();
         dealerHand[1] = GetCard(deckCards, cardCount, dealerSum, 0, 0);
 
         // ==================
@@ -132,6 +133,7 @@ int main(){
                         case 0:
                             // on hand hit
                             if(flagHitOrStay == 1){
+                                cout << "Recibes una carta."; getchar();
                                 GetCard(deckCards, cardCount, playerHands[handSelect], 1, 0);
                                 if(playerHands[handSelect] > 21) flagHands[handSelect] = 2;
                                 flagHitOrStay = 99;
@@ -180,9 +182,12 @@ int main(){
                 for (int i = 0; i < 4; i++){ if(flagHands[i] != 0) flagExit++;} 
             }
         }while(flagExit != 4);
-
-        cout << "\n*** RESET ***\n";
-        getchar();
+        
+        ClrScr();
+        cout << "* El Crupier voltea su carta boca abajo."; getchar();
+        PrintCard(dealerHand[1]);
+        cout << "dealerSum: " << dealerSum; getchar();
+        cout << "\n*** RESET ***\n"; getchar();
         for(int i = 0; i < 4; i++) playerHands[i] = 0;
         placedCardCount = 1;
         handSelect = 0;
@@ -193,7 +198,7 @@ int main(){
 //  *** GET A CARD FROM THE CURRENT DECK AND GET A NEW  ***
 //  *** DECK IF THE CURRENT ONE IS EMPTY                ***
 int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bool onlyGetDeck){
-    int pos, drawnCard; 
+    int pos, drawnCard;
     // check if the deck is empty, and if so, get a new one
     if(!cardCount){ 
         for(int i = 1; i <= 13; i++){
@@ -209,39 +214,32 @@ int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bo
     drawnCard = deckCards[pos];
     deckCards[pos] = 0;
     cardCount--;
-    if(showCard){ HandleCard(drawnCard); }
-    if(drawnCard == 1 && currHandSum < 11) currHandSum += 10;       // for switching the ace value
-    currHandSum += drawnCard;
+    if(showCard) PrintCard(drawnCard);
+    if(drawnCard > 10) currHandSum += (drawnCard - (drawnCard%10));     // for mapping J, Q and K
+    else if(drawnCard == 1 && currHandSum < 11) currHandSum += 11;      // for switching the ace value
+    else currHandSum += drawnCard;
     return drawnCard;
 }
 
-//  *** TRANSLATE THE CARD INTO ITS REAL VALUE AND  ***
-//  *** PRINT ITS NAME                              ***
-void HandleCard(int &drawnCard){
-    cout << "Salio un";
+//  *** PRINT THE DRAWN CARD'S NAME ***
+void PrintCard(int &drawnCard){
+    cout << "Es un";
     switch(drawnCard){
-    case 1:
-        cout << " As.\n";
-        break;
-    case 11: 
-        cout << "a Jota.\n";
-        drawnCard = 10;
-        break;
-    case 12:
-        cout << "a Reina.\n";
-        drawnCard = 10;
-        break;
-    case 13:
-        cout << " Rey.\n";
-        drawnCard = 10;
-        break;
-    default:
-        cout << " " << drawnCard << ".\n"; 
+        case 1:
+            cout << " As.\n"; break;
+        case 11: 
+            cout << "a Jota.\n"; break;
+        case 12:
+            cout << "a Reina.\n"; break;
+        case 13:
+            cout << " Rey.\n"; break;
+        default:
+            cout << " " << drawnCard << ".\n"; 
     }
     getchar();
 }
 
-//  *** PRINT THE CURRENT PLAYER HANDS  *** 
+//  *** PRINT THE CURRENT PLAYER'S HANDS  ***
 void DrawHands(int playerHands[], int availHands){
     cout << setw(40) << " *** MANOS ACTUALES ***\n\n";
     //cout << setw(17) << " ";
