@@ -6,18 +6,19 @@
 #include <conio.h>          // for getch()
 
 using   std::cout, std::cin, std::endl, std::setw,
-        std::begin, std::end;
+        std::begin, std::end, std::setfill;
 
 int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bool onlyGetDeck);
 void PrintCard(int &drawnCard);
 void DrawHands(int playerHands[], int playerBet[], int &availHands);
-void DrawResults(int playerHands[], int flagHands[], int &dealerSum);
+void DrawResults(int playerHands[], int flagHands[], int playerBet[], int &dealerSum);
+void DrawStats(int &playerMoney, int &minBet, int &roundNum);
 void ClrScr();
 
 int main(){
     // MULTI-USE VARIABLES
     int nextCard, cardCount = 0, playerMoney = 100,
-        minBet;
+        minBet, roundNum = 0;
     int playerBet[4] = {};
     int playerHands[4] = {};        // sum of the cards in each of the player's hands. One element for each hand
     int deckCards[52] = {};
@@ -45,7 +46,10 @@ int main(){
     cin >> minBet;
     if(minBet > playerMoney){ cout  << "\nCRUPIER: Lo siento, no tiene\n"
                                     << "suficiente dinero para jugar.\n"; return 0; }
-    
+    DrawStats(playerMoney, minBet, roundNum);
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+    getchar();
+
     do{
         ClrScr(); 
         // ===================================
@@ -209,7 +213,7 @@ int main(){
             GetCard(deckCards, cardCount, dealerSum, 1, 0);
             cout << "dealerSum: " << dealerSum; getchar();
         }
-        DrawResults(playerHands, flagHands, dealerSum); getchar();
+        DrawResults(playerHands, flagHands, playerBet, dealerSum); getchar();
 
         cout << "\n*** RESET ***\n"; getchar();
         for(int i = 0; i < 4; i++) playerHands[i] = 0;
@@ -277,27 +281,40 @@ void DrawHands(int playerHands[], int playerBet[], int &availHands){
 }
 
 //  *** PRINT THE GAME RESULTS ***
-void DrawResults(int playerHands[], int flagHands[], int &dealerSum){
+void DrawResults(int playerHands[], int flagHands[], int playerBet[], int &dealerSum){
     ClrScr();
     cout << setw(39) << " *** RESULTADOS ***\n\n";
     for(int i = 0; i < 4; i++){ 
         if(!playerHands[i]) break; 
-        cout << setw(25) << "-> Mano " << i+1 << ": ";
-        if(playerHands[i] > dealerSum){
+        cout << setw(21) << "-> Mano " << i+1 << " (" << playerBet[i] << "$): ";
+        if(flagHands[i] == 4) cout << "Rendida";
+        else if(playerHands[i] > dealerSum){
             if(dealerSum <= 21){
-                if(playerHands[i] <= 21) cout << "Gano ";
-                else cout << "Perdio ";
+                if(playerHands[i] <= 21) cout << "Gano";
+                else cout << "Perdio";
             }
-            else cout << "Empate ";
+            else cout << "Empate";
         }
         else if(playerHands[i] < dealerSum){
             if(dealerSum <= 21) cout << "Perdio ";
-            else if(playerHands[i] <= 21) cout << "Gano ";
-            else cout << "Empate ";
+            else if(playerHands[i] <= 21) cout << "Gano";
+            else cout << "Empate";
         }
-        else cout << "Empate ";
-        cout << "(" << playerHands[i] << ")\n";
+        else cout << "Empate";
+        cout << " (" << playerHands[i] << ")\n";
     }
+}
+
+void DrawStats(int &playerMoney, int &minBet, int &roundNum){
+    cout    << "_______________________________\n"
+            << "| Jugador |  Estado  | Dinero |" << setw(20) << "Apuesta minima: " << minBet << "$\n"
+            << "|_____________________________|" << setw(20) << "Ronda: " << roundNum << endl
+            << "|" << setw(5) << "1" << setw(5) << "|" << setw(9); 
+    if(playerMoney > minBet) cout << "Jugando";
+    else cout << "Quebrado"; 
+    cout    << setw(2) << "|"
+            << setw(6) << playerMoney << "$" << setw(3) << "|\n"
+            << "|_____________________________|";
 }
 
 void ClrScr(){
