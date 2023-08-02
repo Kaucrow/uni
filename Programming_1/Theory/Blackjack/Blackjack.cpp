@@ -10,13 +10,15 @@ using   std::cout, std::cin, std::endl, std::setw,
 
 int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bool onlyGetDeck);
 void PrintCard(int &drawnCard);
-void DrawHands(int playerHands[], int availHands);
+void DrawHands(int playerHands[], int &availHands);
+void DrawResults(int playerHands[], int flagHands[], int &dealerSum);
 void ClrScr();
 
 int main(){
     // MULTI-USE VARIABLES
     int nextCard, cardCount = 0, playerMoney = 100,
-        minBet, playerBet;
+        minBet;
+    int playerBet[4] = {};
     int playerHands[4] = {};        // sum of the cards in each of the player's hands. One element for each hand
     int deckCards[52] = {};
     
@@ -28,7 +30,7 @@ int main(){
     int availHands = 4, handSelect = 0, actSelect = 0, dealerSum = 0, 
         currKey;
     int flagHitOrStay = 99;         // [0 : stay] [1 : hit] [99 : no action]
-    int flagHands[4] = {0,5,5,5};   // [0 : normal] [1 : won] [2 : over] [3 : stayed] [4 : surrendered] [5 : not playing] 
+    int flagHands[4] = {0,9,9,9};   // [0 : normal] [1 : won] [2 : over] [3 : stayed] [4 : surrendered] [9 : not playing] 
     int dealerHand[13] = {};
     int flagExit = 0;               // [0 : stay in the hand play screen] [1 : exit the hand play screen]
                                     // [4 : exit the hand select screen]
@@ -82,11 +84,11 @@ int main(){
                 cout << endl;
             }
         }
-
+        
         // get the dealer's initial hand
-        cout << "\n* El crupier toma una carta y la coloca frente a el."; getchar();
+        cout << "\n* El crupier coloca una carta frente a el."; getchar();
         dealerHand[0] = GetCard(deckCards, cardCount, dealerSum, 1, 0);
-        cout << "* El crupier coloca una carta boca abajo."; getchar();
+        cout << "\n* El crupier coloca una carta boca abajo."; getchar();
         dealerHand[1] = GetCard(deckCards, cardCount, dealerSum, 0, 0);
 
         // ==================
@@ -184,9 +186,19 @@ int main(){
         }while(flagExit != 4);
         
         ClrScr();
-        cout << "* El Crupier voltea su carta boca abajo."; getchar();
+        // ============================
+        // *** DEALER'S TURN SCREEN ***
+        // ============================
+        cout << "* El crupier voltea su carta boca abajo."; getchar();
         PrintCard(dealerHand[1]);
         cout << "dealerSum: " << dealerSum; getchar();
+        while(dealerSum <= 16){
+            cout << "* El crupier toma una carta."; getchar();
+            GetCard(deckCards, cardCount, dealerSum, 1, 0);
+            cout << "dealerSum: " << dealerSum; getchar();
+        }
+        DrawResults(playerHands, flagHands, dealerSum); getchar();
+
         cout << "\n*** RESET ***\n"; getchar();
         for(int i = 0; i < 4; i++) playerHands[i] = 0;
         placedCardCount = 1;
@@ -226,25 +238,48 @@ void PrintCard(int &drawnCard){
     cout << "Es un";
     switch(drawnCard){
         case 1:
-            cout << " As.\n"; break;
+            cout << " As."; break;
         case 11: 
-            cout << "a Jota.\n"; break;
+            cout << "a Jota."; break;
         case 12:
-            cout << "a Reina.\n"; break;
+            cout << "a Reina."; break;
         case 13:
-            cout << " Rey.\n"; break;
+            cout << " Rey."; break;
         default:
-            cout << " " << drawnCard << ".\n"; 
+            cout << " " << drawnCard << "."; 
     }
     getchar();
 }
 
 //  *** PRINT THE CURRENT PLAYER'S HANDS  ***
-void DrawHands(int playerHands[], int availHands){
+void DrawHands(int playerHands[], int &availHands){
     cout << setw(40) << " *** MANOS ACTUALES ***\n\n";
-    //cout << setw(17) << " ";
     cout << setw(23 - ((availHands - 1)*2)) << " ";
     for(int i = 0; i < 4; i++){ if(!playerHands[i]) break; cout << setw(4) << playerHands[i]; }
+}
+
+//  *** PRINT THE GAME RESULTS ***
+void DrawResults(int playerHands[], int flagHands[], int &dealerSum){
+    ClrScr();
+    cout << setw(39) << " *** RESULTADOS ***\n\n";
+    for(int i = 0; i < 4; i++){ 
+        if(!playerHands[i]) break; 
+        cout << setw(25) << "-> Mano " << i+1 << ": ";
+        if(playerHands[i] > dealerSum){
+            if(dealerSum <= 21){
+                if(playerHands[i] <= 21) cout << "Gano ";
+                else cout << "Perdio ";
+            }
+            else cout << "Empate ";
+        }
+        else if(playerHands[i] < dealerSum){
+            if(dealerSum <= 21) cout << "Perdio ";
+            else if(playerHands[i] <= 21) cout << "Gano ";
+            else cout << "Empate ";
+        }
+        else cout << "Empate ";
+        cout << "(" << playerHands[i] << ")\n";
+    }
 }
 
 void ClrScr(){
