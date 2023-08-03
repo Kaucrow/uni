@@ -17,7 +17,7 @@ void ClrScr();
 int main(){
     // MULTI-USE VARIABLES
     int nextCard, cardCount = 0, playerMoney = 100,
-        minBet, roundNum = 0;
+        addMoney, minBet, roundNum = 0;
     int playerBet[4] = {};
     int playerHands[4] = {};        // sum of the cards in each of the player's hands. One element for each hand
     int deckCards[52] = {};
@@ -27,10 +27,10 @@ int main(){
     char flagSplit;
     
     // USER INPUT AND GAME VARIABLES
-    int availHands = 4, handSelect = 0, actSelect = 0, dealerSum = 0, 
+    int availHands, handSelect = 0, actSelect = 0, dealerSum = 0, 
         currKey;
     int flagHitOrStay = 99;         // [0 : stay] [1 : hit] [99 : no action]
-    int flagHands[4] = {0,9,9,9};   // [0 : normal] [1 : won] [2 : over] [3 : stayed] [4 : surrendered] [9 : not playing] 
+    int flagHands[4] = {0,9,9,9};   // [0 : normal] [1 : won] [2 : over] [3 : stayed] [4 : surrendered] [5 : lost] [9 : not playing] 
     int dealerHand[13] = {};
     int flagExit = 0;               // [0 : stay in the hand play screen] [1 : exit the hand play screen]
                                     // [4 : exit the hand select screen]
@@ -50,15 +50,15 @@ int main(){
     getchar();
 
     do{
-        ClrScr();
         roundNum++;
         // ===================================
         // *** SET UP THE STARTING HAND(s) ***
         // ===================================
         do{
-            cout << "Cuanto desea apostar esta ronda?: ";
+            ClrScr(); DrawStats(playerMoney, minBet, roundNum);
+            cout << "\nCuanto desea apostar esta ronda?: ";
             cin >> playerBet[0];
-        }while(playerBet[0] < minBet);
+        }while(playerBet[0] < minBet || playerBet[0] > playerMoney);
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
         ClrScr();
         playerHands[0] = (rand()%1+1);
@@ -200,7 +200,8 @@ int main(){
                 for (int i = 0; i < 4; i++){ if(flagHands[i] != 0) flagExit++;} 
             }
         }while(flagExit != 4);
-        
+        flagExit = 0;
+
         // ============================
         // *** DEALER'S TURN SCREEN ***
         // ============================
@@ -240,13 +241,30 @@ int main(){
             else{ cout << "Empate"; flagHands[i] = 0; }
             cout << " (" << playerHands[i] << ")\n";
         }
-        getchar();
+        
+        DrawStats(playerMoney, minBet, roundNum); getchar();
 
+        // UPDATE THE PLAYER'S MONEY
+        for(int i = 0; i < 4; i++){
+            if(flagHands[i] == 4) addMoney -= (playerBet[i] / 2);               // on hand surrender
+            else if(flagHands[i] == 1) addMoney += playerBet[i];                // on hand win
+            else if(flagHands[i] == 5) addMoney -= playerBet[i];                // on hand lose
+        }
+
+        playerMoney += addMoney;
+        cout << "* El jugador " << "1";
+        if(addMoney >= 0) cout << " gano ";
+        else cout << " perdio ";
+        cout << abs(addMoney) << "$.\n"; getchar();
+        
+        ClrScr(); DrawStats(playerMoney, minBet, roundNum); getchar();
+        
         cout << "\n*** RESET ***\n"; getchar();
         for(int i = 0; i < 4; i++) playerHands[i] = 0;
+        addMoney = 0;
         placedCardCount = 1;
         handSelect = 0;
-        playerMoney--;
+        dealerSum = 0;
     }while(playerMoney > minBet);
 }
 
