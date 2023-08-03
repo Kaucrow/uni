@@ -51,7 +51,8 @@ int main(){
     getchar();
 
     do{
-        ClrScr(); 
+        ClrScr();
+        roundNum++;
         // ===================================
         // *** SET UP THE STARTING HAND(s) ***
         // ===================================
@@ -207,11 +208,11 @@ int main(){
         // ============================
         cout << "* El crupier voltea su carta boca abajo."; getchar();
         PrintCard(dealerHand[1]);
-        cout << "dealerSum: " << dealerSum; getchar();
+        cout << "La mano del crupier suma " << dealerSum << ".\n"; getchar();
         while(dealerSum <= 16){
             cout << "* El crupier toma una carta."; getchar();
             GetCard(deckCards, cardCount, dealerSum, 1, 0);
-            cout << "dealerSum: " << dealerSum; getchar();
+            cout << "La mano del crupier suma " << dealerSum << ".\n"; getchar();
         }
         DrawResults(playerHands, flagHands, playerBet, dealerSum); getchar();
 
@@ -290,18 +291,19 @@ void DrawResults(int playerHands[], int flagHands[], int playerBet[], int &deale
         if(flagHands[i] == 4) cout << "Rendida";
         else if(playerHands[i] > dealerSum){
             if(dealerSum <= 21){
-                if(playerHands[i] <= 21) cout << "Gano";
-                else cout << "Perdio";
+                if(playerHands[i] <= 21){ cout << "  Gano"; flagHands[i] = 1; }
+                else{ cout << "Perdio"; flagHands[i] = 5; }
             }
-            else cout << "Empate";
+            else{ cout << "Empate"; flagHands[i] = 0; }
         }
         else if(playerHands[i] < dealerSum){
-            if(dealerSum <= 21) cout << "Perdio ";
-            else if(playerHands[i] <= 21) cout << "Gano";
-            else cout << "Empate";
+            if(dealerSum <= 21){ cout << "Perdio"; flagHands[i] = 5; }
+            else if(playerHands[i] <= 21){ cout << "  Gano"; flagHands[i] = 1; }
+            else{ cout << "Empate"; flagHands[i] = 0; }
         }
-        else cout << "Empate";
+        else{ cout << "Empate"; flagHands[i] = 0; }
         cout << " (" << playerHands[i] << ")\n";
+
     }
 }
 
@@ -314,7 +316,7 @@ void DrawStats(int &playerMoney, int &minBet, int &roundNum){
     else cout << "Quebrado"; 
     cout    << setw(2) << "|"
             << setw(6) << playerMoney << "$" << setw(3) << "|\n"
-            << "|_____________________________|";
+            << "|_____________________________|\n";
 }
 
 void ClrScr(){
