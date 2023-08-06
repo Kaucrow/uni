@@ -2,11 +2,10 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <time.h>
-#include <limits>           // for flushing the stdin
-#include <conio.h>          // for getch()
+#include <limits>               // for flushing the stdin
+#include <conio.h>              // for getch()
 
-using   std::cout, std::cin, std::endl, std::setw,
-        std::begin, std::end;
+using   std::cout, std::cin, std::setw;
 
 int GetCard(int deckCards[], int &cardCount, int &currHandSum, bool showCard, bool onlyGetDeck);
 void PrintCard(int &drawnCard);
@@ -16,14 +15,14 @@ void ClrScr();
 
 int main(){
     // MULTI-USE VARIABLES
-    int nextCard, cardCount = 0, playerMoney = 100,
-        addMoney, minBet, roundNum = 0;
+    int cardCount = 0, playerMoney, addMoney, minBet, roundNum = 0;
+    int dealerHidden;               // stores the dealer's hidden card
     int playerBet[4] = {};
     int playerHands[4] = {};        // sum of the cards in each of the player's hands. One element for each hand
     int deckCards[52] = {};
     
     // STARTING HAND SETUP VARIABLES
-    int placedCardCount; 
+    int placedCardCount, nextCard; 
     char flagSplit;
     
     // USER INPUT AND GAME VARIABLES
@@ -31,7 +30,6 @@ int main(){
         currKey;
     int flagHitOrStay = 99;         // [0 : stay] [1 : hit] [99 : no action]
     int flagHands[4] = {9,9,9,9};   // [0 : normal] [1 : won] [2 : over] [3 : stayed] [4 : surrendered] [5 : lost] [9 : not playing] 
-    int dealerHand[13] = {};
     int flagExit = 0;               // [0 : stay in the hand play screen] [1 : exit the hand play screen]
                                     // [4 : exit the hand select screen]
     
@@ -57,7 +55,6 @@ int main(){
             cin >> playerBet[0];
         }while(playerBet[0] < minBet || playerBet[0] > playerMoney);
         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-        //playerHands[0] = (rand()%1+1); placedCardCount = 1;
         ClrScr(); cout << "* Recibes la primera carta "; getchar();
         GetCard(deckCards, cardCount, playerHands[handSelect], 1, 0); placedCardCount = 1;
         for(int splitCount = 0; splitCount <= 3; splitCount++){
@@ -72,11 +69,10 @@ int main(){
                 cout << "\n\n* Recibes una carta.\n";
                 nextCard = 0; GetCard(deckCards, cardCount, nextCard, 1, 0);
                 placedCardCount++;
-                //cout << "\nSalio un: " << nextCard << endl; getchar();
                 // executes if the card on the current hand is equal to the drawn card
                 if(playerHands[temp] == nextCard && splitCount < 3){
                     do{
-                        cout << "Desea dividir? (y/n): ";
+                        cout << "\nDesea dividir la mano? (y/n): ";
                         flagSplit = getchar();
                         // to remove the "\n" left after getchar()
                         cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
@@ -98,9 +94,9 @@ int main(){
         ClrScr(); DrawHands(playerHands, playerBet, availHands);
         // get the dealer's initial hand
         cout << "\n\n* El crupier coloca una carta frente a el."; getchar();
-        dealerHand[0] = GetCard(deckCards, cardCount, dealerSum, 1, 0);
+        GetCard(deckCards, cardCount, dealerSum, 1, 0);
         cout << "\n* El crupier coloca una carta boca abajo."; getchar();
-        dealerHand[1] = GetCard(deckCards, cardCount, dealerSum, 0, 0);
+        dealerHidden = GetCard(deckCards, cardCount, dealerSum, 0, 0);
 
         // ==================
         // *** USER INPUT ***
@@ -109,7 +105,7 @@ int main(){
         do{
             ClrScr();
             DrawHands(playerHands, playerBet, availHands);
-            cout << endl << setw((handSelect * 5) + (28 - ((availHands - 1)*2))) << '*' << endl;
+            cout << '\n' << setw((handSelect * 5) + (28 - ((availHands - 1)*2))) << '*' << '\n';
             cout << setw(42) << "Cual mano? (<-/->/Enter): ";
             do{
                 currKey = getch();
@@ -118,12 +114,12 @@ int main(){
             // if the left arrow key was pressed, move left
             if(currKey == 75){
                 if(handSelect > 0) handSelect--;
-                cout << "handSelect: " << handSelect << endl;
+                cout << "handSelect: " << handSelect << '\n';
             }
             // if the right arrow key was pressed, move right
             else if(currKey == 77){
                 if(handSelect < availHands - 1) handSelect++;
-                cout << "handSelect: " << handSelect << endl;
+                cout << "handSelect: " << handSelect << '\n';
             }
             // if the Enter key was pressed, select the current hand
             else{
@@ -146,7 +142,7 @@ int main(){
                         case 0:
                             // on hand hit
                             if(flagHitOrStay == 1){
-                                cout << "Recibes una carta."; getchar();
+                                cout << setw(38) << "* Recibes una carta." << setw(28); getchar();
                                 GetCard(deckCards, cardCount, playerHands[handSelect], 1, 0);
                                 if(playerHands[handSelect] > 21) flagHands[handSelect] = 2;
                                 flagHitOrStay = 99;
@@ -158,10 +154,11 @@ int main(){
                                 continue;
                             }
                             // on neither hit nor stay
-                            else cout << "Utilice las flechas para moverse y\nEnter para aceptar.\n"; break;
-                        case 2: cout << setw(21) << "La mano se paso.\n"; break;
-                        case 3: cout << setw(20) << "La mano se quedo.\n"; break;
-                        case 4: cout << setw(20) << "La mano fue rendida.\n";
+                            else cout   << setw(45) << "Utilice las flechas para moverse\n"
+                                        << setw(40) << "y Enter para aceptar.\n"; break;
+                        case 2: cout << setw(37) << "La mano se paso.\n"; break;
+                        case 3: cout << setw(38) << "La mano se quedo.\n"; break;
+                        case 4: cout << setw(39) << "La mano fue rendida.\n";
                     }
                     
                     do{
@@ -202,7 +199,7 @@ int main(){
         // ============================
         ClrScr();
         cout << "* El crupier voltea su carta boca abajo."; getchar();
-        PrintCard(dealerHand[1]);
+        PrintCard(dealerHidden);
         cout << "La mano del crupier suma " << dealerSum << ".\n"; getchar();
         while(dealerSum <= 16){
             cout << "* El crupier toma una carta."; getchar();
@@ -236,7 +233,7 @@ int main(){
             else{ cout << "Empate"; flagHands[i] = 0; }
             cout << " (" << playerHands[i] << ")\n";
         }
-        cout << endl << setw(34) << "-> Mano del crupier: " << dealerSum << endl;
+        cout << '\n' << setw(34) << "-> Mano del crupier: " << dealerSum << '\n';
         
         DrawStats(playerMoney, minBet, roundNum); getchar();
 
@@ -331,7 +328,7 @@ void DrawHands(int playerHands[], int playerBet[], int &availHands){
 void DrawStats(int &playerMoney, int &minBet, int &roundNum){
     cout    << "_______________________________\n"
             << "| Jugador |  Estado  | Dinero |" << setw(20) << "Apuesta minima: " << minBet << "$\n"
-            << "|_____________________________|" << setw(20) << "Ronda: " << roundNum << endl
+            << "|_____________________________|" << setw(20) << "Ronda: " << roundNum << '\n'
             << "|" << setw(5) << "1" << setw(5) << "|" << setw(9); 
     if(playerMoney >= minBet) cout << "Jugando"; else cout << "Quebrado"; 
     cout    << setw(2) << "|"
