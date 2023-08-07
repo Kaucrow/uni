@@ -161,16 +161,23 @@ int main(){
                         case 4: cout << setw(39) << "La mano fue rendida.\n";
                     }
                     
+                    // if there are no more hands left, stop the user input phase
+                    for(int i = 0; i < 4; i++){ 
+                        if(flagHands[i] == 0){ flagExit = 0; break; }
+                        else flagExit = 2;
+                    } 
+                    if(flagExit == 2){ getch(); break; }
+
                     do{
                         currKey = getch();
                     }while(currKey != 75 && currKey != 77 && currKey != 13); 
                     
                     // SWITCH THE ACTION
                     if(currKey == 75 && actSelect > 0){ actSelect--; }
-                    if(currKey == 77 && actSelect < 3){ actSelect++; }
+                    else if(currKey == 77 && actSelect < 3){ actSelect++; }
                     
                     // EXECUTE THE ACTION
-                    if(currKey == 13){
+                    else if(currKey == 13){
                         switch(actSelect){
                         case 0 /* stay */:
                             flagHitOrStay = 0; 
@@ -187,11 +194,11 @@ int main(){
                     } 
                 }while(!flagExit);
                 // EXECUTES ON PLAYING HAND SCREEN EXIT
-                flagExit = 0; actSelect = 0; flagHitOrStay = 99;
+                flagExit--; actSelect = 0; flagHitOrStay = 99;
                 // if there are no more hands left, stop the user input phase
-                for (int i = 0; i < 4; i++){ if(flagHands[i] != 0) flagExit++;} 
+                //for (int i = 0; i < 4; i++){ if(flagHands[i] != 0) flagExit++;} 
             }
-        }while(flagExit != 4);
+        }while(!flagExit);
         flagExit = 0; handSelect = 0;
 
         // ============================
