@@ -60,17 +60,17 @@ int main(){
         for(int splitCount = 0; splitCount <= 3; splitCount++){
             availHands = splitCount + 1;
             flagHands[splitCount] = 0;
-            // the value of temp is a displacement added to the loop
+            // the value of card is a displacement added to the loop
             // for avoiding putting more than two cards on any hand
-            for(int temp = (placedCardCount - splitCount - 1); temp < 4; temp++){
+            for(int card = (placedCardCount - splitCount - 1); card < 4; card++){
                 ClrScr(); DrawHands(playerHands, playerBet, availHands);
                 // if a 0 is reached in the playerHands, stop the setup
-                if(!playerHands[temp]){ splitCount = 4; break; }
+                if(!playerHands[card]){ splitCount = 4; break; }
                 cout << "\n\n* Recibes una carta.\n";
                 nextCard = 0; GetCard(deckCards, cardCount, nextCard, 1, 0);
                 placedCardCount++;
                 // executes if the card on the current hand is equal to the drawn card
-                if(playerHands[temp] == nextCard && splitCount < 3){
+                if(playerHands[card] == nextCard && splitCount < 3){
                     do{
                         cout << "\nDesea dividir la mano? (y/n): ";
                         flagSplit = getchar();
@@ -81,13 +81,13 @@ int main(){
                     // playerHands[] element, divide the bet, and exit this loop to increase the splitCount
                     if(flagSplit == 'y'){ 
                         playerHands[splitCount+1] = nextCard;
-                        playerBet[splitCount+1] = playerBet[temp]/2;
-                        playerBet[temp] /= 2;
+                        playerBet[splitCount+1] = playerBet[card]/2;
+                        playerBet[card] /= 2;
                         break; 
                     }
                 }
                 // executes if the player can't split or doesn't want to
-                playerHands[temp] += nextCard;
+                playerHands[card] += nextCard;
             }
         }
         
@@ -123,7 +123,6 @@ int main(){
             }
             // if the Enter key was pressed, select the current hand
             else{
-                flagExit = 0;
                 // ===========================
                 // *** PLAYING HAND SCREEN ***
                 // ===========================
@@ -195,8 +194,6 @@ int main(){
                 }while(!flagExit);
                 // EXECUTES ON PLAYING HAND SCREEN EXIT
                 flagExit--; actSelect = 0; flagHitOrStay = 99;
-                // if there are no more hands left, stop the user input phase
-                //for (int i = 0; i < 4; i++){ if(flagHands[i] != 0) flagExit++;} 
             }
         }while(!flagExit);
         flagExit = 0; handSelect = 0;
