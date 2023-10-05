@@ -7,9 +7,9 @@
 using   std::cout, std::cerr, std::cin, std::string, 
         std::getline, std::ifstream;
 
-void SearchForExp(string exp, string readingLine);
+void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen);
 int main(int argc, char* argv[]){
-    string readingLine; 
+    string readingLine;
 
     // if the binary is executed without args, throw an error
     if(argc == 1){
@@ -22,48 +22,52 @@ int main(int argc, char* argv[]){
         string exp(argv[argc - 1]);
         cout << "PIPED INPUT\n";
         while(getline(cin, readingLine)){
-            SearchForExp(exp, readingLine);
+            SearchForExp(exp, static_cast<int>(exp.length()), readingLine, static_cast<int>(readingLine.length()));
         }
         return 0;
     }
 
-    string exp(argv[argc - 2]);
+    // if the binary is executed with more than 2 args, assume that the last arg
+    // is the file to read, and the one before it is the expression
+    else{
+        string exp(argv[argc - 2]);
 
-    // if the binary is executed with more than 2 args, get the file to read
-    ifstream readFile(argv[argc - 1]);
-    if(!readFile){
-        cerr << "sgrep: [ ERR ] FILE \"" << argv[argc - 1] << "\" DOES NOT EXIST\n";
-        return 1;
-    }
+        ifstream readFile(argv[argc - 1]);
+        if(!readFile){
+            cerr << "sgrep: [ ERR ] FILE \"" << argv[argc - 1] << "\" DOES NOT EXIST\n";
+            return 1;
+        }
 
-    while(getline(readFile, readingLine)){
-        SearchForExp(exp, readingLine);
+        while(getline(readFile, readingLine)){
+            SearchForExp(exp, static_cast<int>(exp.length()), readingLine, static_cast<int>(readingLine.length()));
+        }
+        return 0;
     }
-    return 0; 
 }
 
-void SearchForExp(string exp, string readingLine){
-    if(static_cast<int>(readingLine.length()) < static_cast<int>(exp.length())){ cout << readingLine << '\n'; return; }
-    bool foundCurr = true;
-    bool foundAny = false;
-    int lastMatchPos = 0;
-    for(int i = 0; i <= (static_cast<int>(readingLine.length()) - static_cast<int>(exp.length())); i++){
+void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
+    if(readLnLen < expLen){ cout << readingLine << '\n'; return; }
+    bool foundAny = false;      // true if the exp was found anywhere in the line, false otherwise
+    int lineWritePos = 0;       // stores the pos of the next character to write from the line
+    for(int i = 0; i <= (readLnLen - expLen); i++){
+        // check for exp match if the first character of the exp matches the character being read
         if(exp[0] == readingLine[i]){
-            for(int j = 0; j < exp.length(); j++){
+            bool foundCurr = true;
+            for(int j = 0; j < expLen; j++){
+                // if any character differs, set foundCurr to false & exit loop
                 if(!(exp[j] == readingLine[i + j])){ foundCurr = false; break; }
             }
             if(foundCurr){
                 foundAny = true;
-                cout << readingLine.substr(lastMatchPos, i - lastMatchPos);
+                cout << readingLine.substr(lineWritePos, i - lineWritePos);
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
-                cout << readingLine.substr(i, static_cast<int>(exp.length()));
+                cout << readingLine.substr(i, expLen);
 
-                lastMatchPos = i + static_cast<int>(exp.length());
+                lineWritePos = i + expLen;
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
             }
-            else{ foundCurr = true; }
         }
     }
-    if(foundAny) cout << readingLine.substr(lastMatchPos) << '\n';
+    if(foundAny) cout << readingLine.substr(lineWritePos) << '\n';
     else cout << readingLine << '\n';
 }
