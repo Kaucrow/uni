@@ -79,13 +79,14 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
 
 bool CheckArgs(int argc, char* argv[]){
     int minArgs = 2;
-    for(int i = 0; i < argc - 1; i++){
+    for(int i = 0; i < argc; i++){
         if(((argv[i]))[0] == '-'){
             switch(((argv[i]))[1]){
                 case 'c': minArgs += 2; break;
             }
         }
     }
+    cout << minArgs << '\n';
     if(argc < minArgs || argc > minArgs + 1){ cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n"; return 1; }
     else if(argc == minArgs){ mode = "piped"; }
     else{ mode = "file"; }
