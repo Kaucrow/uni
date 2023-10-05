@@ -19,13 +19,11 @@ class Exception{
         Exception(const char* setErrMsg) : errMsg(setErrMsg) {};
         Exception(const char* setErrMsg, const char* setBadColor){
             string tempStr = setErrMsg;
-            tempStr = tempStr.substr(0, tempStr.find('$')) + setBadColor + tempStr.substr(tempStr.find('}') + 1);
-            cout << tempStr << '\n';
-            errMsg = tempStr.c_str();
+            errMsg = tempStr.substr(0, tempStr.find('$')) + setBadColor + tempStr.substr(tempStr.find('}') + 1);
         };
         void what(){ cerr << errMsg << '\n'; }
     private:
-        const char* errMsg;
+        string errMsg;
 };
 
 void CheckArgs(int argc, char* argv[]);
