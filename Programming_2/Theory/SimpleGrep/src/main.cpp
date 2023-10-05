@@ -1,40 +1,40 @@
 #include <iostream>
 #include <fstream>
+#include <map>
 #ifdef _WIN32
     #include <windows.h>
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 #endif
 using   std::cout, std::cerr, std::cin, std::string, 
-        std::getline, std::ifstream;
+        std::getline, std::ifstream, std::map;
+
+enum Colors{BLUE=9, GREEN=10, CYAN=11, RED=12, MAGENTA=13, YELLOW=14, WHITE=15};
 string mode = "file";
+Colors markColor = RED;
+Colors whiteColor = WHITE;
+map<string, Colors> winColorMap = {{"blue", BLUE},{"green", GREEN},{"cyan", CYAN},{"red", RED},
+                                   {"magenta", MAGENTA},{"yellow", YELLOW},{"white", WHITE}};
 
 bool CheckArgs(int argc, char* argv[]);
 void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen);
 int main(int argc, char* argv[]){
     if(CheckArgs(argc, argv)) return 1;
-    if(mode == "file") cout << "FILE" << '\n';
-    else if(mode == "piped") cout << "PIPED" << '\n';
     string readingLine;
 
-    // if the binary is executed without args, throw an error
-    if(argc == 1){
-        cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n";
-        return 1;
-    }
-
-    // if the binary is executed with one arg, assume that input is piped
-    else if(argc == 2){
+    // if the binary is executed with one arg (minus options), assume that input is piped
+    if(mode == "piped"){
+        cout << "PIPED" << '\n';    // debug
         string exp(argv[argc - 1]);
-        cout << "PIPED INPUT\n";
         while(getline(cin, readingLine)){
             SearchForExp(exp, static_cast<int>(exp.length()), readingLine, static_cast<int>(readingLine.length()));
         }
         return 0;
     }
 
-    // if the binary is executed with more than 2 args, assume that the last arg
+    // if the binary is executed with more than 2 args (minus options), assume that the last arg
     // is the file to read, and the one before it is the expression
     else{
+        cout << "FILE" << '\n';     // debug
         string exp(argv[argc - 2]);
 
         ifstream readFile(argv[argc - 1]);
@@ -65,11 +65,11 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
             if(foundCurr){
                 foundAny = true;
                 cout << readingLine.substr(lineWritePos, i - lineWritePos);
-                SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+                SetConsoleTextAttribute(hConsole, markColor);
                 cout << readingLine.substr(i, expLen);
 
                 lineWritePos = i + expLen;
-                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                SetConsoleTextAttribute(hConsole, whiteColor);
             }
         }
     }
@@ -83,17 +83,24 @@ bool CheckArgs(int argc, char* argv[]){
         if(((argv[i]))[0] == '-'){
             switch(((argv[i]))[1]){
                 case 'c': minArgs += 2; break;
-                /*default:
-                    cerr << "sgrep: [ ERR ] UNRECOGNIZED OPTION \'-" << ((argv[i])[1]) << "\'.";
-                    return 1;*/
             }
         }
     }
-    if(argc < minArgs){ cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n";
-        return 1;
+    if(argc < minArgs || argc > minArgs + 1){ cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n"; return 1; }
+    else if(argc == minArgs){ mode = "piped"; }
+    else{ mode = "file"; }
+    for(int i = 0; i < argc - 1; i++){
+        if(((argv[i])[0]) == '-'){
+            switch(((argv[i]))[1]){
+                case 'c':{
+                    markColor = winColorMap.find(argv[i + 1])->second;
+                    if(markColor == 0){
+                        cerr << "sgrep: Option -c: \"" << argv[i + 1] << "\" is not a valid color."; return 1;
+                    }
+                    break;
+                }
+            }
+        }
     }
-
-    if(argc == minArgs + 1) mode = "file";
-    else mode = "piped";
     return 0;
 }
