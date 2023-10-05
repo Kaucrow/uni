@@ -19,17 +19,21 @@ class Exception{
         Exception(const char* setErrMsg) : errMsg(setErrMsg) {};
         Exception(const char* setErrMsg, const char* setBadColor){
             string tempStr = setErrMsg;
-            //errMsg = tempStr.substr(0, tempStr.find('$'));
+            tempStr = tempStr.substr(0, tempStr.find('$')) + setBadColor + tempStr.substr(tempStr.find('}') + 1);
+            cout << tempStr << '\n';
+            errMsg = tempStr.c_str();
         };
-        void what(){ cerr << errMsg << '\n';}
+        void what(){ cerr << errMsg << '\n'; }
     private:
         const char* errMsg;
 };
 
-bool CheckArgs(int argc, char* argv[]);
+void CheckArgs(int argc, char* argv[]);
 void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen);
 int main(int argc, char* argv[]){
-    if(CheckArgs(argc, argv)) return 1;
+    try{ CheckArgs(argc, argv); }
+    catch(Exception& exc){ exc.what(); return 1; }
+
     string readingLine;
 
     // if the binary is executed with one arg (minus options), assume that input is piped
@@ -88,7 +92,7 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
     else cout << readingLine << '\n';
 }
 
-bool CheckArgs(int argc, char* argv[]){
+void CheckArgs(int argc, char* argv[]){
     int minArgs = 2;
     for(int i = 0; i < argc; i++){
         if(((argv[i]))[0] == '-'){
@@ -108,14 +112,10 @@ bool CheckArgs(int argc, char* argv[]){
                 case 'c':{
                     markColor = winColorMap.find(argv[i + 1])->second;
                     if(markColor == 0){
-                        Exception badColor("sgrep: Option -c: \"${COLOR}\" is not a valid color.", argv[i + 1]);
-                        badColor.what();
-                        //throw badColor;
-                    }
+                        Exception badColor("sgrep: Option -c: \"${COLOR}\" is not a valid color.", argv[i + 1]); throw badColor; }
                     break;
                 }
             }
         }
     }
-    return 0;
 }
