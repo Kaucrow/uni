@@ -1,5 +1,9 @@
 #include <iostream>
 #include <fstream>
+#ifdef _WIN32
+    #include <windows.h>
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
 using   std::cout, std::cerr, std::cin, std::string, 
         std::getline, std::ifstream;
 
@@ -39,18 +43,27 @@ int main(int argc, char* argv[]){
 }
 
 void SearchForExp(string exp, string readingLine){
-    bool found = true;
-    cout << readingLine.length() << '\n';
-    cout << readingLine << '\n';
-    cout << exp.length() << '\n';
-    cout << exp << '\n';
+    if(static_cast<int>(readingLine.length()) < static_cast<int>(exp.length())){ cout << readingLine << '\n'; return; }
+    bool foundCurr = true;
+    bool foundAny = false;
+    int lastMatchPos = 0;
     for(int i = 0; i <= (static_cast<int>(readingLine.length()) - static_cast<int>(exp.length())); i++){
         if(exp[0] == readingLine[i]){
             for(int j = 0; j < exp.length(); j++){
-                if(!(exp[j] == readingLine[i + j])){ found = false; break; }
+                if(!(exp[j] == readingLine[i + j])){ foundCurr = false; break; }
             }
-            if(found){ cout << "FOUND" << '\n'; }
-            else{ found = true; }
+            if(foundCurr){
+                foundAny = true;
+                cout << readingLine.substr(lastMatchPos, i - lastMatchPos);
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+                cout << readingLine.substr(i, static_cast<int>(exp.length()));
+
+                lastMatchPos = i + static_cast<int>(exp.length());
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            }
+            else{ foundCurr = true; }
         }
     }
+    if(foundAny) cout << readingLine.substr(lastMatchPos) << '\n';
+    else cout << readingLine << '\n';
 }
