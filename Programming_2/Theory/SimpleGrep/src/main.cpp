@@ -6,9 +6,14 @@
 #endif
 using   std::cout, std::cerr, std::cin, std::string, 
         std::getline, std::ifstream;
+string mode = "file";
 
+bool CheckArgs(int argc, char* argv[]);
 void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen);
 int main(int argc, char* argv[]){
+    if(CheckArgs(argc, argv)) return 1;
+    if(mode == "file") cout << "FILE" << '\n';
+    else if(mode == "piped") cout << "PIPED" << '\n';
     string readingLine;
 
     // if the binary is executed without args, throw an error
@@ -70,4 +75,25 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
     }
     if(foundAny) cout << readingLine.substr(lineWritePos) << '\n';
     else cout << readingLine << '\n';
+}
+
+bool CheckArgs(int argc, char* argv[]){
+    int minArgs = 2;
+    for(int i = 0; i < argc - 1; i++){
+        if(((argv[i]))[0] == '-'){
+            switch(((argv[i]))[1]){
+                case 'c': minArgs += 2; break;
+                /*default:
+                    cerr << "sgrep: [ ERR ] UNRECOGNIZED OPTION \'-" << ((argv[i])[1]) << "\'.";
+                    return 1;*/
+            }
+        }
+    }
+    if(argc < minArgs){ cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n";
+        return 1;
+    }
+
+    if(argc == minArgs + 1) mode = "file";
+    else mode = "piped";
+    return 0;
 }
