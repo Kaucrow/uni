@@ -116,13 +116,12 @@ void CheckArgs(int argc, char* argv[]){
     for(int i = 0; i < argc - 1; i++){
         if(((argv[i])[0]) == '-'){
             switch(((argv[i]))[1]){
-                case 'c':{
+                case 'c':
                     markColor = winColorMap.find(argv[i + 1])->second;
                     // throw an exception if the color wasn't found in the map of colors
                     if(markColor == 0){
                         Exception badColor("sgrep: Option -c: \"${COLOR}\" is not a valid color.", argv[i + 1]); throw badColor; }
                     break;
-                }
             }
         }
     }
