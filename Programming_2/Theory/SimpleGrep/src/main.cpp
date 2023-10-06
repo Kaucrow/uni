@@ -92,7 +92,6 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
         }
     }
     if(foundAny) cout << readingLine.substr(lineWritePos) << '\n';
-    else cout << readingLine << '\n';
 }
 
 void CheckArgs(int argc, char* argv[]){
