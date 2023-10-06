@@ -9,11 +9,22 @@ using   std::cout, std::cerr, std::cin, std::string,
         std::getline, std::ifstream, std::map;
 
 enum Colors{BLUE=9, GREEN=10, CYAN=11, RED=12, MAGENTA=13, YELLOW=14, WHITE=15};
-string mode = "file";
+bool pipedMode = true;
 Colors markColor = RED;
 Colors whiteColor = WHITE;
 map<string, Colors> winColorMap = {{"blue", BLUE},{"green", GREEN},{"cyan", CYAN},{"red", RED},
                                    {"magenta", MAGENTA},{"yellow", YELLOW},{"white", WHITE}};
+class Exception{
+    public:
+        Exception(const char* setErrMsg) : errMsg(setErrMsg) {};
+        Exception(const char* setErrMsg, const char* setBadColor){
+            string tempStr = setErrMsg;
+            //errMsg = tempStr.substr(0, tempStr.find('$'));
+        };
+        void what(){ cerr << errMsg << '\n';}
+    private:
+        const char* errMsg;
+};
 
 bool CheckArgs(int argc, char* argv[]);
 void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen);
@@ -22,7 +33,7 @@ int main(int argc, char* argv[]){
     string readingLine;
 
     // if the binary is executed with one arg (minus options), assume that input is piped
-    if(mode == "piped"){
+    if(pipedMode){
         cout << "PIPED" << '\n';    // debug
         string exp(argv[argc - 1]);
         while(getline(cin, readingLine)){
@@ -86,17 +97,20 @@ bool CheckArgs(int argc, char* argv[]){
             }
         }
     }
-    cout << minArgs << '\n';
-    if(argc < minArgs || argc > minArgs + 1){ cerr << "Usage: sgrep [OPTION] PATTERN [FILE]\n"; return 1; }
-    else if(argc == minArgs){ mode = "piped"; }
-    else{ mode = "file"; }
+
+    if(argc < minArgs || argc > minArgs + 1){
+        Exception badUsage("Usage: sgrep [OPTION...] PATTERN [FILE]"); throw badUsage; }
+    else if(argc == minArgs + 1){ pipedMode = false; }
+
     for(int i = 0; i < argc - 1; i++){
         if(((argv[i])[0]) == '-'){
             switch(((argv[i]))[1]){
                 case 'c':{
                     markColor = winColorMap.find(argv[i + 1])->second;
                     if(markColor == 0){
-                        cerr << "sgrep: Option -c: \"" << argv[i + 1] << "\" is not a valid color."; return 1;
+                        Exception badColor("sgrep: Option -c: \"${COLOR}\" is not a valid color.", argv[i + 1]);
+                        badColor.what();
+                        //throw badColor;
                     }
                     break;
                 }
