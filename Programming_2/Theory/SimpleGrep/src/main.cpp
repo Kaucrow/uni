@@ -38,8 +38,9 @@ int main(int argc, char* argv[]){
     if(pipedMode){
         cout << "PIPED" << '\n';    // debug
         string exp(argv[argc - 1]);
+        int expLen = static_cast<int>(exp.length());
         while(getline(cin, readingLine)){
-            SearchForExp(exp, static_cast<int>(exp.length()), readingLine, static_cast<int>(readingLine.length()));
+            SearchForExp(exp, expLen, readingLine, static_cast<int>(readingLine.length()));
         }
         return 0;
     }
@@ -48,7 +49,8 @@ int main(int argc, char* argv[]){
     // is the file to read, and the one before it is the expression
     else{
         cout << "FILE" << '\n';     // debug
-        string exp(argv[argc - 2]);
+        string exp(argv[argc - 2]); 
+        int expLen = static_cast<int>(exp.length());
 
         ifstream readFile(argv[argc - 1]);
         if(!readFile){
@@ -57,7 +59,7 @@ int main(int argc, char* argv[]){
         }
 
         while(getline(readFile, readingLine)){
-            SearchForExp(exp, static_cast<int>(exp.length()), readingLine, static_cast<int>(readingLine.length()));
+            SearchForExp(exp, expLen, readingLine, static_cast<int>(readingLine.length()));
         }
         return 0;
     }
