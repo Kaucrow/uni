@@ -18,3 +18,5 @@ In this format, [OPTION...] represents any optional flags or settings you can us
 
 ## Compilation
 To build the binary yourself, simply compile the "main.cpp" file, or execute ```make``` and ```make clean``` to build the binary using the Makefile provided.
+
+**NOTE: GNU/Linux compatibility hasn't been fully implemented yet.**
