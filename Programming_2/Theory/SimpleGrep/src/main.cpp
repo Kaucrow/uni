@@ -69,7 +69,8 @@ int main(int argc, char* argv[]){
 }
 
 void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
-    if(readLnLen < expLen){ cout << readingLine << '\n'; return; }
+    // return, since the exp can't be in the readingLine
+    if(readLnLen < expLen) return;
     bool foundAny = false;      // true if the exp was found anywhere in the line, false otherwise
     int lineWritePos = 0;       // stores the pos of the next character to write from the line
     for(int i = 0; i <= (readLnLen - expLen); i++){
@@ -87,6 +88,7 @@ void SearchForExp(string& exp, int expLen, string& readingLine, int readLnLen){
                 cout << readingLine.substr(i, expLen);
 
                 lineWritePos = i + expLen;
+                i = lineWritePos - 1;       // - 1, since 'i' will get incremented on next for loop iteration
                 SetConsoleTextAttribute(hConsole, whiteColor);      // return to normal foreground color
             }
         }
