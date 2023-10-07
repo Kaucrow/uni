@@ -9,13 +9,13 @@ else ifeq ($(shell uname), Linux)
 endif
 
 $(BIN_NAME): main.o
-	g++ main.o -o ./bin/$(BIN_NAME)
+	g++ -I "C:/Program Files/boost/boost_1_66_0" main.o -o ./bin/$(BIN_NAME)
 	@echo INFO: Binary was built in ./bin/$(BIN_NAME)
 	@$(ECHO_NL)
 
 main.o: ./src/main.cpp
 	@$(ECHO_NL)
-	g++ ./src/main.cpp -c
+	g++ -I "C:/Program Files/boost/boost_1_66_0" ./src/main.cpp -c
 
 clean:
 	@$(RM) *.o

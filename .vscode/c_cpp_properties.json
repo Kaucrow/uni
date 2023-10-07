@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                "C:/Boost/include/boost-1_83"
+            ],
+            "intelliSenseMode": "${default}",
+            "compilerPath": "C:\\Program Files\\MinGW\\mingw64\\bin\\gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17"
+        }
+    ],
+    "version": 4
+}
