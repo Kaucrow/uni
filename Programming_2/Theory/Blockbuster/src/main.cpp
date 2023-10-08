@@ -19,7 +19,8 @@ int main(){
     inFile.imbue(loc);                          // apply the locale to the movies.csv file.
     if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
 
-    Movie movieList[GetNumMovies(inFile) + 3001];       // create a list of movies for 4000 movies, where the first index is unused.
+    int totalMovies = GetNumMovies(inFile);
+    Movie movieList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
     wcout << GetNumMovies(inFile) << '\n';      // debug.
     wcout << sizeof(movieList) << '\n';         // debug.
     try{ PopulateMovieList(movieList, inFile); }
@@ -106,10 +107,10 @@ void PopulateMovieList(Movie movieList[], wifstream& inFile){
 int GetNumMovies(wifstream& inFile){
     inFile.seekg(0, std::ios_base::end);            // move to the EOF.
     std::wifstream::pos_type pos = inFile.tellg();  // get the curr pos and assign to a variable.
-    pos = int(pos) - 1;             // reduce the pos by one to
-    inFile.seekg(pos);              // go back one char.
+    pos = int(pos) - 2;             // reduce the pos by two to
+    inFile.seekg(pos);              // go back two chars.
 
-    wchar_t ch;
+    wchar_t ch = ' ';
     // executes while a newline isn't found.
     while(ch != '\n'){
         pos = int(pos) - 1;         // reduce the pos by one to
@@ -119,7 +120,7 @@ int GetNumMovies(wifstream& inFile){
 
     wstring lastLine;
     getline(inFile, lastLine);
-
-    inFile.seekg(0, std::ios_base::beg);    // put the inFile position back at the beginning.
+    
+    inFile.seekg(0, std::ios_base::beg);    // put the inFile position back at the beginning
     return stoi(lastLine);          // return the first number in the last line.
 }
