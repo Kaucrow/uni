@@ -22,43 +22,38 @@ int main(){
     Movie movieList[GetNumMovies(inFile) + 3001];       // create a list of movies for 4000 movies, where the first index is unused
     wcout << GetNumMovies(inFile) << '\n';      // debug
     wcout << sizeof(movieList) << '\n';         // debug
-    //PopulateMovieList(movieList, inFile);
+    PopulateMovieList(movieList, inFile);
 }
 
-/*void PopulateMovieList(Movie movieList[], wifstream& inFile){
+void PopulateMovieList(Movie movieList[], wifstream& inFile){
     int numMovies = GetNumMovies(inFile);
-    string readingLine;
-    std::wstring wideReadingLine;
-    int commaPos[6];
-    auto GetCommas = [&wideReadingLine, &commaPos](){
-        int nextComma, totalComma = 0;
-        for(int i = 0; i < 6; i++){
-            nextComma = wideReadingLine.find(',');
-            if(i == 0) totalComma += nextComma;
-            else totalComma += nextComma + 1;
-            commaPos[i] = totalComma;
-            std::wcout << wideReadingLine << '\n';
-            wideReadingLine = wideReadingLine.substr(nextComma + 1);
-        }
-    };
+    int nextComma;
+    wstring wideReadingLine;
+
     inFile.seekg(0);
     getline(inFile, wideReadingLine);
 
-    for(int i = 1; i <= numMovies; i++){
+    for(int i = 1; i <= 100; i++){
         getline(inFile, wideReadingLine);
-        if(i == 1) GetCommas();
-        // debug
-        if(i == 1){
-            cout << commaPos[0] << '\n';
-            cout << commaPos[1] << '\n';
-            cout << commaPos[2] << '\n';
-            cout << commaPos[3] << '\n';
-            cout << commaPos[4] << '\n';
-            cout << commaPos[5] << '\n';
+        wcout << "i: " << i << '\n';                // debug
+        for(int j = 0; j < 6; j++){
+            nextComma = wideReadingLine.find(',');
+            switch(j){
+                case 0: movieList[i].ID = stoi(wideReadingLine.substr(0)); break;
+                case 1:
+                    wcout << nextComma << '\n';     // debug
+                    if(wideReadingLine[0] == '"') nextComma = wideReadingLine.find('"', 1) + 1;
+                    wcout << nextComma << '\n';     // debug
+                    movieList[i].title = wideReadingLine.substr(0, nextComma); break;
+                case 2: movieList[i].genres = wideReadingLine.substr(0, nextComma); break;
+                case 3: movieList[i].duration = stoi(wideReadingLine); break;
+                case 4: movieList[i].director = wideReadingLine.substr(0, nextComma); break;
+            }
+            wideReadingLine = wideReadingLine.substr(nextComma + 1);
         }
-        //movieList[i].ID = stoi(readingLine.substr(0, readingLine.find(',')));
     }
-}*/
+    wcout << movieList[47].duration << '\n';
+}
 
 int GetNumMovies(wifstream& inFile){
     inFile.seekg(0, std::ios_base::end);            // move to the EOF

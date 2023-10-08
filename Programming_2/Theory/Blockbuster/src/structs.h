@@ -1,10 +1,11 @@
 #include <string>
-using std::string;
+using std::wstring;
 
 struct Movie{
     int ID = 0, duration = 0;
-    string title = "NULL";
-    string genres[7];
+    wstring title;
+    wstring genres;
+    wstring director;
     struct{
         int year = 0, month = 0, day = 0;
     } release;
