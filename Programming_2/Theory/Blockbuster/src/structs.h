@@ -4,7 +4,7 @@ using std::wstring;
 struct Movie{
     int ID = 0, duration = 0;
     wstring title;
-    wstring genres;
+    wstring genres[5] = {};
     wstring director;
     struct{
         int year = 0, month = 0, day = 0;
