@@ -11,7 +11,15 @@ endif()
 
 find_package(Boost REQUIRED COMPONENTS locale)
 
+# set a 32Mb stack size
+set(STACK_SIZE_BYTES 32000000)
+
+# append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_BYTES}")
+
 add_executable(blockbuster ./src/main.cpp)
+
+add_subdirectory(./src/lib/merge_sort)
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME}
@@ -24,3 +32,16 @@ if(Boost_FOUND)
 else()
     message(STATUS "WEBSOCKET BOOST NOT FOUND")
 endif()
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ./src/lib
+    PUBLIC ./src/lib/merge_sort    
+)
+
+target_link_directories(${PROJECT_NAME}
+    PRIVATE ./src/lib/merge_sort
+)
+
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE merge_sort
+)
