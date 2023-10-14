@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <fcntl.h>              // for _setmode().
-#include <boost/locale.hpp>
+//#include <boost/locale.hpp>
 #include "structs.h"
 using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
         std::wifstream, std::wifstream, std::wstring;
@@ -9,14 +9,15 @@ using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
 int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
 void PopulateMovieList(Movie movieList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
 int main(){
-    boost::locale::generator gen;               // create the locale generator.
-    std::locale loc = gen("en_US");             // create an "en_US" locale.
-    std::locale::global(loc);                   // and set it as the global locale.
-    _setmode(_fileno(stdout), _O_U8TEXT);       // change the STDOUT mode to use UTF-8 characters.
+
+    //boost::locale::generator gen;               // create the locale generator.
+    //std::locale loc = gen("en_US");             // create an "en_US" locale.
+    //std::locale::global(loc);                   // and set it as the global locale.
+    //_setmode(_fileno(stdout), _O_U8TEXT);       // change the STDOUT mode to use UTF-8 characters.
 
     wstring inFileName = L"./data/movies.csv";
     wifstream inFile(inFileName.c_str());
-    inFile.imbue(loc);                          // apply the locale to the movies.csv file.
+    //inFile.imbue(loc);                          // apply the locale to the movies.csv file.
     if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
 
     int totalMovies = GetNumMovies(inFile);
@@ -25,6 +26,7 @@ int main(){
     wcout << sizeof(movieList) << '\n';         // debug.
     try{ PopulateMovieList(movieList, inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
+    
     
     return 0;
 }
