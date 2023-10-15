@@ -27,7 +27,31 @@ int main(){
     try{ PopulateMovieList(movieList, inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
     
+    string name, lastName;
+    int id;
+  
+    wcout << "Ingrese su nombre: ";
+    cin >> name;
+
+    wcout << "Ingrese su apellido: ";
+    cin >> lastName;
+
+    id = rand(); // generates a random ID 
+
+    ofstream archivo("datos.bin", ios::out | ios::app | ios::binary);
+
+  if (archivo.is_open()) {
     
+    archivo.write((char*) &id, sizeof(id));
+    archivo.write(name.c_str(), name.size() + 1);
+    archivo.write(lastName.c_str(), lastName.size() + 1);
+    
+    archivo.close();
+  }
+  else {
+    wcout << "No se pudo abrir el archivo"; 
+  }
+
     return 0;
 }
 
