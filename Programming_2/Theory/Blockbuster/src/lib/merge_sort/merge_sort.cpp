@@ -2,6 +2,8 @@
 #include <functional>
 using std::function;
 
+// polymorphic function wrapper used by the Merge() function for sorting a movie list
+// according to duration, title, director, release year, release month, or release day.
 function<bool(Movie L[], Movie R[], int i, int j)> Compare[6] = {
     [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].duration <= R[j].duration; },
     [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].title <= R[j].title; },
@@ -11,6 +13,7 @@ function<bool(Movie L[], Movie R[], int i, int j)> Compare[6] = {
     [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.day <= R[j].release.day; }
 };
 
+// for use only by MergeSort()
 void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
     int n1 = m - l + 1;     // amount of elements of the L subarray
     int n2 = r - m;         // amount of elements of the R subarray

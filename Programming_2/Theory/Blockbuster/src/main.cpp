@@ -20,24 +20,28 @@ int main(){
 
     wstring inFileName = L"./data/movies.csv";
     wifstream inFile(inFileName.c_str());
-    inFile.imbue(loc);                          // apply the locale to the movies.csv file.
+    inFile.imbue(loc);                          // apply the locale to the movies.csv stream object.
     if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
 
-    int totalMovies = GetNumMovies(inFile);
-    Movie durList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    Movie ttlList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    Movie dirList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    Movie yeaList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    Movie monList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    Movie dayList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    int totalMovies = GetNumMovies(inFile);     // get the number of movies in the movies.csv file
+
+    // create lists of movies which hold 4000 movies each, where the first index of the array is unused.
+    // each movie list is sorted according to a different property (duration, title, director, release year, release month, release day).
+    Movie durList[totalMovies + 3001];
+    Movie ttlList[totalMovies + 3001];
+    Movie dirList[totalMovies + 3001];
+    Movie yeaList[totalMovies + 3001];
+    Movie monList[totalMovies + 3001];
+    Movie dayList[totalMovies + 3001];
     Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
-    //wcout << GetNumMovies(inFile) << '\n';      // debug.
+    //wcout << GetNumMovies(inFile) << '\n';    // debug.
     //wcout << sizeof(movList) << '\n';         // debug.
     
+    // populate the duration movie list
     try{ PopulateMovieList(movList[DURATION], inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    for(int i = 0; i <= totalMovies; i++){
+    for(int i = 1; i <= totalMovies; i++){
         movList[TITLE][i]    = movList[DURATION][i];
         movList[DIRECTOR][i] = movList[DURATION][i];
         movList[YEAR][i]     = movList[DURATION][i];
@@ -48,16 +52,16 @@ int main(){
     for(int i = 0; i < 6; i++)
         MergeSort(movList[i], 1, totalMovies, i);
 
-    wcout << "Executes" << '\n';
-    wcout << movList[DAY][1000].release.day << '\n';
-    wcout << movList[TITLE][1000].title << '\n';
+    //wcout << "Executes" << '\n';                // debug
+    //wcout << movList[DAY][1000].release.day << '\n';
+    //wcout << movList[TITLE][1000].title << '\n';
 
     return 0;
 }
 
 void PopulateMovieList(Movie movList[], wifstream& inFile){
     int numMovies = GetNumMovies(inFile);
-    int nextComma;      // stores the pos of the next comma in the curr line.
+    int nextComma;              // stores the pos of the next comma in the curr line.
     wstring wReadingLine;       // stores the curr line.
 
     // vars for setting the movie genres.
@@ -107,7 +111,7 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
                     else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
                 // Duration
                 case 3:
-                    wcout << "CASE3: " << i << '\n';
+                    wcout << "CASE3: " << i << '\n';    // debug
                     movList[i].duration = stoi(wReadingLine); 
                     break;
                 // Director
@@ -123,11 +127,9 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
                     movList[i].release.day   = stoi(wReadingLine.substr(8, 2));
                     break;
             } 
-            wReadingLine = wReadingLine.substr(nextComma + 1);  // remove the stored data field from the curr line
+            wReadingLine = wReadingLine.substr(nextComma + 1);  // remove the stored data field from the curr line.
         }
     }
-    //wcout << '\n';      // debug.
-    //wcout << movList[1].title << '\n';       // debug.
 }
 
 // sets the inFile pos to the start of the last line, gets the line,
