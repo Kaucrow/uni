@@ -1,6 +1,17 @@
 #include "merge_sort.h"
+#include <functional>
+using std::function;
 
-void Merge(Movie listFrom[], int l, int m, int r){
+function<bool(Movie L[], Movie R[], int i, int j)> Compare[6] = {
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].duration <= R[j].duration; },
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].title <= R[j].title; },
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].director <= R[j].director; },
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.year <= R[j].release.year; },
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.month <= R[j].release.month; },
+    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.day <= R[j].release.day; }
+};
+
+void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
     int n1 = m - l + 1;     // amount of elements of the L subarray
     int n2 = r - m;         // amount of elements of the R subarray
 
@@ -20,7 +31,7 @@ void Merge(Movie listFrom[], int l, int m, int r){
     int k = l;  // initial index of merged subarray
 
     while(i < n1 && j < n2){
-        if(L[i].title <= R[j].title){
+        if(Compare[sortBy](L, R, i, j)){
             listFrom[k] = L[i];
             i++;
         }
@@ -46,16 +57,16 @@ void Merge(Movie listFrom[], int l, int m, int r){
     }
 }
 
-void MergeSort(Movie listFrom[], int l, int r){
+void MergeSort(Movie listFrom[], int l, int r, const int sortBy){
     if(l < r){
         // same as (l + r) / 2, but avoids overflow for large l and r
         int m = l + (r - l) / 2;
 
         // sort first and second halves
-        MergeSort(listFrom, l, m);
-        MergeSort(listFrom, m + 1, r);
+        MergeSort(listFrom, l, m, sortBy);
+        MergeSort(listFrom, m + 1, r, sortBy);
 
         // merge the sorted halves
-        Merge(listFrom, l, m, r);
+        Merge(listFrom, l, m, r, sortBy);
     }
 }

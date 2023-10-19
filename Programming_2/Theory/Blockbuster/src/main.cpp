@@ -8,6 +8,8 @@
 using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
         std::wifstream, std::wifstream, std::wstring;
 
+enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
+
 int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
 void PopulateMovieList(Movie movList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
 int main(){
@@ -22,19 +24,33 @@ int main(){
     if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
 
     int totalMovies = GetNumMovies(inFile);
-    Movie movList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie durList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie ttlList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie dirList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie yeaList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie monList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie dayList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
+    Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
     //wcout << GetNumMovies(inFile) << '\n';      // debug.
     //wcout << sizeof(movList) << '\n';         // debug.
     
-    try{ PopulateMovieList(movList, inFile); }
+    try{ PopulateMovieList(movList[DURATION], inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    //Movie titleMovList[3388];
-    //wcout << movList[8].title << '\n';
-    MergeSort(movList, 1, totalMovies);
+    for(int i = 0; i <= totalMovies; i++){
+        movList[TITLE][i]    = movList[DURATION][i];
+        movList[DIRECTOR][i] = movList[DURATION][i];
+        movList[YEAR][i]     = movList[DURATION][i];
+        movList[MONTH][i]    = movList[DURATION][i];
+        movList[DAY][i]      = movList[DURATION][i];
+    }
+
+    for(int i = 0; i < 6; i++)
+        MergeSort(movList[i], 1, totalMovies, i);
 
     wcout << "Executes" << '\n';
-    wcout << movList[1000].title << '\n';
+    wcout << movList[DAY][1000].release.day << '\n';
+    wcout << movList[TITLE][1000].title << '\n';
 
     return 0;
 }
