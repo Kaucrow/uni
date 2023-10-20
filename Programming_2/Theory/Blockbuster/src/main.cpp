@@ -4,7 +4,8 @@
 //#include <boost/locale.hpp>
 #include "structs.h"
 using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
-        std::wifstream, std::wifstream, std::wstring;
+        std::wifstream, std::wifstream, std::wstring, std::fstream, std::wcin;
+
 
 int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
 void PopulateMovieList(Movie movieList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
@@ -28,29 +29,30 @@ int main(){
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
     
     string name, lastName;
-    int id;
+
+    int countOfUsers = 0;
   
-    wcout << "Ingrese su nombre: ";
+    wcout << "Input your name: ";
     cin >> name;
 
-    wcout << "Ingrese su apellido: ";
+    wcout << "Input your last name: "; 
     cin >> lastName;
 
-    id = rand(); // generates a random ID 
+    countOfUsers++; 
 
-    ofstream archivo("datos.bin", ios::out | ios::app | ios::binary);
+    fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
-  if (archivo.is_open()) {
+    if (file.is_open()) {
     
-    archivo.write((char*) &id, sizeof(id));
-    archivo.write(name.c_str(), name.size() + 1);
-    archivo.write(lastName.c_str(), lastName.size() + 1);
+        file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
+        file.write(name.c_str(), name.size() + 1);
+        file.write(lastName.c_str(), lastName.size() + 1);
     
-    archivo.close();
-  }
-  else {
-    wcout << "No se pudo abrir el archivo"; 
-  }
+    file.close();
+    }
+    else {
+    wcout << "File could not be opened";
+    }
 
     return 0;
 }
