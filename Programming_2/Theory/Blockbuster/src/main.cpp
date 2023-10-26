@@ -4,11 +4,13 @@
 #include <boost/locale.hpp>
 #include "structs.h"
 using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
-        std::wifstream, std::wifstream, std::wstring;
+        std::wifstream, std::wifstream, std::wstring, std::fstream, std::wcin;
+
 
 int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
 void PopulateMovieList(Movie movieList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
 int main(){
+
     boost::locale::generator gen;               // create the locale generator.
     std::locale loc = gen("en_US");             // create an "en_US" locale.
     std::locale::global(loc);                   // and set it as the global locale.
@@ -19,12 +21,39 @@ int main(){
     inFile.imbue(loc);                          // apply the locale to the movies.csv file.
     if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
 
-    Movie movieList[GetNumMovies(inFile) + 3001];       // create a list of movies for 4000 movies, where the first index is unused.
+    int totalMovies = GetNumMovies(inFile);
+    Movie movieList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
     wcout << GetNumMovies(inFile) << '\n';      // debug.
     wcout << sizeof(movieList) << '\n';         // debug.
     try{ PopulateMovieList(movieList, inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
     
+    string name, lastName;
+
+    int countOfUsers = 0;
+  
+    wcout << "Input your name: ";
+    cin >> name;
+
+    wcout << "Input your last name: "; 
+    cin >> lastName;
+
+    countOfUsers++; 
+
+    fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
+
+    if (file.is_open()) {
+    
+        file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
+        file.write(name.c_str(), name.size() + 1);
+        file.write(lastName.c_str(), lastName.size() + 1);
+    
+    file.close();
+    }
+    else {
+    wcout << "File could not be opened";
+    }
+
     return 0;
 }
 
@@ -106,10 +135,10 @@ void PopulateMovieList(Movie movieList[], wifstream& inFile){
 int GetNumMovies(wifstream& inFile){
     inFile.seekg(0, std::ios_base::end);            // move to the EOF.
     std::wifstream::pos_type pos = inFile.tellg();  // get the curr pos and assign to a variable.
-    pos = int(pos) - 1;             // reduce the pos by one to
-    inFile.seekg(pos);              // go back one char.
+    pos = int(pos) - 2;             // reduce the pos by two to
+    inFile.seekg(pos);              // go back two chars.
 
-    wchar_t ch;
+    wchar_t ch = ' ';
     // executes while a newline isn't found.
     while(ch != '\n'){
         pos = int(pos) - 1;         // reduce the pos by one to
@@ -119,7 +148,7 @@ int GetNumMovies(wifstream& inFile){
 
     wstring lastLine;
     getline(inFile, lastLine);
-
-    inFile.seekg(0, std::ios_base::beg);    // put the inFile position back at the beginning.
+    
+    inFile.seekg(0, std::ios_base::beg);    // put the inFile position back at the beginning
     return stoi(lastLine);          // return the first number in the last line.
 }
