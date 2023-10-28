@@ -89,3 +89,10 @@ test/test_runner
 
 # Built Visual Studio Code Extensions
 **/*.vsix
+
+# ==========
+# Others
+# ==========
+
+**/test/**
+**/Test/**

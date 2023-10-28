@@ -1,0 +1,1 @@
+add_library(merge_sort merge_sort.cpp)
