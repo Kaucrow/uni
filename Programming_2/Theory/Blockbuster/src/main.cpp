@@ -4,8 +4,9 @@
 #include <boost/locale.hpp>
 #include "./lib/structs.h"
 #include "./lib/merge_sort/merge_sort.h"
+#include "./lib/bin_search/bin_search.h"
 
-using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
+using   std::wcout, std::wcerr, std::wcin, std::getline,
         std::wifstream, std::wifstream, std::wstring;
 
 enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
@@ -51,6 +52,86 @@ int main(){
 
     for(int i = 0; i < 6; i++)
         MergeSort(movList[i], 1, totalMovies, i);
+
+    wcout << movList[DURATION][1].duration << '\n';
+    wcout << movList[DURATION][2].duration << '\n';
+    wcout << movList[DURATION][3].duration << '\n';
+    wcout << movList[DURATION][4].duration << '\n';
+
+    Movie matches[totalMovies + 3001];
+    Movie toMatch;
+    int filterSel;
+    wcout   << "*** FILTERS ***\n"
+            << "(1) Duration\n"
+            << "(2) Title\n"
+            << "(3) Director\n"
+            << "(4) Release year\n"
+            << "(5) Release month\n"
+            << "(6) Release day\n"
+            << "Select option: ";
+
+    wcin >> filterSel;
+    while(filterSel < 1 || filterSel > 6){
+        wcout << "INVALID OPTION.\nSelect option: ";
+        wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        wcin >> filterSel;
+    }
+    wcin.ignore(1);
+
+    wstring search;
+    switch(filterSel){
+        case 1:
+            wcout << "Duration to search for: ";
+            getline(wcin, search);
+            toMatch.duration = stoi(search);
+            BinSearch(movList[DURATION], matches, 0, totalMovies, toMatch, DURATION);
+            break;
+        case 2:
+            wcout << "Title to search for: ";
+            getline(wcin, search);
+            toMatch.title = search;
+            BinSearch(movList[TITLE], matches, 0, totalMovies, toMatch, TITLE);
+            break;
+        case 3:
+            wcout << "Director to search for: ";
+            getline(wcin, search);
+            toMatch.director = search;
+            BinSearch(movList[DIRECTOR], matches, 0, totalMovies, toMatch, DIRECTOR);
+            break;
+        case 4:
+            wcout << "Year to search for: ";
+            getline(wcin, search);
+            toMatch.release.year = stoi(search);
+            BinSearch(movList[YEAR], matches, 0, totalMovies, toMatch, YEAR);
+            break;
+        case 5:
+            wcout << "Month to search for: ";
+            getline(wcin, search);
+            while(stoi(search) < 1 || stoi(search) > 12){
+                wcout << "Please input a valid month.\n";
+                getline(wcin, search);
+            }
+            toMatch.release.month = stoi(search);
+            BinSearch(movList[MONTH], matches, 0, totalMovies, toMatch, MONTH);
+            break;
+        case 6:
+            wcout << "Day to search for: ";
+            getline(wcin, search);
+            while(stoi(search) < 1 || stoi(search) > 31){
+                wcout << "Please input a valid day.\n";
+                getline(wcin, search);
+            }
+            toMatch.release.day = stoi(search);
+            BinSearch(movList[DAY], matches, 0, totalMovies, toMatch, DAY);
+            break;
+        default:
+            wcerr << "ERR: INVALID FILTER.\n";
+            break;
+    }
+
+    for(int i = 0; matches[i].duration != 0; i++){
+        wcout << matches[i].title << '\n';
+    }
 
     //wcout << "Executes" << '\n';                // debug
     //wcout << movList[DAY][1000].release.day << '\n';
@@ -111,7 +192,7 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
                     else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
                 // Duration
                 case 3:
-                    wcout << "CASE3: " << i << '\n';    // debug
+                    //wcout << "CASE3: " << i << '\n';    // debug
                     movList[i].duration = stoi(wReadingLine); 
                     break;
                 // Director

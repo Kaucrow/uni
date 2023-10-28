@@ -20,6 +20,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_B
 add_executable(blockbuster ./src/main.cpp)
 
 add_subdirectory(./src/lib/merge_sort)
+add_subdirectory(./src/lib/bin_search)
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME}
@@ -35,13 +36,16 @@ endif()
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
-    PUBLIC ./src/lib/merge_sort    
+    PUBLIC ./src/lib/merge_sort
+    PUBLIC ./src/lib/bin_search
 )
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE ./src/lib/merge_sort
+    PRIVATE ./src/lib/bin_search
 )
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE merge_sort
+    PRIVATE bin_search
 )
