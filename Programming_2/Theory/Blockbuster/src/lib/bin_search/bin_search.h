@@ -1,4 +1,5 @@
 #pragma once
 #include "../structs.h"
 
-void BinSearch(Movie searchArr[], Movie storeArr[], int l, int r, Movie toCompare, const int type);
+int BinSearch(Movie searchArr[], Movie storeArr[], int l, int r, const Movie &toCompare, const int type);
+void StoreNewMovie(Movie searchArr[], Movie storeArr[], int l, int r, const Movie &toCompare, const int type);

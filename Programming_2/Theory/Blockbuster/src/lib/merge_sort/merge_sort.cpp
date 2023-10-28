@@ -1,4 +1,5 @@
 #include "merge_sort.h"
+#include <iostream>
 #include <functional>
 using std::function;
 
@@ -19,8 +20,8 @@ void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
     int n2 = r - m;         // amount of elements of the R subarray
 
     // create temp L and R arrays
-    Movie L[n1];
-    Movie R[n2];
+    Movie* L{ new Movie [n1] };
+    Movie* R{ new Movie [n2] };
 
     // copy data to temp arrays L[] and R[]
     for(int i = 0; i < n1; i++)
@@ -58,6 +59,8 @@ void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
         j++;
         k++;
     }
+
+    delete [] L; delete [] R;
 }
 
 void MergeSort(Movie listFrom[], int l, int r, const int sortBy){

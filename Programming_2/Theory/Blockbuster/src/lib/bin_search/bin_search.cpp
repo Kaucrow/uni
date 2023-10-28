@@ -4,8 +4,8 @@
 using std::function;
 
 template <typename T>
-bool CompareFunc(T searchArr, T toCompare, bool equality){
-    return equality ? searchArr == toCompare : searchArr < toCompare;
+bool CompareFunc(T searchArrDat, T toCompareDat, bool equality){
+    return equality ? searchArrDat == toCompareDat : searchArrDat < toCompareDat;
 }
 
 // polymorphic function wrapper used by the Merge() function for sorting a movie list
@@ -25,7 +25,7 @@ function<bool(Movie searchArr[], int pos, Movie toCompare, bool equality)> BinCo
         return CompareFunc(searchArr[pos].release.day, toCompare.release.day, equality); }
 };
 
-void StoreMatches(Movie searchArr[], Movie storeArr[], int someMatchPos, Movie toCompare, const int type){
+void StoreMatches(Movie searchArr[], Movie storeArr[], int someMatchPos, const Movie &toCompare, const int type){
     int storeIndex = 0;
     for(int offset = 0; BinCompare[type](searchArr, someMatchPos + offset, toCompare, 1); offset--){
         storeArr[storeIndex] = searchArr[someMatchPos + offset];
@@ -42,14 +42,14 @@ void StoreMatches(Movie searchArr[], Movie storeArr[], int someMatchPos, Movie t
     //std::wcout << searchArr[someMatchPos + storeIndex].duration << '\n';      // debug
 }
 
-void BinSearch(Movie searchArr[], Movie storeArr[], int l, int r, Movie toCompare, const int type){
+int BinSearch(Movie searchArr[], Movie storeArr[], int l, int r, const Movie &toCompare, const int type){
+    int m;
     while (l <= r) {
-        int m = l + (r - l) / 2;
- 
+        m = l + (r - l) / 2;
         // check if x is present at mid
         if (BinCompare[type](searchArr, m, toCompare, 1)){
             StoreMatches(searchArr, storeArr, m, toCompare, type);
-            return;
+            return -999;
         }
  
         // if x is greater, ignore left half
@@ -63,5 +63,28 @@ void BinSearch(Movie searchArr[], Movie storeArr[], int l, int r, Movie toCompar
  
     // if we reach here, the element was not present
     std::wcout << "NOT PRESENT\n";
-    return;
+    std::wcout << searchArr[m].title << '\n';
+    return m;
+}
+
+void StoreNewMovie(Movie searchArr[], Movie storeArr[], int l, int r, const Movie &toCompare, const int type){
+    int pivot = BinSearch(searchArr, storeArr, l, r, toCompare, type);
+    if(pivot == -999){ std::wcerr << "ERR: COULD NOT STORE MOVIE OF TYPE " << type << ".\n"; return; }
+    int storeAt;
+     
+    std::wcout << "BEGIN DEBUGGING\n";
+
+    while(!(BinCompare[type](searchArr, pivot, toCompare, 0))){ std::wcout << "REDUCED\n"; pivot -= 10; }
+    for(storeAt = pivot; BinCompare[type](searchArr, pivot + storeAt, toCompare, 0); storeAt++){}
+
+    // debug
+    std::wcout << '\n';
+    for(int i = pivot; i < pivot + 20; i++){
+        std::wcout << searchArr[i].title << '\n';
+    }
+    for(int i = pivot; i > pivot - 20; i--){
+        std::wcout << searchArr[i].title << '\n';
+    }
+    std::wcout << '\n';
+    std::wcout << searchArr[storeAt].title << '\n';
 }
