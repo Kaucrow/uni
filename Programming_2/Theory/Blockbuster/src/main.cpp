@@ -14,6 +14,7 @@ enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
 int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
 void PopulateMovieList(Movie movList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
 int main(){
+
     boost::locale::generator gen;               // create the locale generator.
     std::locale loc = gen("en_US");             // create an "en_US" locale.
     std::locale::global(loc);                   // and set it as the global locale.
@@ -38,6 +39,32 @@ int main(){
     //wcout << GetNumMovies(inFile) << '\n';    // debug.
     //wcout << sizeof(movList) << '\n';         // debug.
     
+    string name, lastName;
+
+    int countOfUsers = 0;
+  
+    wcout << "Input your name: ";
+    cin >> name;
+
+    wcout << "Input your last name: "; 
+    cin >> lastName;
+
+    countOfUsers++; 
+
+    fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
+
+    if (file.is_open()) {
+    
+        file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
+        file.write(name.c_str(), name.size() + 1);
+        file.write(lastName.c_str(), lastName.size() + 1);
+    
+    file.close();
+    }
+    else {
+    wcout << "File could not be opened";
+    }
+
     // populate the duration movie list
     try{ PopulateMovieList(movList[DURATION], inFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
