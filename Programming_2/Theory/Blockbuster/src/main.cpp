@@ -6,7 +6,7 @@
 #include "./lib/merge_sort/merge_sort.h"
 #include "./lib/bin_search/bin_search.h"
 
-using   std::wcout, std::wcerr, std::wcin, std::getline,
+using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wifstream, std::wstring;
 
 enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
@@ -39,23 +39,23 @@ int main(){
     //wcout << GetNumMovies(inFile) << '\n';    // debug.
     //wcout << sizeof(movList) << '\n';         // debug.
     
-    string name, lastName;
+    wstring name, lastName;
 
     int countOfUsers = 0;
   
     wcout << "Input your name: ";
-    cin >> name;
+    wcin >> name;
 
     wcout << "Input your last name: "; 
-    cin >> lastName;
+    wcin >> lastName;
 
     countOfUsers++; 
 
-    fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
+    wfstream file("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
     if (file.is_open()) {
     
-        file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
+        file.write((wchar_t*) &countOfUsers, sizeof(countOfUsers)); 
         file.write(name.c_str(), name.size() + 1);
         file.write(lastName.c_str(), lastName.size() + 1);
     
