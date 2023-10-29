@@ -40,13 +40,36 @@ int main(){
 
     countOfUsers++; 
 
+    string searchWord;
+
+    int index;
+
+    wcout << "What movie would you like to rent?: " << endl;
+
+    cin >> searchWord;
+
+    //Lineal search of available movies in the array
+
+    for (int i = 0; i < totalMovies + 3001; i++) {
+
+        if (movieList[i] == searchWord) {   // if the word we've searched is in the array
+
+            index = i;                      // we store here the movie name
+
+            break;
+
+        } 
+
+    } 
+
     fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
-    if (file.is_open()) {
+    if (file.is_open()) {   //Printing data of the users in the bin file
     
         file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
         file.write(name.c_str(), name.size() + 1);
         file.write(lastName.c_str(), lastName.size() + 1);
+        file.write((char*) &index, sizeof(index));
     
     file.close();
     }
