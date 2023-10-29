@@ -87,7 +87,7 @@ int main(){
     wcout << movList[DURATION][4].duration << '\n';
 
     while(true){
-        ClrScr();
+        //ClrScr();
         int action;
         wcout   << "*** CHOOSE AN ACTION ***\n"
                 << "(1) Search with filters\n"
@@ -129,25 +129,25 @@ int main(){
                     wcout << "Duration to search for: ";
                     getline(wcin, search);
                     toMatch.duration = stoi(search);
-                    BinSearch(movList[DURATION], matches, 0, totalMovies, toMatch, DURATION);
+                    BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
                     break;
                 case 2:
                     wcout << "Title to search for: ";
                     getline(wcin, search);
                     toMatch.title = search;
-                    BinSearch(movList[TITLE], matches, 0, totalMovies, toMatch, TITLE);
+                    BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
                     break;
                 case 3:
                     wcout << "Director to search for: ";
                     getline(wcin, search);
                     toMatch.director = search;
-                    BinSearch(movList[DIRECTOR], matches, 0, totalMovies, toMatch, DIRECTOR);
+                    BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
                     break;
                 case 4:
                     wcout << "Year to search for: ";
                     getline(wcin, search);
                     toMatch.release.year = stoi(search);
-                    BinSearch(movList[YEAR], matches, 0, totalMovies, toMatch, YEAR);
+                    BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
                     break;
                 case 5:
                     wcout << "Month to search for: ";
@@ -157,7 +157,7 @@ int main(){
                     getline(wcin, search);
                 }
                 toMatch.release.month = stoi(search);
-                BinSearch(movList[MONTH], matches, 0, totalMovies, toMatch, MONTH);
+                BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
                 break;
             case 6:
                 wcout << "Day to search for: ";
@@ -167,7 +167,7 @@ int main(){
                     getline(wcin, search);
                 }
                 toMatch.release.day = stoi(search);
-                BinSearch(movList[DAY], matches, 0, totalMovies, toMatch, DAY);
+                BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
                 break;
             default:
                 wcerr << "ERR: INVALID FILTER.\n";
@@ -227,7 +227,12 @@ int main(){
             getline(wcin, storeDat);
             toStore.release.day = stoi(storeDat);
 
-            StoreNewMovie(movList[TITLE], movList[TITLE], 0, totalMovies - 1, toStore, TITLE);
+            StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
+            //StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
+            /*StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
+            StoreNewMovie(movList[YEAR], 1, totalMovies, toStore, YEAR);
+            StoreNewMovie(movList[MONTH], 1, totalMovies, toStore, MONTH);
+            StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);*/
         }
         wcin.get();
     }
