@@ -2,9 +2,10 @@
 #include <fstream>
 #include <fcntl.h>              // for _setmode().
 #include <boost/locale.hpp>
-#include "./lib/structs.h"
-#include "./lib/merge_sort/merge_sort.h"
-#include "./lib/bin_search/bin_search.h"
+#include <structs.h>
+#include <merge_sort.h>
+#include <bin_search.h>
+#include <store_movie.h>
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wifstream, std::wstring;
@@ -37,8 +38,6 @@ int main(){
     Movie monList[totalMovies + 3001];
     Movie dayList[totalMovies + 3001];
     Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
-    //wcout << GetNumMovies(inFile) << '\n';    // debug.
-    //wcout << sizeof(movList) << '\n';         // debug.
     
     wstring name, lastName;
 
@@ -81,13 +80,9 @@ int main(){
     for(int i = 0; i < 6; i++)
         MergeSort(movList[i], 1, totalMovies, i);
 
-    wcout << movList[DURATION][1].duration << '\n';
-    wcout << movList[DURATION][2].duration << '\n';
-    wcout << movList[DURATION][3].duration << '\n';
-    wcout << movList[DURATION][4].duration << '\n';
 
     while(true){
-        //ClrScr();
+        ClrScr();
         int action;
         wcout   << "*** CHOOSE AN ACTION ***\n"
                 << "(1) Search with filters\n"
@@ -178,10 +173,6 @@ int main(){
             for(int i = 0; matches[i].duration != 0; i++){
                 wcout << matches[i].title << '\n';
             }
-
-            //wcout << "Executes" << '\n';                // debug
-            //wcout << movList[DAY][1000].release.day << '\n';
-            //wcout << movList[TITLE][1000].title << '\n';
         }
         else{
             ClrScr();
@@ -191,48 +182,51 @@ int main(){
 
             wcout << "*** NEW MOVIE DATA ***\n";
 
-            wcout << "Duration: ";
+            wcout << "-> Duration: ";
             getline(wcin, storeDat);
             while(stoi(storeDat) <= 0){
-                wcout << "Movie cannot have a duration equal or less than 0.\nMovie duration:";
+                wcerr << "[ ERR ] The movie cannot have a duration less than or equal to 0.\n-> Duration:";
                 getline(wcin, storeDat);
             }
             toStore.duration = stoi(storeDat);
 
-            wcout << "Title: ";
+            wcout << "-> Title: ";
             getline(wcin, storeDat);
             storeDat[0] = toupper(storeDat[0]);
             toStore.title = storeDat;
 
+            wcout << "-> Genres\n";
             for(int i = 0; i < 6; i++){
-                wcout << "Genre " << i + 1 << ": ";
+                wcout << "   * " << i + 1 << ": ";
                 getline(wcin, storeDat);
                 toStore.genres[i] = storeDat;
             }
 
 
-            wcout << "Director: ";
+            wcout << "-> Director: ";
             getline(wcin, storeDat);
             toStore.director = storeDat;
 
-            wcout << "Release year: ";
+            wcout << "-> Release year: ";
             getline(wcin, storeDat);
             toStore.release.year = stoi(storeDat);
             
-            wcout << "Release month: ";
+            wcout << "-> Release month: ";
             getline(wcin, storeDat);
             toStore.release.month = stoi(storeDat);
             
-            wcout << "Release day: ";
+            wcout << "-> Release day: ";
             getline(wcin, storeDat);
             toStore.release.day = stoi(storeDat);
 
             StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
-            //StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
-            /*StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
+            StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
+            StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
             StoreNewMovie(movList[YEAR], 1, totalMovies, toStore, YEAR);
             StoreNewMovie(movList[MONTH], 1, totalMovies, toStore, MONTH);
-            StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);*/
+            StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);
+
+            wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
         }
         wcin.get();
     }
