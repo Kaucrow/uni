@@ -10,18 +10,18 @@ bool CompareFunc(T searchArrDat, T toCompareDat, bool equality){
 
 // polymorphic function wrapper used by the Merge() function for sorting a movie list
 // according to duration, title, director, release year, release month, or release day.
-function<bool(const Movie searchArr[], int pos, Movie toCompare, bool equality)> BinCompare[6] = {
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+function<bool(const Movie searchArr[], int pos, const Movie &toCompare, bool equality)> BinCompare[6] = {
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].duration, toCompare.duration, equality); },
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].title, toCompare.title, equality); },
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].director, toCompare.director, equality); },
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].release.year, toCompare.release.year, equality); },
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].release.month, toCompare.release.month, equality); },
-    [](const Movie searchArr[], int pos, Movie toCompare, bool equality) -> bool{ 
+    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
         return CompareFunc(searchArr[pos].release.day, toCompare.release.day, equality); }
 };
 

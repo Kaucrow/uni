@@ -22,6 +22,7 @@ void ClrScr();
  * @brief Gets the number of movies in the movies.csv file.
  * @param inFile - wifstream object that contains the movies.csv file.
  * @return Number of movies in the movies.csv file.
+ * @see GetNumMoviesDetails "GetNumMovies() implementation details"
  */
 int GetNumMovies(wifstream& inFile);
 
@@ -143,31 +144,31 @@ int main(){
              * perform the search, and store the matching movies in the "matches" movie list array.
              */
             switch(action){
-                case DURATION:
+                case DURATION + 1:
                     wcout << "Duration to search for: ";
                     getline(wcin, search);
                     toMatch.duration = stoi(search);
                     BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
                     break;
-                case TITLE:
+                case TITLE + 1:
                     wcout << "Title to search for: ";
                     getline(wcin, search);
                     toMatch.title = search;
                     BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
                     break;
-                case DIRECTOR:
+                case DIRECTOR + 1:
                     wcout << "Director to search for: ";
                     getline(wcin, search);
                     toMatch.director = search;
                     BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
                     break;
-                case YEAR:
+                case YEAR + 1:
                     wcout << "Year to search for: ";
                     getline(wcin, search);
                     toMatch.release.year = stoi(search);
                     BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
                     break;
-                case MONTH:
+                case MONTH + 1:
                     wcout << "Month to search for: ";
                     getline(wcin, search);
                     while(stoi(search) < 1 || stoi(search) > 12){
@@ -177,7 +178,7 @@ int main(){
                     toMatch.release.month = stoi(search);
                     BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
                     break;
-                case DAY:
+                case DAY + 1:
                     wcout << "Day to search for: ";
                     getline(wcin, search);
                     while(stoi(search) < 1 || stoi(search) > 31){
@@ -343,6 +344,7 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
 }
 
 /**
+ * @name GetNumMoviesDetails
  * Sets the inFile pos to the start of the last line, gets the line,
  * and returns the first number in it.
  */
