@@ -22,7 +22,7 @@ void ClrScr();
  * @brief Gets the number of movies in the movies.csv file.
  * @param inFile - wifstream object that contains the movies.csv file.
  * @return Number of movies in the movies.csv file.
- * @see GetNumMoviesDetails "GetNumMovies() implementation details"
+ * @see GetNumMoviesImplem "GetNumMovies() implementation details".
  */
 int GetNumMovies(wifstream& inFile);
 
@@ -139,6 +139,7 @@ int main(){
 
             wstring search;
             ClrScr();
+
             /**
              * Generate the "toMatch" movie according to the selected filter,
              * perform the search, and store the matching movies in the "matches" movie list array.
@@ -198,6 +199,7 @@ int main(){
             for(int i = 0; matches[i].duration != 0; i++){
                 wcout << matches[i].title << '\n';
             }
+            
         }
         /***************************
         /*  Add a movie.
@@ -344,7 +346,7 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
 }
 
 /**
- * @name GetNumMoviesDetails
+ * @name GetNumMoviesImplem
  * Sets the inFile pos to the start of the last line, gets the line,
  * and returns the first number in it.
  */

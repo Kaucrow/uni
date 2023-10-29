@@ -3,59 +3,66 @@
 #include <functional>
 using std::function;
 
-// polymorphic function wrapper used by the Merge() function for sorting a movie list
-// according to duration, title, director, release year, release month, or release day.
-function<bool(Movie L[], Movie R[], int i, int j)> Compare[6] = {
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].duration <= R[j].duration; },
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].title <= R[j].title; },
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].director <= R[j].director; },
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.year <= R[j].release.year; },
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.month <= R[j].release.month; },
-    [](Movie L[], Movie R[], int i, int j) -> bool{ return L[i].release.day <= R[j].release.day; }
+/**
+ * @brief   Polymorphic function wrapper used by the Merge() function for sorting a movie list
+ *          according to duration, title, director, release year, release month, or release day.
+ * @param L - Left half of the array that is being merged.
+ * @param R - Right half of the array that is being merged.
+ * @param i - Index of the L array element to be compared.
+ * @param j - Index of the R array element to be compared.
+ * @return True if L[i].dataType <= R[j].dataType, false otherwise.
+ */
+function<bool(const Movie L[], const Movie R[], int i, int j)> Compare[6] = {
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].duration <= R[j].duration; },
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].title <= R[j].title; },
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].director <= R[j].director; },
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].release.year <= R[j].release.year; },
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].release.month <= R[j].release.month; },
+    [](const Movie L[], const Movie R[], int i, int j) -> bool{ return L[i].release.day <= R[j].release.day; }
 };
 
-// for use only by MergeSort()
-void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
-    int n1 = m - l + 1;     // amount of elements of the L subarray
-    int n2 = r - m;         // amount of elements of the R subarray
+/* For use only by MergeSort() */
+void Merge(Movie arr[], int l, int m, int r, const int sortBy){
+    int n1 = m - l + 1;     // Amount of elements of the L subarray.
+    int n2 = r - m;         // Amount of elements of the R subarray.
 
-    // create temp L and R arrays
+    // Create temp L and R arrays.
     Movie* L{ new Movie [n1] };
     Movie* R{ new Movie [n2] };
 
-    // copy data to temp arrays L[] and R[]
+    // Copy data to temp arrays L[] and R[].
     for(int i = 0; i < n1; i++)
-        L[i] = listFrom[l + i];
+        L[i] = arr[l + i];
     for(int j = 0; j < n2; j++)
-        R[j] = listFrom[m + 1 + j];
+        R[j] = arr[m + 1 + j];
 
-    // merge the temp arrays back into movies[l..r]
-    int i = 0;  // initial index of first subarray
-    int j = 0;  // initial index of second subarray
-    int k = l;  // initial index of merged subarray
+    // Merge the temp arrays back into movies[l..r].
+    int i = 0;  // Initial index of first subarray.
+    int j = 0;  // Initial index of second subarray.
+    int k = l;  // Initial index of merged subarray.
 
     while(i < n1 && j < n2){
         if(Compare[sortBy](L, R, i, j)){
-            listFrom[k] = L[i];
+            arr[k] = L[i];
             i++;
         }
         else{
-            listFrom[k] = R[j];
+            arr[k] = R[j];
             j++;
         }
         k++;
     }
 
-    // copy the remaining elements of L[], if any
+    // Copy the remaining elements of L[], if any.
     while(i < n1){
-        listFrom[k] = L[i];
+        arr[k] = L[i];
         i++;
         k++;
     }
 
-    // copy the remaining elements of R[], if any
+    // Copy the remaining elements of R[], if any.
     while(j < n2){
-        listFrom[k] = R[j];
+        arr[k] = R[j];
         j++;
         k++;
     }
@@ -63,16 +70,16 @@ void Merge(Movie listFrom[], int l, int m, int r, const int sortBy){
     delete [] L; delete [] R;
 }
 
-void MergeSort(Movie listFrom[], int l, int r, const int sortBy){
+void MergeSort(Movie arr[], int l, int r, const int sortBy){
     if(l < r){
-        // same as (l + r) / 2, but avoids overflow for large l and r
+        // Same as (l + r) / 2, but avoids overflow for large l and r.
         int m = l + (r - l) / 2;
 
-        // sort first and second halves
-        MergeSort(listFrom, l, m, sortBy);
-        MergeSort(listFrom, m + 1, r, sortBy);
+        // Sort first and second halves.
+        MergeSort(arr, l, m, sortBy);
+        MergeSort(arr, m + 1, r, sortBy);
 
-        // merge the sorted halves
-        Merge(listFrom, l, m, r, sortBy);
+        // Merge the sorted halves.
+        Merge(arr, l, m, r, sortBy);
     }
 }

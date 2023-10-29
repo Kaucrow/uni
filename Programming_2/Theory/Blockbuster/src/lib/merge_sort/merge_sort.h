@@ -1,4 +1,11 @@
 #pragma once
 #include "../structs.h"
 
-extern void MergeSort(Movie listFrom[], int l, int r, const int sortBy);
+/**
+ * @brief Merge sort function implementation.
+ * @param arr - Array to sort.
+ * @param l - First index of the array.
+ * @param r - Last index of the array.
+ * @param sortBy - Type of data field to sort by (DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY).
+*/
+void MergeSort(Movie arr[], int l, int r, const int sortBy);
