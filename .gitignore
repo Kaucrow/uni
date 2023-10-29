@@ -49,7 +49,7 @@
 **/install_manifest.txt
 **/CMakeFiles/
 **/CTestTestfile.cmake
-**/Makefile
+#**/Makefile
 **/*.cbp
 **/CMakeScripts
 **/compile_commands.json
@@ -68,9 +68,6 @@ include/*
 lib/*
 bin/*
 test/test_runner
-
-# For using only make without CMake
-!**/Makefile
 
 # ==========
 # VSCode
@@ -96,3 +93,6 @@ test/test_runner
 
 **/test/**
 **/Test/**
+
+# Blockbuster
+Programming_2/Theory/Blockbuster/data/user_data.bin
