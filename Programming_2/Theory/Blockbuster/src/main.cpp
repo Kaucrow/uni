@@ -276,8 +276,8 @@ int main(){
             else{
                 wcout << toRent[0].title << '\n';
             }
-            wstring currTime = GetDateTime().substr(0, 10);
-            wcout << currTime << '\n';
+            wstring currDate = GetDateTime().substr(0, 10);
+            wcout << currDate << '\n';
 
             wcin.get();
         }
