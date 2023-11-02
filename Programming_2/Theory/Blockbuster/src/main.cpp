@@ -45,9 +45,9 @@ int main(){
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
 
-    wstring csvName = L"./data/movies.csv";
-    wfstream csvFile(csvName.c_str());
-    if(!csvFile){ wcerr << "ERR: FILE \"" << csvName << "\" COULD NOT BE OPENED."; return 1; }
+    wstring csvFileName = L"./data/movies.csv";
+    wfstream csvFile(csvFileName.c_str());
+    if(!csvFile){ wcerr << "ERR: FILE \"" << csvFileName << "\" COULD NOT BE OPENED."; return 1; }
     csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
 
     int totalMovies = GetNumMovies(csvFile);     // Get the number of movies in the movies.csv file.
@@ -84,6 +84,8 @@ int main(){
     /* Populate the DURATION movie list. */
     try{ PopulateMovieList(movList[DURATION], csvFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
+
+    csvFile.close();
 
     /* Copy the duration movie list elements to all of the other lists. */
     for(int i = 1; i <= totalMovies; i++){
@@ -267,7 +269,8 @@ int main(){
 
             wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
         }
-        else if(action == RENT){ 
+        else if(action == RENT){
+            ClrScr();
             Movie toRent[1];
             wcout << "This execs\n";
             wcout << "*** MOVIE RENT ***\n";
@@ -281,7 +284,7 @@ int main(){
             wcout << currDate << '\n';
             wcout << toRent[0].ID << '\n';
 
-            RentMovie(csvFile, toRent[0].ID, username, currDate);
+            RentMovie(csvFileName, toRent[0].ID, username, currDate);
 
             wcin.get();
         }

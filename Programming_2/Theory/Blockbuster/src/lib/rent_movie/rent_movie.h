@@ -2,4 +2,4 @@
 #include <fstream>
 using std::wstring;
 
-void RentMovie(std::wfstream &csvFile, int movieID, wstring username, wstring date);
+void RentMovie(wstring csvFileName, int movieID, wstring username, wstring date);
