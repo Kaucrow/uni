@@ -8,6 +8,7 @@
 #include <merge_sort.h>
 #include <bin_search.h>
 #include <store_movie.h>
+#include <rent_movie.h>
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wifstream, std::wstring;
@@ -29,14 +30,14 @@ wstring GetDateTime();
  * @return Number of movies in the movies.csv file.
  * @see GetNumMoviesImplem "GetNumMovies() implementation details".
  */
-int GetNumMovies(wifstream& inFile);
+int GetNumMovies(wfstream& inFile);
 
 /**
  * @brief Puts the movies in the movies.csv file into a movie list array.
  * @param movList - Movie list array to store the movies in.
  * @param inFile - wifstream object that contains the movies.csv file.
  */
-void PopulateMovieList(Movie movList[], wifstream& inFile);
+void PopulateMovieList(Movie movList[], wfstream& inFile);
 
 int main(){
     boost::locale::generator gen;               // Create the locale generator.
@@ -44,12 +45,12 @@ int main(){
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
 
-    wstring inFileName = L"./data/movies.csv";
-    wifstream inFile(inFileName.c_str());
-    if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
-    inFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
+    wstring csvName = L"./data/movies.csv";
+    wfstream csvFile(csvName.c_str());
+    if(!csvFile){ wcerr << "ERR: FILE \"" << csvName << "\" COULD NOT BE OPENED."; return 1; }
+    csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
 
-    int totalMovies = GetNumMovies(inFile);     // Get the number of movies in the movies.csv file.
+    int totalMovies = GetNumMovies(csvFile);     // Get the number of movies in the movies.csv file.
 
     /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
         each movie list is sorted according to a different property
@@ -81,7 +82,7 @@ int main(){
     }
 
     /* Populate the DURATION movie list. */
-    try{ PopulateMovieList(movList[DURATION], inFile); }
+    try{ PopulateMovieList(movList[DURATION], csvFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     /* Copy the duration movie list elements to all of the other lists. */
@@ -278,6 +279,9 @@ int main(){
             }
             wstring currDate = GetDateTime().substr(0, 10);
             wcout << currDate << '\n';
+            wcout << toRent[0].ID << '\n';
+
+            RentMovie(csvFile, toRent[0].ID, username, currDate);
 
             wcin.get();
         }
@@ -287,7 +291,7 @@ int main(){
     return 0;
 }
 
-void PopulateMovieList(Movie movList[], wifstream& inFile){
+void PopulateMovieList(Movie movList[], wfstream& inFile){
     int numMovies = GetNumMovies(inFile);
     int nextComma;              // Stores the pos of the next comma in the curr line.
     wstring wReadingLine;       // Stores the curr line.
@@ -370,7 +374,7 @@ void PopulateMovieList(Movie movList[], wifstream& inFile){
  * Sets the inFile pos to the start of the last line, gets the line,
  * and returns the first number in it.
  */
-int GetNumMovies(wifstream& inFile){
+int GetNumMovies(wfstream& inFile){
     inFile.seekg(0, std::ios_base::end);            // Move to the EOF.
     std::wifstream::pos_type pos = inFile.tellg();  // Get the curr pos and assign to a variable.
     pos = int(pos) - 2;             // Reduce the pos by two to
