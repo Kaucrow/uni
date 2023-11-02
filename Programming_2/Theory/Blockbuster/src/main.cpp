@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <fcntl.h>              // for _setmode().
+#include <ctime>
+#include <iomanip>
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
@@ -11,12 +13,15 @@ using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wifstream, std::wstring;
 
 enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
-enum { SEARCH = 1, ADD = 2, EXIT = 3 };
+enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
+
 
 /**
  * @brief OS agnostic clear screen function.
  */
 void ClrScr();
+
+wstring GetDateTime();
 
 /**
  * @brief Gets the number of movies in the movies.csv file.
@@ -57,25 +62,22 @@ int main(){
     Movie dayList[totalMovies + 3001];
     Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
     
-    wstring name, lastName;
+    wstring username, lastName;
 
-    int countOfUsers = 0;
+    int userCount = 0;
   
-    wcout << "Input your name: ";
-    wcin >> name;
+    wcout << "Input your full name: ";
+    wcin >> username;
 
-    wcout << "Input your last name: "; 
-    wcin >> lastName;
+    userCount++; 
 
-    countOfUsers++; 
+    wfstream binFile("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
-    wfstream file("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
-
-    if(file.is_open()){ 
-        file.write((wchar_t*) &countOfUsers, sizeof(countOfUsers)); 
-        file.write(name.c_str(), name.size() + 1);
-        file.write(lastName.c_str(), lastName.size() + 1); 
-        file.close();
+    if(binFile.is_open()){ 
+        binFile.write((wchar_t*) &userCount, sizeof(userCount)); 
+        binFile.write(username.c_str(), username.size() + 1);
+        //file.write(lastName.c_str(), lastName.size() + 1); 
+        binFile.close();
     }
 
     /* Populate the DURATION movie list. */
@@ -104,9 +106,11 @@ int main(){
         wcout   << "*** CHOOSE AN ACTION ***\n"
                 << "(1) Search with filters\n"
                 << "(2) Add a movie\n"
+                << "(3) Rent a movie\n"
+                << "(4) Exit\n"
                 << "Select option: ";
         wcin >> action;
-        while(action < SEARCH || action > ADD){
+        while(action < SEARCH || action > EXIT){
             wcout << "INVALID OPTION.\nSelect option: ";
             wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             wcin >> action;
@@ -262,6 +266,22 @@ int main(){
 
             wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
         }
+        else if(action == RENT){ 
+            Movie toRent[1];
+            wcout << "This execs\n";
+            wcout << "*** MOVIE RENT ***\n";
+            wcout << "Input the name of the movie: ";
+            wcin >> toRent[0].title;
+            if(BinSearch(ttlList, toRent, 1, totalMovies, toRent[0], TITLE) == -1);
+            else{
+                wcout << toRent[0].title << '\n';
+            }
+            wstring currTime = GetDateTime().substr(0, 10);
+            wcout << currTime << '\n';
+
+            wcin.get();
+        }
+        else{ wcout << "\nTerminating program...\n"; return 0; }
         wcin.get();
     }
     return 0;
@@ -369,6 +389,19 @@ int GetNumMovies(wifstream& inFile){
     
     inFile.seekg(0, std::ios_base::beg);    // Put the inFile position back at the beginning.
     return stoi(lastLine);          // Return the first number in the last line.
+}
+
+wstring GetDateTime(){
+    time_t rawtime;
+    struct tm timeinfo;
+    wchar_t buffer[20];
+
+    time(&rawtime);
+    localtime_s(&timeinfo, &rawtime);
+
+    wcsftime(buffer, 20, L"%Y-%m-%d %H:%M:%S", &timeinfo);
+
+    return buffer;
 }
 
 void ClrScr(){
