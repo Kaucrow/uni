@@ -8,7 +8,7 @@ using std::getline;
  * to it while also updating the line of the rented movie, and lastly deletes
  * the curr movies.csv and renames write.csv to movies.csv.
 */
-void RentMovie(wstring csvFileName, int movieID, wstring username, wstring date){
+void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring date){
     /**
      * @brief Lambda function to get the position of the Nth comma in a line.
      * @param line - wstring object containing the line to search.
@@ -28,7 +28,7 @@ void RentMovie(wstring csvFileName, int movieID, wstring username, wstring date)
     };
 
     const char writeFileName[] = "./data/write.csv";        // Path of the writeFile.
-    std::wfstream csvFile(csvFileName.c_str());             // Open the csvFile.
+    std::wfstream csvFile(csvFilePath);             // Open the csvFile.
     std::wofstream writeFile(writeFileName);                // Open the writeFile.
 
     wstring readingLine;
@@ -57,9 +57,9 @@ void RentMovie(wstring csvFileName, int movieID, wstring username, wstring date)
     // rename write.csv to movies.csv                                  //
     csvFile.close();
     writeFile.close(); 
-    char csvBuffer[32];
-    wcstombs(csvBuffer, csvFileName.c_str(), sizeof(csvBuffer));
-    std::wcout << csvBuffer << '\n';
-    remove(csvBuffer);
-    rename(writeFileName, csvBuffer);
+    /*char csvBuffer[32];
+    wcstombs(csvBuffer, csvFilePath, sizeof(csvBuffer));
+    std::wcout << csvBuffer << '\n';*/
+    remove(csvFilePath);
+    rename(writeFileName, csvFilePath);
 }

@@ -96,4 +96,4 @@ test/test_runner
 *.bkp
 
 # Blockbuster
-Programming_2/Theory/Blockbuster/data/user_data.bin
+Programming_2/Theory/Blockbuster/data/*.bin

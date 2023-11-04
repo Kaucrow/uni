@@ -10,8 +10,12 @@
 #include <store_movie.h>
 #include <rent_movie.h>
 
+#define USRDATA_PATH "./data/user_data.bin"
+#define USRCOUNT_PATH "./data/user_count.bin"
+#define CSV_PATH "./data/movies.csv"
+
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
-        std::wifstream, std::wifstream, std::wstring;
+        std::wifstream, std::wofstream, std::wstring;
 
 enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
 enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
@@ -45,9 +49,9 @@ int main(){
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
 
-    wstring csvFileName = L"./data/movies.csv";
-    wfstream csvFile(csvFileName.c_str());
-    if(!csvFile){ wcerr << "ERR: FILE \"" << csvFileName << "\" COULD NOT BE OPENED."; return 1; }
+    //wstring csvFileName = L"./data/movies.csv";
+    wfstream csvFile(CSV_PATH);
+    if(!csvFile){ wcerr << "ERR: FILE \"" << CSV_PATH << "\" COULD NOT BE OPENED."; return 1; }
     csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
 
     int totalMovies = GetNumMovies(csvFile);     // Get the number of movies in the movies.csv file.
@@ -62,38 +66,25 @@ int main(){
     Movie monList[totalMovies + 3001];
     Movie dayList[totalMovies + 3001];
     Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
-    
-    wstring username, lastName;
 
-    int userCount = 0;
-  
+    wstring username;
+
     wcout << "Input your full name: ";
     wcin >> username;
 
-    userCount++; 
-
-    wstring searchWord;
-
-    int index;
-
-    wcout << "Which movie would you like to rent?: ";
-    wcin >> searchWord;
-
-    for (int i = 0; i < totalMovies + 3001; i++) {      //Looking for available movies in the array
-        if (movList[TITLE][i].title == searchWord) {   
-            index = i;                      
-            break;
-        } 
-    } 
-
-    wfstream binFile("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
-
-    if(binFile.is_open()){ 
-        binFile.write((wchar_t*) &userCount, sizeof(userCount)); 
-        binFile.write(username.c_str(), username.size() + 1);
-        binFile.write((wchar_t*) &index, sizeof(index));
-        binFile.close();
+    int userCount = 0;
+    wifstream usrCountFileI(USRCOUNT_PATH, std::ios::binary);
+    if(usrCountFileI){
+        wcout << "EXISTS\n";        // debug
+        usrCountFileI.read(reinterpret_cast<wchar_t*>(&userCount), sizeof(userCount));
+        usrCountFileI.close();
     }
+    wcout << userCount << '\n';     // debug
+    userCount++;
+    wofstream usrCountFileO(USRCOUNT_PATH, std::ios::binary);
+    usrCountFileO.write(reinterpret_cast<wchar_t*>(&userCount), sizeof(userCount));
+    wcout << userCount << '\n';
+    usrCountFileO.close();
 
     /* Populate the DURATION movie list. */
     try{ PopulateMovieList(movList[DURATION], csvFile); }
@@ -303,7 +294,7 @@ int main(){
             wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
 
             // Update the movies.csv file with the rent information.
-            RentMovie(csvFileName, toRent[0].ID, username, currDate);
+            RentMovie(CSV_PATH, toRent[0].ID, username, currDate);
 
             wcin.get();
         }
