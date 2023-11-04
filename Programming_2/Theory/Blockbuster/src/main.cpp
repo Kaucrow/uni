@@ -269,12 +269,14 @@ int main(){
 
             wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
         }
+        /***************************
+        /*  Rent a movie.
+         **************************/
         else if(action == RENT){
             ClrScr();
             // An array of one movie is declared here, since the StoreMatches() function //
             // in bin_search.cpp only accepts an array of movies.                        //
             Movie toRent[1];
-            wcout << "This execs\n";
             wcout << "*** MOVIE RENT ***\n";
             wcout << "Input the name of the movie: ";
             wcin >> toRent[0].title;
