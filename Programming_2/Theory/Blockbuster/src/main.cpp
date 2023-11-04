@@ -72,12 +72,26 @@ int main(){
 
     userCount++; 
 
+    string searchWord;
+
+    int index;
+
+    wcout << "Which movie would you like to rent?: " << endl;
+    wcin >> searchWord;
+
+    for (int i = 0; i < totalMovies + 3001; i++) {      //Looking for available movies in the array
+        if (movieList[i] == searchWord) {   
+            index = i;                      
+            break;
+        } 
+    } 
+
     wfstream binFile("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
     if(binFile.is_open()){ 
         binFile.write((wchar_t*) &userCount, sizeof(userCount)); 
         binFile.write(username.c_str(), username.size() + 1);
-        //file.write(lastName.c_str(), lastName.size() + 1); 
+        binFile.write((char*) &index, sizeof(index));
         binFile.close();
     }
 
