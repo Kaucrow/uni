@@ -1,50 +1,82 @@
 #include <iostream>
 #include <fstream>
 #include <fcntl.h>              // for _setmode().
+#include <ctime>
+#include <iomanip>
 #include <boost/locale.hpp>
-#include "structs.h"
-using   std::wcout, std::wcerr, std::cin, std::string, std::getline,
-        std::wifstream, std::wifstream, std::wstring, std::fstream, std::wcin;
+#include <structs.h>
+#include <merge_sort.h>
+#include <bin_search.h>
+#include <store_movie.h>
+#include <rent_movie.h>
+
+using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
+        std::wifstream, std::wifstream, std::wstring;
+
+enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
+enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
 
 
-int GetNumMovies(wifstream& inFile);            // returns the num of movies in the movies.csv file.
-void PopulateMovieList(Movie movieList[], wifstream& inFile);   // puts the movies in the movies.csv file into the movie list.
+/**
+ * @brief OS agnostic clear screen function.
+ */
+void ClrScr();
+
+wstring GetDateTime();
+
+/**
+ * @brief Gets the number of movies in the movies.csv file.
+ * @param inFile - wifstream object that contains the movies.csv file.
+ * @return Number of movies in the movies.csv file.
+ * @see GetNumMoviesImplem "GetNumMovies() implementation details".
+ */
+int GetNumMovies(wfstream& inFile);
+
+/**
+ * @brief Puts the movies in the movies.csv file into a movie list array.
+ * @param movList - Movie list array to store the movies in.
+ * @param inFile - wifstream object that contains the movies.csv file.
+ */
+void PopulateMovieList(Movie movList[], wfstream& inFile);
+
 int main(){
-
-    boost::locale::generator gen;               // create the locale generator.
-    std::locale loc = gen("en_US");             // create an "en_US" locale.
+    boost::locale::generator gen;               // Create the locale generator.
+    std::locale loc = gen("en_US");             // Create an "en_US" locale
     std::locale::global(loc);                   // and set it as the global locale.
-    _setmode(_fileno(stdout), _O_U8TEXT);       // change the STDOUT mode to use UTF-8 characters.
+    _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
 
-    wstring inFileName = L"./data/movies.csv";
-    wifstream inFile(inFileName.c_str());
-    inFile.imbue(loc);                          // apply the locale to the movies.csv file.
-    if(!inFile){ wcerr << "ERR: FILE \"" << inFileName << "\" COULD NOT BE OPENED."; return 1; }
+    wstring csvFileName = L"./data/movies.csv";
+    wfstream csvFile(csvFileName.c_str());
+    if(!csvFile){ wcerr << "ERR: FILE \"" << csvFileName << "\" COULD NOT BE OPENED."; return 1; }
+    csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
 
-    int totalMovies = GetNumMovies(inFile);
-    Movie movieList[totalMovies + 3001];        // create a list of movies for 4000 movies, where the first index is unused.
-    wcout << GetNumMovies(inFile) << '\n';      // debug.
-    wcout << sizeof(movieList) << '\n';         // debug.
-    try{ PopulateMovieList(movieList, inFile); }
-    catch(wstring exc){ wcerr << exc << '\n'; return 1; }
+    int totalMovies = GetNumMovies(csvFile);     // Get the number of movies in the movies.csv file.
+
+    /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
+        each movie list is sorted according to a different property
+        (duration, title, director, release year, release month, release day). */
+    Movie durList[totalMovies + 3001];
+    Movie ttlList[totalMovies + 3001];
+    Movie dirList[totalMovies + 3001];
+    Movie yeaList[totalMovies + 3001];
+    Movie monList[totalMovies + 3001];
+    Movie dayList[totalMovies + 3001];
+    Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
     
-    string name, lastName;
+    wstring username, lastName;
 
-    int countOfUsers = 0;
+    int userCount = 0;
   
-    wcout << "Input your name: ";
-    wcin >> name;
+    wcout << "Input your full name: ";
+    wcin >> username;
 
-    wcout << "Input your last name: "; 
-    wcin >> lastName;
-
-    countOfUsers++; 
+    userCount++; 
 
     string searchWord;
 
     int index;
 
-    wcout << "What movie would you like to rent?: " << endl;
+    wcout << "Which movie would you like to rent?: " << endl;
     wcin >> searchWord;
 
     for (int i = 0; i < totalMovies + 3001; i++) {      //Looking for available movies in the array
@@ -52,119 +84,359 @@ int main(){
             index = i;                      
             break;
         } 
-
     } 
 
-    fstream file("user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
+    wfstream binFile("./data/user_data.bin", std::ios::out | std::ios::app | std::ios::binary);
 
-    if (file.is_open()) {   //Writing user data in the bin file
-    
-        file.write((char*) &countOfUsers, sizeof(countOfUsers)); 
-        file.write(name.c_str(), name.size() + 1);
-        file.write(lastName.c_str(), lastName.size() + 1);
-        file.write((char*) &index, sizeof(index));
-    
-    file.close();
-    }
-    else {
-    wcout << "File could not be opened";
+    if(binFile.is_open()){ 
+        binFile.write((wchar_t*) &userCount, sizeof(userCount)); 
+        binFile.write(username.c_str(), username.size() + 1);
+        binFile.write((char*) &index, sizeof(index));
+        binFile.close();
     }
 
+    /* Populate the DURATION movie list. */
+    try{ PopulateMovieList(movList[DURATION], csvFile); }
+    catch(wstring exc){ wcerr << exc << '\n'; return 1; }
+
+    csvFile.close();
+
+    /* Copy the duration movie list elements to all of the other lists. */
+    for(int i = 1; i <= totalMovies; i++){
+        movList[TITLE][i]    = movList[DURATION][i];
+        movList[DIRECTOR][i] = movList[DURATION][i];
+        movList[YEAR][i]     = movList[DURATION][i];
+        movList[MONTH][i]    = movList[DURATION][i];
+        movList[DAY][i]      = movList[DURATION][i];
+    }
+
+    /* Sort each list. */
+    for(int i = 0; i < 6; i++)
+        MergeSort(movList[i], 1, totalMovies, i);
+
+    /***************************
+    /*  Main loop.
+     **************************/
+    while(true){
+        ClrScr();
+        int action;
+        wcout   << "*** CHOOSE AN ACTION ***\n"
+                << "(1) Search with filters\n"
+                << "(2) Add a movie\n"
+                << "(3) Rent a movie\n"
+                << "(4) Exit\n"
+                << "Select option: ";
+        wcin >> action;
+        while(action < SEARCH || action > EXIT){
+            wcout << "INVALID OPTION.\nSelect option: ";
+            wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            wcin >> action;
+        }
+        wcin.ignore(1);
+
+        /***************************
+        /*  Search with filters.
+         **************************/
+        if(action == SEARCH){
+            ClrScr();
+            Movie matches[totalMovies + 3001];      // Movie list array to stores the search matches.
+            Movie toMatch;                          // Movie that holds the parameter to be matched in the corresponding movie list.
+            wcout   << "*** FILTERS ***\n"
+                    << "(1) Duration\n"
+                    << "(2) Title\n"
+                    << "(3) Director\n"
+                    << "(4) Release year\n"
+                    << "(5) Release month\n"
+                    << "(6) Release day\n"
+                    << "Select option: ";
+
+            wcin >> action;
+            while(action < (DURATION + 1) || action > (DAY + 1)){
+                wcout << "INVALID OPTION.\nSelect option: ";
+                wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                wcin >> action;
+            }
+            wcin.ignore(1);
+
+            wstring search;
+            ClrScr();
+
+            /**
+             * Generate the "toMatch" movie according to the selected filter,
+             * perform the search, and store the matching movies in the "matches" movie list array.
+             */
+            switch(action){
+                case DURATION + 1:
+                    wcout << "Duration to search for: ";
+                    getline(wcin, search);
+                    toMatch.duration = stoi(search);
+                    BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
+                    break;
+                case TITLE + 1:
+                    wcout << "Title to search for: ";
+                    getline(wcin, search);
+                    toMatch.title = search;
+                    BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
+                    break;
+                case DIRECTOR + 1:
+                    wcout << "Director to search for: ";
+                    getline(wcin, search);
+                    toMatch.director = search;
+                    BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
+                    break;
+                case YEAR + 1:
+                    wcout << "Year to search for: ";
+                    getline(wcin, search);
+                    toMatch.release.year = stoi(search);
+                    BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
+                    break;
+                case MONTH + 1:
+                    wcout << "Month to search for: ";
+                    getline(wcin, search);
+                    while(stoi(search) < 1 || stoi(search) > 12){
+                        wcout << "Please input a valid month.\n";
+                        getline(wcin, search);
+                    }
+                    toMatch.release.month = stoi(search);
+                    BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
+                    break;
+                case DAY + 1:
+                    wcout << "Day to search for: ";
+                    getline(wcin, search);
+                    while(stoi(search) < 1 || stoi(search) > 31){
+                        wcout << "Please input a valid day.\n";
+                        getline(wcin, search);
+                    }
+                    toMatch.release.day = stoi(search);
+                    BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
+                    break;
+                default:
+                    wcerr << "[ ERR ] THIS SHOULD NEVER EXECUTE. IT'S ONLY HERE FOR DEBUG PURPOSES.\n";     // debug
+                    break;
+            }
+
+            ClrScr();
+            /* Print the matching movies from the "matches" movie list array. */
+            for(int i = 0; matches[i].duration != 0; i++){
+                wcout << matches[i].title << '\n';
+            }
+            
+        }
+        /***************************
+        /*  Add a movie.
+         **************************/
+        else if(action == ADD){
+            ClrScr();
+            Movie toStore;
+            wstring storeDat;
+            totalMovies++;              // Increase the count of movies.
+
+            wcout << "*** NEW MOVIE DATA ***\n";
+
+            /* Get each of the 6 data fields of the movie that will be added.*/
+            wcout << "-> Duration: ";
+            getline(wcin, storeDat);
+            while(stoi(storeDat) <= 0){
+                wcerr << "[ ERR ] The movie cannot have a duration less than or equal to 0.\n-> Duration:";
+                getline(wcin, storeDat);
+            }
+            toStore.duration = stoi(storeDat);
+
+            wcout << "-> Title: ";
+            getline(wcin, storeDat);
+            storeDat[0] = toupper(storeDat[0]);
+            toStore.title = storeDat;
+
+            wcout << "-> Genres\n";
+            for(int i = 0; i < 6; i++){
+                wcout << "   * " << i + 1 << ": ";
+                getline(wcin, storeDat);
+                toStore.genres[i] = storeDat;
+            }
+
+            wcout << "-> Director: ";
+            getline(wcin, storeDat);
+            toStore.director = storeDat;
+
+            wcout << "-> Release year: ";
+            getline(wcin, storeDat);
+            toStore.release.year = stoi(storeDat);
+            
+            wcout << "-> Release month: ";
+            getline(wcin, storeDat);
+            toStore.release.month = stoi(storeDat);
+            
+            wcout << "-> Release day: ";
+            getline(wcin, storeDat);
+            toStore.release.day = stoi(storeDat);
+
+            /**
+             * Update each of the movie lists with the added movie, while preserving the
+             * sorting order in each of them.
+             */
+            StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
+            StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
+            StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
+            StoreNewMovie(movList[YEAR], 1, totalMovies, toStore, YEAR);
+            StoreNewMovie(movList[MONTH], 1, totalMovies, toStore, MONTH);
+            StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);
+
+            wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
+        }
+        /***************************
+        /*  Rent a movie.
+         **************************/
+        else if(action == RENT){
+            ClrScr();
+            // An array of one movie is declared here, since the StoreMatches() function //
+            // in bin_search.cpp only accepts an array of movies.                        //
+            Movie toRent[1];
+            wcout << "*** MOVIE RENT ***\n";
+            wcout << "Input the name of the movie: ";
+            wcin >> toRent[0].title;
+
+            // Search for the movie to rent, and throw an error if it doesn't exist in the database. //
+            // If it exists, it will get stored in the toRent[] array.                               //
+            if(BinSearch(ttlList, toRent, 1, totalMovies, toRent[0], TITLE) == -1)
+                wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+
+            wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
+
+            // Update the movies.csv file with the rent information.
+            RentMovie(csvFileName, toRent[0].ID, username, currDate);
+
+            wcin.get();
+        }
+        // Executes if the user selects the "Exit" action. //
+        else{ wcout << "\nTerminating program...\n"; return 0; }
+        wcin.get();
+    }
     return 0;
 }
 
-void PopulateMovieList(Movie movieList[], wifstream& inFile){
+void PopulateMovieList(Movie movList[], wfstream& inFile){
     int numMovies = GetNumMovies(inFile);
-    int nextComma;      // stores the pos of the next comma in the curr line.
-    wstring wReadingLine;       // stores the curr line.
+    int nextComma;              // Stores the pos of the next comma in the curr line.
+    wstring wReadingLine;       // Stores the curr line.
 
-    // vars for setting the movie genres.
-    int nextPipe = 0;           // stores the pos of the next pipe in the wTempReadingLine.
-    bool exitSuccess = false;   // true if no more than 5 genres were found, false otherwise.
-    wstring wTempReadingLine;   // temp copy of the curr line.
-    wstring genreExc = L"ERR: FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // exc thrown when exitSuccess is false.
+    /* Vars for setting the movie genres. */
+    int nextPipe = 0;           // Stores the pos of the next pipe in the wTempReadingLine.
+    bool exitSuccess = false;   // True if no more than 6 genres were found, false otherwise.
+    wstring wTempReadingLine;   // Temp copy of the curr line.
+    wstring genreExc = L"ERR: FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
 
     inFile.seekg(0);
-    getline(inFile, wReadingLine);      // ignore the first line in the inFile.
+    getline(inFile, wReadingLine);      // Ignore the first line in the inFile.
 
-    for(int i = 1; i <= 100; i++){
-        getline(inFile, wReadingLine);  // get the next line
-        for(int j = 0; j < 6; j++){     // and store each of the 6 data fields.
+    for(int i = 1; i <= numMovies; i++){
+        getline(inFile, wReadingLine);  // Get the next line
+        for(int j = 0; j < 6; j++){     // And store each of the 6 data fields.
             nextComma = wReadingLine.find(',');
             switch(j){
-                // ID
+                /* ID */
                 case 0: 
-                    movieList[i].ID = stoi(wReadingLine);       // store the first number of the curr line.
+                    movList[i].ID = stoi(wReadingLine);       // Store the first number of the curr line.
                     break;
-                // Title
+                /* Title */
                 case 1:
-                    // if the first character is a double quote, adjust the value of nextComma to actually
-                    // contain the pos of the comma after the title.
-                    if(wReadingLine[0] == '"') nextComma = wReadingLine.find('"', 1) + 1;
-                    movieList[i].title = wReadingLine.substr(0, nextComma);
+                    /** 
+                     * If the first character is a double quote, adjust the value of nextComma to actually
+                     * contain the pos of the comma after the title.
+                     * WARNING: Assumes the last double quote char is within the title, and nowhere else.
+                     */
+                    if(wReadingLine[0] == '"') nextComma = (wReadingLine.substr(1)).find_last_of('"') + 2;
+                    movList[i].title = wReadingLine.substr(0, nextComma);
                     break;
-                // Genres
+                /* Genres */
                 case 2:
-                    // create a temp copy of the curr line with only the movie genres in it.
+                    /* Create a temp copy of the curr line with only the movie genres in it. */
                     wTempReadingLine = wReadingLine.substr(0, nextComma);
-                    // store a max of 5 genres.
-                    for(int k = 0; k < 5; k++){         
+                    /* Store a max of 6 genres. */
+                    for(int k = 0; k < 6; k++){         
                         nextPipe = wTempReadingLine.find('|');
-                        // if no pipe character was found on the temp line, assign the last genre and stop storing any more.
-                        if(nextPipe == -1){ movieList[i].genres[k] = wTempReadingLine; exitSuccess = true; break; }
-                        // otherwise, store the curr genre and remove it from the temp line.
+                        /* If no pipe character was found on the temp line, assign the last genre and stop storing any more. */
+                        if(nextPipe == -1){ movList[i].genres[k] = wTempReadingLine; exitSuccess = true; break; }
+                        /* Otherwise, store the curr genre and remove it from the temp line. */
                         else{
-                            movieList[i].genres[k] = wTempReadingLine.substr(0, nextPipe);
+                            movList[i].genres[k] = wTempReadingLine.substr(0, nextPipe);
                             wTempReadingLine = wTempReadingLine.substr(nextPipe + 1);
                         }
                     }
-                    // throw an exception if the loop never encountered a "break", meaning there were
-                    // more than 5 genres in the temp line.
+                    /**
+                     * Throw an exception if the loop never encountered a break statement, meaning there were
+                     * more than 6 genres in the wReadingLine.
+                     */
                     if(exitSuccess){ exitSuccess = false; break; }
                     else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
-                // Duration
+                /* Duration */
                 case 3:
-                    movieList[i].duration = stoi(wReadingLine); 
+                    movList[i].duration = stoi(wReadingLine); 
                     break;
-                // Director
+                /* Director */
                 case 4:
-                    movieList[i].director = wReadingLine.substr(0, nextComma);
+                    movList[i].director = wReadingLine.substr(0, nextComma);
                     break;
-                // Release
+                /* Release */
                 case 5:
-                    // WARNING: assumes that the release date is in the year-month-day format,
-                    // the year is 4 characters long, and the month and day are two characters long each.
-                    movieList[i].release.year  = stoi(wReadingLine.substr(0, 4));
-                    movieList[i].release.month = stoi(wReadingLine.substr(5, 2));
-                    movieList[i].release.day   = stoi(wReadingLine.substr(8, 2));
+                    /**
+                     * WARNING: Assumes that the release date is in the year-month-day format,
+                     * the year is 4 characters long, and the month and day are two characters long each.
+                     */
+                    movList[i].release.year  = stoi(wReadingLine.substr(0, 4));
+                    movList[i].release.month = stoi(wReadingLine.substr(5, 2));
+                    movList[i].release.day   = stoi(wReadingLine.substr(8, 2));
                     break;
             } 
-            wReadingLine = wReadingLine.substr(nextComma + 1);  // remove the stored data field from the curr line
+            wReadingLine = wReadingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
         }
     }
-    wcout << '\n';      // debug.
-    wcout << movieList[47].genres[4] << '\n';       // debug.
 }
 
-// sets the inFile pos to the start of the last line, gets the line,
-// and returns the first number in it.
-int GetNumMovies(wifstream& inFile){
-    inFile.seekg(0, std::ios_base::end);            // move to the EOF.
-    std::wifstream::pos_type pos = inFile.tellg();  // get the curr pos and assign to a variable.
-    pos = int(pos) - 2;             // reduce the pos by two to
-    inFile.seekg(pos);              // go back two chars.
+/**
+ * @name GetNumMoviesImplem
+ * Sets the inFile pos to the start of the last line, gets the line,
+ * and returns the first number in it.
+ */
+int GetNumMovies(wfstream& inFile){
+    inFile.seekg(0, std::ios_base::end);            // Move to the EOF.
+    std::wifstream::pos_type pos = inFile.tellg();  // Get the curr pos and assign to a variable.
+    pos = int(pos) - 2;             // Reduce the pos by two to
+    inFile.seekg(pos);              // Go back two chars.
 
     wchar_t ch = ' ';
-    // executes while a newline isn't found.
+    /* Executes while a newline isn't found. */
     while(ch != '\n'){
-        pos = int(pos) - 1;         // reduce the pos by one to
+        pos = int(pos) - 1;         // Reduce the pos by one to
         inFile.seekg(pos);          // go back one char.
-        inFile.get(ch);             // get the curr char.
+        inFile.get(ch);             // Get the curr char.
     }
 
     wstring lastLine;
     getline(inFile, lastLine);
     
-    inFile.seekg(0, std::ios_base::beg);    // put the inFile position back at the beginning
-    return stoi(lastLine);          // return the first number in the last line.
+    inFile.seekg(0, std::ios_base::beg);    // Put the inFile position back at the beginning.
+    return stoi(lastLine);          // Return the first number in the last line.
+}
+
+wstring GetDateTime(){
+    time_t rawtime;
+    struct tm timeinfo;
+    wchar_t buffer[20];
+
+    time(&rawtime);
+    localtime_s(&timeinfo, &rawtime);
+
+    wcsftime(buffer, 20, L"%Y-%m-%d %H:%M:%S", &timeinfo);
+
+    return buffer;
+}
+
+void ClrScr(){
+    #ifdef _WIN32
+        // If on Windows OS
+        std::system("cls");
+    #else
+        // Assuming POSIX OS
+        std::system("clear");
+    #endif
 }

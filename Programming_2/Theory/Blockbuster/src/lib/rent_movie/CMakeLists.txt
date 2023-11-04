@@ -1,0 +1,1 @@
+add_library(rent_movie rent_movie.cpp)

@@ -1,0 +1,1 @@
+add_library(bin_search bin_search.cpp)
