@@ -72,15 +72,15 @@ int main(){
 
     userCount++; 
 
-    string searchWord;
+    wstring searchWord;
 
     int index;
 
-    wcout << "Which movie would you like to rent?: " << endl;
+    wcout << "Which movie would you like to rent?: ";
     wcin >> searchWord;
 
     for (int i = 0; i < totalMovies + 3001; i++) {      //Looking for available movies in the array
-        if (movieList[i] == searchWord) {   
+        if (movList[TITLE][i].title == searchWord) {   
             index = i;                      
             break;
         } 
@@ -91,7 +91,7 @@ int main(){
     if(binFile.is_open()){ 
         binFile.write((wchar_t*) &userCount, sizeof(userCount)); 
         binFile.write(username.c_str(), username.size() + 1);
-        binFile.write((char*) &index, sizeof(index));
+        binFile.write((wchar_t*) &index, sizeof(index));
         binFile.close();
     }
 
