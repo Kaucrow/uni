@@ -318,22 +318,23 @@ int main(){
             **************************/
             else if(action == RENT){
                 ClrScr();
-                // An array of one movie is declared here, since the StoreMatches() function //
-                // in bin_search.cpp only accepts an array of movies.                        //
-                Movie toRent[1];
+                wstring rentName;
                 wcout << "*** MOVIE RENT ***\n";
                 wcout << "Input the name of the movie: ";
-                wcin >> toRent[0].title;
+                wcin >> rentName;
 
                 // Search for the movie to rent, and throw an error if it doesn't exist in the database. //
                 // If it exists, it will get stored in the toRent[] array.                               //
-                /*if(BinSearch(ttlList, toRent, 1, totalMovies, toRent[0], TITLE) == -1)
-                    wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";*/
+                int rentPos = wstrFrags[TTL][BinSearch(wstrFrags[TTL], 1, totalMovies, rentName)].ID;
+                if(rentPos == -1){
+                    wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                    continue;
+                }
 
                 wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
 
                 // Update the movies.csv file with the rent information.
-                RentMovie(CSV_PATH, toRent[0].ID, username, currDate);
+                RentMovie(CSV_PATH, rentPos, username, currDate);
 
                 wcin.get();
             }
