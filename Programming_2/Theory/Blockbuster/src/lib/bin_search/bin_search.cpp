@@ -54,15 +54,13 @@ void StoreMatches(const T searchArr[], int storeArr[], int someMatchPos, const U
 }
 
 template<typename T, typename U>
-int BinSearch(const T searchArr[], int storeArr[], int l, int r, const U search, bool storeMatches){
+int BinSearch(const T searchArr[], int l, int r, const U search){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
         // Check if x is present at mid.
-        if(searchArr[m].data == search){
-            if(storeMatches) StoreMatches(searchArr, storeArr, m, search);
+        if(searchArr[m].data == search)
             return m;
-        }
  
         // If x is greater, ignore left half.
         if(searchArr[m].data < search)
@@ -74,9 +72,17 @@ int BinSearch(const T searchArr[], int storeArr[], int l, int r, const U search,
     }
  
     // If we reach here, the element was not present.
-    if(storeMatches) return -1;
-    else return m;
+    return m;
 }
 
-template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search, bool storeMatches);
-template int BinSearch<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search, bool storeMatches);
+template<typename T, typename U>
+int BinSearchStoreMatches(const T searchArr[], int storeArr[], int l, int r, const U search){
+    int m = BinSearch(searchArr, l, r, search);
+    if(m != -1){ StoreMatches(searchArr, storeArr, m, search); }
+    return m;
+}
+
+template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search);
+template int BinSearch<WstrFrag, wstring>(const WstrFrag searchArr[], int l, int r, const wstring search);
+template int BinSearchStoreMatches<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search);
+template int BinSearchStoreMatches<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search);

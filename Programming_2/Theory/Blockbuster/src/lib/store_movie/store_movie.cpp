@@ -1,6 +1,7 @@
 #include "../bin_search/bin_search.h"
+#include <string>
 #include <functional>
-using std::function;
+using std::wstring, std::function;
 
 /**
  * @file ../bin_search/bin_search.h
@@ -19,22 +20,27 @@ using std::function;
  * starting from the last one, until it reaches the index of the arr where the new
  * movie should be stored at, and stores it there.
  */
-//void StoreNewMovie(Movie arr[], int l, int r, const Movie &toStore, const int type){
+template<typename T, typename U>
+void StoreNewFrag(T arr[], int l, int r, const U toStore){
     /* Get the pivot. */
-    /*int pivot = BinSearch(arr, arr, l, r - 1, toStore, type, 0);
+    int pivot = BinSearch(arr, l, r - 1, toStore);
 
     /* Go back a number of elements. */
-    /*if(pivot > 11){ pivot -= 10; }
+    if(pivot > 10){ pivot -= 10; }
     else{ pivot = 1; } 
 
     int storeAt = pivot;
 
     /* Get the index where the movie should be stored at. */
-    //for(int i = 0; BinCompare[type](arr, pivot + i, toStore, 0); i++){ storeAt++; }
+    for(int i = 0; arr[pivot + i].data < toStore; i++){ storeAt++; }
 
     /* Shift every movie up, until the storeAt index is reached. */
-    //for(int i = r; i > storeAt; i--){ arr[i] = arr[i - 1]; }
+    for(int i = r; i > storeAt; i--){ arr[i] = arr[i - 1]; }
 
     /* Store the movie at the storeAt index. */
-    //arr[storeAt] = toStore;
-//}
+    arr[storeAt].ID = r;
+    arr[storeAt].data = toStore;
+}
+
+template void StoreNewFrag<IntFrag, int>(IntFrag arr[], int l, int r, const int toStore);
+template void StoreNewFrag<WstrFrag, wstring>(WstrFrag arr[], int l, int r, const wstring toStore);

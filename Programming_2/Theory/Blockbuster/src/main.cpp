@@ -204,22 +204,22 @@ int main(){
                     case 1:
                         wcout << "Duration to search for: ";
                         wcin >> intSearch;
-                        BinSearch(intFrags[DUR], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(intFrags[DUR], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 2:
                         wcout << "Title to search for: ";
                         getline(wcin, wstrSearch);
-                        BinSearch(wstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(wstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 3:
                         wcout << "Director to search for: ";
                         getline(wcin, wstrSearch);
-                        BinSearch(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 4:
                         wcout << "Year to search for: ";
                         wcin >> intSearch;
-                        BinSearch(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 5:
                         wcout << "Month to search for: ";
@@ -228,7 +228,7 @@ int main(){
                             wcout << "Please input a valid month.\n";
                             wcin >> intSearch;
                         }
-                        BinSearch(intFrags[MON], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(intFrags[MON], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 6:
                         wcout << "Day to search for: ";
@@ -237,7 +237,7 @@ int main(){
                             wcout << "Please input a valid day.\n";
                             wcin >> intSearch;
                         }
-                        BinSearch(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
                         break;
                     default:
                         wcerr << "[ ERR ] THIS SHOULD NEVER EXECUTE. IT'S ONLY HERE FOR DEBUG PURPOSES.\n";     // debug
@@ -298,17 +298,18 @@ int main(){
                 wcout << "-> Release day: ";
                 getline(wcin, storeDat);
                 toStore.release.day = stoi(storeDat);
-
+                
+                baseList[totalMovies] = toStore;
                 /**
-                 * Update each of the movie lists with the added movie, while preserving the
-                 * sorting order in each of them.
+                 * Update each of the frag lists with the added movie data,
+                 * while preserving the sorting order in each of them.
                  */
-                /*StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
-                StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
-                StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
-                StoreNewMovie(movList[YEAR], 1, totalMovies, toStore, YEAR);
-                StoreNewMovie(movList[MONTH], 1, totalMovies, toStore, MONTH);
-                StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);*/
+                StoreNewFrag(intFrags[DUR], 1, totalMovies, toStore.duration);
+                StoreNewFrag(intFrags[YEA], 1, totalMovies, toStore.release.year);
+                StoreNewFrag(intFrags[MON], 1, totalMovies, toStore.release.month);
+                StoreNewFrag(intFrags[DAY], 1, totalMovies, toStore.release.day);
+                StoreNewFrag(wstrFrags[TTL], 1, totalMovies, toStore.title);
+                StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
 
                 wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
             }

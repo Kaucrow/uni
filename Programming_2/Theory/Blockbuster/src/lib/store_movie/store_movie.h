@@ -10,4 +10,6 @@
  * @param toStore - Movie struct to store in the arr.
  * @see StoreNewMovieImplem "StoreNewMovie() implementation details".
  */
-void StoreNewMovie(Movie arr[], int l, int r, const Movie &toStore, const int type);
+//void StoreNewMovie(Movie arr[], int l, int r, const Movie &toStore, const int type);
+template<typename T, typename U>
+void StoreNewFrag(T arr[], int l, int r, const U toStore);
