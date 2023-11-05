@@ -1,6 +1,5 @@
 #include "file_ops.h"
 
-
 // ================================
 //      GENERAL PURPOSE
 // ================================
@@ -79,25 +78,25 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
     if(!movFile){ throw openExc; }
 
     int nextComma;              // Stores the pos of the next comma in the curr line.
-    wstring wReadingLine;       // Stores the curr line.
+    wstring readingLine;       // Stores the curr line.
 
     /* Vars for setting the movie genres. */
-    int nextPipe = 0;           // Stores the pos of the next pipe in the wTempReadingLine.
+    int nextPipe = 0;           // Stores the pos of the next pipe in the tempReadingLine.
     bool exitSuccess = false;   // True if no more than 6 genres were found, false otherwise.
-    wstring wTempReadingLine;   // Temp copy of the curr line.
+    wstring tempReadingLine;    // Temp copy of the curr line.
     wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
 
     movFile.seekg(0);
-    getline(movFile, wReadingLine);      // Ignore the first line in the inFile.
+    getline(movFile, readingLine);      // Ignore the first line in the inFile.
 
     for(int i = 1; i <= movieNum; i++){
-        getline(movFile, wReadingLine);  // Get the next line
+        getline(movFile, readingLine);  // Get the next line
         for(int j = 0; j < 6; j++){     // And store each of the 6 data fields.
-            nextComma = wReadingLine.find(',');
+            nextComma = readingLine.find(',');
             switch(j){
                 /* ID */
                 case 0: 
-                    movList[i].ID = stoi(wReadingLine);       // Store the first number of the curr line.
+                    movList[i].ID = stoi(readingLine);       // Store the first number of the curr line.
                     break;
                 /* Title */
                 case 1:
@@ -106,37 +105,37 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
                      * contain the pos of the comma after the title.
                      * WARNING: Assumes the last double quote char is within the title, and nowhere else.
                      */
-                    if(wReadingLine[0] == '"') nextComma = (wReadingLine.substr(1)).find_last_of('"') + 2;
-                    movList[i].title = wReadingLine.substr(0, nextComma);
+                    if(readingLine[0] == '"') nextComma = (readingLine.substr(1)).find_last_of('"') + 2;
+                    movList[i].title = readingLine.substr(0, nextComma);
                     break;
                 /* Genres */
                 case 2:
                     /* Create a temp copy of the curr line with only the movie genres in it. */
-                    wTempReadingLine = wReadingLine.substr(0, nextComma);
+                    tempReadingLine = readingLine.substr(0, nextComma);
                     /* Store a max of 6 genres. */
                     for(int k = 0; k < 6; k++){         
-                        nextPipe = wTempReadingLine.find('|');
+                        nextPipe = tempReadingLine.find('|');
                         /* If no pipe character was found on the temp line, assign the last genre and stop storing any more. */
-                        if(nextPipe == -1){ movList[i].genres[k] = wTempReadingLine; exitSuccess = true; break; }
+                        if(nextPipe == -1){ movList[i].genres[k] = tempReadingLine; exitSuccess = true; break; }
                         /* Otherwise, store the curr genre and remove it from the temp line. */
                         else{
-                            movList[i].genres[k] = wTempReadingLine.substr(0, nextPipe);
-                            wTempReadingLine = wTempReadingLine.substr(nextPipe + 1);
+                            movList[i].genres[k] = tempReadingLine.substr(0, nextPipe);
+                            tempReadingLine = tempReadingLine.substr(nextPipe + 1);
                         }
                     }
                     /**
                      * Throw an exception if the loop never encountered a break statement, meaning there were
-                     * more than 6 genres in the wReadingLine.
+                     * more than 6 genres in the readingLine.
                      */
                     if(exitSuccess){ exitSuccess = false; break; }
                     else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
                 /* Duration */
                 case 3:
-                    movList[i].duration = stoi(wReadingLine); 
+                    movList[i].duration = stoi(readingLine); 
                     break;
                 /* Director */
                 case 4:
-                    movList[i].director = wReadingLine.substr(0, nextComma);
+                    movList[i].director = readingLine.substr(0, nextComma);
                     break;
                 /* Release */
                 case 5:
@@ -144,17 +143,41 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
                      * WARNING: Assumes that the release date is in the year-month-day format,
                      * the year is 4 characters long, and the month and day are two characters long each.
                      */
-                    movList[i].release.year  = stoi(wReadingLine.substr(0, 4));
-                    movList[i].release.month = stoi(wReadingLine.substr(5, 2));
-                    movList[i].release.day   = stoi(wReadingLine.substr(8, 2));
+                    movList[i].release.year  = stoi(readingLine.substr(0, 4));
+                    movList[i].release.month = stoi(readingLine.substr(5, 2));
+                    movList[i].release.day   = stoi(readingLine.substr(8, 2));
                     break;
             } 
-            wReadingLine = wReadingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
+            readingLine = readingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
         }
     }
     movFile.close();
 }
 
-void PopulateUserDataList(User userList[], int userNum, const char* userDataFilePath){
-    
+void PopulateUserList(User userList[], int userNum, const char* userDataFilePath){
+    wstring openExc = L"[ ERR ] user_data.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
+    wifstream userDataFile(userDataFilePath);
+    if(!userDataFile){ throw openExc; }
+
+    int nextComma;
+    wstring readingLine;
+    getline(userDataFile, readingLine);
+
+    for(int i = 1; getline(userDataFile, readingLine); i++){
+        for(int j = 0; j < 3; j++){
+            nextComma = readingLine.find(',');
+            switch(j){
+                case 0:
+                    userList[i].ID = stoi(readingLine);
+                    break;
+                case 1:
+                    userList[i].name = readingLine.substr(0, nextComma);
+                    break;
+                case 2:
+                    userList[i].movies = readingLine;
+                    break;
+            }
+            readingLine = readingLine.substr(nextComma + 1);
+        }
+    }
 }

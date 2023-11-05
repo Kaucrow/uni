@@ -15,3 +15,4 @@ int GetLastLineFirstNum(const char* filePath);
  * @param inFile - wifstream object that contains the movies.csv file.
  */
 void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath);
+void PopulateUserList(User userList[], int userNum, const char* userDataFilePath);
