@@ -175,6 +175,7 @@ int main(){
             if(action == SEARCH){
                 ClrScr();
                 int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
+
                 wcout   << "*** FILTERS ***\n"
                         << "(1) Duration\n"
                         << "(2) Title\n"
@@ -208,17 +209,17 @@ int main(){
                     case 2:
                         wcout << "Title to search for: ";
                         getline(wcin, wstrSearch);
-                        //BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
+                        BinSearch(wstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 3:
                         wcout << "Director to search for: ";
                         getline(wcin, wstrSearch);
-                        //BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
+                        BinSearch(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 4:
                         wcout << "Year to search for: ";
                         wcin >> intSearch;
-                        //BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
+                        BinSearch(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 5:
                         wcout << "Month to search for: ";
@@ -227,7 +228,7 @@ int main(){
                             wcout << "Please input a valid month.\n";
                             wcin >> intSearch;
                         }
-                        //BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
+                        BinSearch(intFrags[MON], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 6:
                         wcout << "Day to search for: ";
@@ -236,7 +237,7 @@ int main(){
                             wcout << "Please input a valid day.\n";
                             wcin >> intSearch;
                         }
-                        //BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
+                        BinSearch(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
                         break;
                     default:
                         wcerr << "[ ERR ] THIS SHOULD NEVER EXECUTE. IT'S ONLY HERE FOR DEBUG PURPOSES.\n";     // debug

@@ -1,7 +1,8 @@
 #include "bin_search.h"
 #include <iostream>
+#include <string>
 #include <functional>
-using std::function;
+using std::wstring, std::function;
 
 template <typename T>
 bool CompareFunc(T searchArrDat, T toCompareDat, bool equality){
@@ -49,6 +50,7 @@ void StoreMatches(const T searchArr[], int storeArr[], int someMatchPos, const U
         storeIndex++;
         std::wcout << "FOUNDR\n";   // debug
     }
+    storeArr[storeIndex] = 0;
 }
 
 template<typename T, typename U>
@@ -77,3 +79,4 @@ int BinSearch(const T searchArr[], int storeArr[], int l, int r, const U search,
 }
 
 template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search, bool storeMatches);
+template int BinSearch<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search, bool storeMatches);
