@@ -97,3 +97,4 @@ test/test_runner
 
 # Blockbuster
 Programming_2/Theory/Blockbuster/data/*.bin
+Programming_2/Theory/Blockbuster/data/user_data.csv

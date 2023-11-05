@@ -17,6 +17,18 @@ struct Movie{
     Date expiry;
 };
 
+struct Frag{
+    int ID = 0;
+};
+
+struct IntFrag : public Frag{
+    int data;
+};
+
+struct WstringFrag : public Frag{
+    wstring data;
+};
+
 struct User{
     int ID = 0;
     wstring name, movies;

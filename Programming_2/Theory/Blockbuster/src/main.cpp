@@ -17,7 +17,7 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY };
+enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY, BASE };
 enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
 
 
@@ -54,12 +54,13 @@ int main(){
     /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
         each movie list is sorted according to a different property
         (duration, title, director, release year, release month, release day). */
-    Movie durList[totalMovies + 3001];
     Movie ttlList[totalMovies + 3001];
+    Movie durList[totalMovies + 3001];
     Movie dirList[totalMovies + 3001];
     Movie yeaList[totalMovies + 3001];
     Movie monList[totalMovies + 3001];
     Movie dayList[totalMovies + 3001];
+    Movie baseList[totalMovies + 3001];
     Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
 
     wstring username;
@@ -88,21 +89,45 @@ int main(){
     wcin.get();
 
     /* Populate the DURATION movie list. */
-    try{ PopulateMovieList(movList[DURATION], totalMovies, CSV_PATH); }
+    try{ PopulateMovieList(baseList, totalMovies, CSV_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
+
+    IntFrag durFrag[totalMovies + 3001];
 
     /* Copy the duration movie list elements to all of the other lists. */
     for(int i = 1; i <= totalMovies; i++){
-        movList[TITLE][i]    = movList[DURATION][i];
-        movList[DIRECTOR][i] = movList[DURATION][i];
-        movList[YEAR][i]     = movList[DURATION][i];
-        movList[MONTH][i]    = movList[DURATION][i];
-        movList[DAY][i]      = movList[DURATION][i];
+        durFrag[i].ID = baseList[i].ID;
+        durFrag[i].data = (baseList[i].duration);
+
+    /*    movList[DURATION][i] = baseList[i];
+        movList[TITLE][i]    = baseList[i];
+        movList[DIRECTOR][i] = baseList[i];
+        movList[YEAR][i]     = baseList[i];
+        movList[MONTH][i]    = baseList[i];
+        movList[DAY][i]      = baseList[i];*/
     }
 
     /* Sort each list. */
-    for(int i = 0; i < 6; i++)
-        MergeSort(movList[i], 1, totalMovies, i);
+    //for(int i = 0; i < 6; i++)
+     //   MergeSort(movList[i], 1, totalMovies, i);
+
+    wcout << durFrag[1].data << '\n';
+    MergeSortAlt(durFrag, 1, totalMovies);
+    wcout << durFrag[1].data << '\n';
+
+    wcin.get();
+    wcin.get();
+    /*for(int i = 1; i <= totalMovies; i++){
+        durFrag[i].data = std::to_wstring(baseList[i].duration);
+    }
+    wcout << durFrag[1].data << '\n';
+    wcin.get();
+    wcin.get();
+
+    MergeSort(durFrag, 1, totalMovies);
+    wcout << durFrag[1].data << '\n';
+    wcin.get();
+    wcin.get();*/
 
     /***************************
     /*  Main loop.
