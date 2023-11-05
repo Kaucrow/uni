@@ -23,6 +23,7 @@ add_subdirectory(./src/lib/merge_sort)
 add_subdirectory(./src/lib/bin_search)
 add_subdirectory(./src/lib/store_movie)
 add_subdirectory(./src/lib/rent_movie)
+add_subdirectory(./src/lib/file_ops)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
@@ -30,6 +31,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib/bin_search
     PUBLIC ./src/lib/store_movie
     PUBLIC ./src/lib/rent_movie
+    PUBLIC ./src/lib/file_ops
 )
 
 if(Boost_FOUND)
@@ -49,6 +51,7 @@ target_link_directories(${PROJECT_NAME}
     PRIVATE bin_search
     PRIVATE store_movie
     PRIVATE rent_movie
+    PRIVATE file_ops
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -56,4 +59,5 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE bin_search
     PRIVATE store_movie
     PRIVATE rent_movie
+    PRIVATE file_ops
 )

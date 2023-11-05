@@ -72,20 +72,6 @@ int main(){
     wcout << "Input your full name: ";
     wcin >> username;
 
-    int userCount = 0;
-    wifstream usrCountFileI(USRCOUNT_PATH, std::ios::binary);
-    if(usrCountFileI){
-        wcout << "EXISTS\n";        // debug
-        usrCountFileI.read(reinterpret_cast<wchar_t*>(&userCount), sizeof(userCount));
-        usrCountFileI.close();
-    }
-    wcout << userCount << '\n';     // debug
-    userCount++;
-    wofstream usrCountFileO(USRCOUNT_PATH, std::ios::binary);
-    usrCountFileO.write(reinterpret_cast<wchar_t*>(&userCount), sizeof(userCount));
-    wcout << userCount << '\n';
-    usrCountFileO.close();
-
     /* Populate the DURATION movie list. */
     try{ PopulateMovieList(movList[DURATION], csvFile); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }

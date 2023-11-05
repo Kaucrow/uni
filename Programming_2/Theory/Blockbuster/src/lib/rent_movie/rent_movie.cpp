@@ -1,4 +1,5 @@
 #include "rent_movie.h"
+#include "../file_ops/file_ops.h"
 #include <iostream>
 using std::getline;
 
@@ -27,9 +28,7 @@ void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring d
         return totalPos;
     };
 
-    const char writeFileName[] = "./data/write.csv";        // Path of the writeFile.
-    std::wfstream csvFile(csvFilePath);             // Open the csvFile.
-    std::wofstream writeFile(writeFileName);                // Open the writeFile.
+    std::wifstream csvFile(csvFilePath);             // Open the csvFile.
 
     wstring readingLine;
     int counter = -1;                       // Counts the lines read.
@@ -38,7 +37,6 @@ void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring d
     while(counter != movieID - 1){
         getline(csvFile, readingLine);
         std::wcout << readingLine << '\n';
-        writeFile << readingLine << '\n';
         counter++;
     }
     
@@ -46,20 +44,6 @@ void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring d
     // Update the line, and write it to writeFile. //
     readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 6));
     readingLine.append(L',' + username + L',' + date + L',' + L"rented");
-    writeFile << readingLine << '\n';
-
-    // Read the remaining lines and write them to writeFile. //
-    while(getline(csvFile, readingLine)){
-        writeFile << readingLine << '\n';
-    }
-
-    // Close the csvFile and the writeFile. Then delete movies.csv and //
-    // rename write.csv to movies.csv                                  //
     csvFile.close();
-    writeFile.close(); 
-    /*char csvBuffer[32];
-    wcstombs(csvBuffer, csvFilePath, sizeof(csvBuffer));
-    std::wcout << csvBuffer << '\n';*/
-    remove(csvFilePath);
-    rename(writeFileName, csvFilePath);
+    ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
