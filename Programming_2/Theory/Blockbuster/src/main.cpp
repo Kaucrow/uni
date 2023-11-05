@@ -17,7 +17,6 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-//enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY, BASE };
 enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
 enum { DUR, YEA, MON, DAY };
 enum { TTL, DIR };
@@ -55,12 +54,6 @@ int main(){
     /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
         each movie list is sorted according to a different property
         (duration, title, director, release year, release month, release day). */
-    /*Movie ttlList[totalMovies + 3001];
-    Movie durList[totalMovies + 3001];
-    Movie dirList[totalMovies + 3001];
-    Movie yeaList[totalMovies + 3001];
-    Movie monList[totalMovies + 3001];
-    Movie dayList[totalMovies + 3001];*/
     Movie baseList[totalMovies + 3001];
     IntFrag durList[totalMovies + 3001];
     IntFrag yeaList[totalMovies + 3001];
@@ -70,7 +63,6 @@ int main(){
     WstrFrag dirList[totalMovies + 3001];
     IntFrag* intFrags[4] = { durList, yeaList, monList, dayList };
     WstrFrag* wstrFrags[2] = { ttlList, dirList };
-    //Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
 
     wstring username;
     wfstream openTest(USRDATA_PATH);
@@ -91,18 +83,16 @@ int main(){
     User userList[userNum + 101];
     try{ PopulateUserList(userList, userNum, USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
-    //appendLine = std::to_wstring(userNum + 1) + L',' + username + L",\n";
-    //AppendLine(USRDATA_PATH, appendLine);
-    wcout << userList[1].name << '\n';
-    wcin.get();
-    wcin.get();
+
+    wcout << userList[1].name << '\n';      // debug
+    wcin.get();     // debug
+    wcin.get();     // debug
 
     /* Populate the DURATION movie list. */
     try{ PopulateMovieList(baseList, totalMovies, CSV_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    /* Copy the duration movie list elements to all of the other lists. */
-
+    /* Copy the base movie list elements data to each frag list. */
     for(int i = 1; i <= totalMovies; i++){
         for(int j = 0; j < 4; j++){ intFrags[j][i].ID = baseList[i].ID; }
         for(int j = 0; j < 2; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
@@ -113,17 +103,7 @@ int main(){
         wstrFrags[TTL][i].data = baseList[i].title;
         wstrFrags[DIR][i].data = baseList[i].director;
     }
-    /*    movList[DURATION][i] = baseList[i];
-        movList[TITLE][i]    = baseList[i];
-        movList[DIRECTOR][i] = baseList[i];
-        movList[YEAR][i]     = baseList[i];
-        movList[MONTH][i]    = baseList[i];
-        movList[DAY][i]      = baseList[i];
-    }*/
-
-    //for(int i = 0; i < 6; i++)
-     //   MergeSort(movList[i], 1, totalMovies, i);
-    
+ 
     /* Sort each list. */
     wcout << intFrags[DUR][1].data << '\n';       // debug
     wcout << wstrFrags[TTL][1].data << '\n';
@@ -137,17 +117,6 @@ int main(){
 
     wcin.get();
     wcin.get();
-    /*for(int i = 1; i <= totalMovies; i++){
-        durFrag[i].data = std::to_wstring(baseList[i].duration);
-    }
-    wcout << durFrag[1].data << '\n';
-    wcin.get();
-    wcin.get();
-
-    MergeSort(durFrag, 1, totalMovies);
-    wcout << durFrag[1].data << '\n';
-    wcin.get();
-    wcin.get();*/
 
     /***************************
     /*  Main loop.
