@@ -34,34 +34,36 @@ function<bool(const Movie searchArr[], int pos, const Movie &toCompare, bool equ
         return CompareFunc(searchArr[pos].release.day, toCompare.release.day, equality); }
 };
 
-void StoreMatches(const Movie searchArr[], Movie storeArr[], int someMatchPos, const Movie &search, const int type){
+template<typename T, typename U>
+void StoreMatches(const T searchArr[], int storeArr[], int someMatchPos, const U search){
     int storeIndex = 0;
-    for(int offset = 0; BinCompare[type](searchArr, someMatchPos + offset, search, 1); offset--){
-        storeArr[storeIndex] = searchArr[someMatchPos + offset];
+    for(int offset = 0; (searchArr[someMatchPos + offset].data == search); offset--){
+        storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
         std::wcout << "FOUNDL\n";   // debug
     }
     std::wcout << "REACHED\n";      // debug
-    std::wcout << searchArr[someMatchPos - storeIndex].duration << '\n';        // debug
-    for(int offset = 1; BinCompare[type](searchArr, someMatchPos + offset, search, 1); offset++){
-        storeArr[storeIndex] = searchArr[someMatchPos + offset];
+    std::wcout << searchArr[someMatchPos - storeIndex].data << '\n';        // debug
+    for(int offset = 1; (searchArr[someMatchPos + offset].data == search); offset++){
+        storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
         std::wcout << "FOUNDR\n";   // debug
     }
 }
 
-int BinSearch(const Movie searchArr[], Movie storeArr[], int l, int r, const Movie &search, const int type, bool storeMatches){
+template<typename T, typename U>
+int BinSearch(const T searchArr[], int storeArr[], int l, int r, const U search, bool storeMatches){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
         // Check if x is present at mid.
-        if(BinCompare[type](searchArr, m, search, 1)){
-            if(storeMatches) StoreMatches(searchArr, storeArr, m, search, type);
+        if(searchArr[m].data == search){
+            if(storeMatches) StoreMatches(searchArr, storeArr, m, search);
             return m;
         }
  
         // If x is greater, ignore left half.
-        if(BinCompare[type](searchArr, m, search, 0))
+        if(searchArr[m].data < search)
             l = m + 1;
  
         // If x is smaller, ignore right half.
@@ -73,3 +75,5 @@ int BinSearch(const Movie searchArr[], Movie storeArr[], int l, int r, const Mov
     if(storeMatches) return -1;
     else return m;
 }
+
+template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search, bool storeMatches);

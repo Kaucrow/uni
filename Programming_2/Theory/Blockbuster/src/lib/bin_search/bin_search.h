@@ -14,4 +14,5 @@
  *          If no match is found, and storeMatches is true, will return -1.
  *          If no match is found, and storeMatches is false, will return the index of the movie that matches the search the closest.
 */
-int BinSearch(const Movie searchArr[], Movie storeArr[], int l, int r, const Movie &search, const int type, bool storeMatches = 1);
+template<typename T, typename U>
+int BinSearch(const T searchArr[], int storeArr[], int l, int r, const U search, bool storeMatches = 1);

@@ -88,7 +88,7 @@ int main(){
     wcin.get();     // debug
     wcin.get();     // debug
 
-    /* Populate the DURATION movie list. */
+    /* Populate the base movie list. */
     try{ PopulateMovieList(baseList, totalMovies, CSV_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
@@ -174,8 +174,7 @@ int main(){
             **************************/
             if(action == SEARCH){
                 ClrScr();
-                Movie matches[totalMovies + 3001];      // Movie list array to stores the search matches.
-                Movie toMatch;                          // Movie that holds the parameter to be matched in the corresponding movie list.
+                int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
                 wcout   << "*** FILTERS ***\n"
                         << "(1) Duration\n"
                         << "(2) Title\n"
@@ -193,56 +192,50 @@ int main(){
                 }
                 wcin.ignore(1);
 
-                wstring search;
-                ClrScr();
-
+                wstring wstrSearch;
+                int intSearch;
                 /**
                  * Generate the "toMatch" movie according to the selected filter,
                  * perform the search, and store the matching movies in the "matches" movie list array.
                  */
+                ClrScr();
                 switch(action){
                     case 1:
                         wcout << "Duration to search for: ";
-                        getline(wcin, search);
-                        toMatch.duration = stoi(search);
-                        //BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
+                        wcin >> intSearch;
+                        BinSearch(intFrags[DUR], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 2:
                         wcout << "Title to search for: ";
-                        getline(wcin, search);
-                        toMatch.title = search;
+                        getline(wcin, wstrSearch);
                         //BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
                         break;
                     case 3:
                         wcout << "Director to search for: ";
-                        getline(wcin, search);
-                        toMatch.director = search;
+                        getline(wcin, wstrSearch);
                         //BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
                         break;
                     case 4:
                         wcout << "Year to search for: ";
-                        getline(wcin, search);
-                        toMatch.release.year = stoi(search);
+                        wcin >> intSearch;
                         //BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
                         break;
                     case 5:
                         wcout << "Month to search for: ";
-                        getline(wcin, search);
-                        while(stoi(search) < 1 || stoi(search) > 12){
+                        wcin >> intSearch;
+                        while(intSearch < 1 || intSearch > 12){
                             wcout << "Please input a valid month.\n";
-                            getline(wcin, search);
+                            wcin >> intSearch;
                         }
-                        toMatch.release.month = stoi(search);
                         //BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
                         break;
                     case 6:
                         wcout << "Day to search for: ";
-                        getline(wcin, search);
-                        while(stoi(search) < 1 || stoi(search) > 31){
+                        wcin >> intSearch;
+                        while(intSearch < 1 || intSearch > 31){
                             wcout << "Please input a valid day.\n";
-                            getline(wcin, search);
+                            wcin >> intSearch;
                         }
-                        toMatch.release.day = stoi(search);
                         //BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
                         break;
                     default:
@@ -252,10 +245,10 @@ int main(){
 
                 ClrScr();
                 /* Print the matching movies from the "matches" movie list array. */
-                for(int i = 0; matches[i].duration != 0; i++){
-                    wcout << matches[i].title << '\n';
+                for(int i = 0; idMatches[i] != 0; i++){
+                    wcout << baseList[idMatches[i]].title << '\n';
                 }
-            
+                wcin.get(); 
             }
             /***************************
             /*  Add a movie.
