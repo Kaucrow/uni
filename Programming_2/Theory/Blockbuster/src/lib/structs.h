@@ -25,7 +25,7 @@ struct IntFrag : public Frag{
     int data;
 };
 
-struct WstringFrag : public Frag{
+struct WstrFrag : public Frag{
     wstring data;
 };
 

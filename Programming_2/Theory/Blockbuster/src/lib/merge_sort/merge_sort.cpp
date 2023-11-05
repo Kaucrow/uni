@@ -22,7 +22,7 @@ function<bool(const Movie L[], const Movie R[], int i, int j)> Compare[6] = {
 };
 
 /* For use only by MergeSort() */
-void Merge(Movie arr[], int l, int m, int r, const int sortBy){
+/*void Merge(Movie arr[], int l, int m, int r, const int sortBy){
     int n1 = m - l + 1;     // Amount of elements of the L subarray.
     int n2 = r - m;         // Amount of elements of the R subarray.
 
@@ -82,11 +82,11 @@ void MergeSort(Movie arr[], int l, int r, const int sortBy){
         // Merge the sorted halves.
         Merge(arr, l, m, r, sortBy);
     }
-}
+}*/
 
 /* For use only by MergeSort() */
 template<typename T>
-void MergeAlt(T arr[], int l, int m, int r){
+void Merge(T arr[], int l, int m, int r){
     int n1 = m - l + 1;     // Amount of elements of the L subarray.
     int n2 = r - m;         // Amount of elements of the R subarray.
 
@@ -135,21 +135,21 @@ void MergeAlt(T arr[], int l, int m, int r){
 }
 
 template<typename T>
-void MergeSortAlt(T arr[], int l, int r){
+void MergeSort(T arr[], int l, int r){
     if(l < r){
         // Same as (l + r) / 2, but avoids overflow for large l and r.
         int m = l + (r - l) / 2;
 
         // Sort first and second halves.
-        MergeSortAlt(arr, l, m);
-        MergeSortAlt(arr, m + 1, r);
+        MergeSort(arr, l, m);
+        MergeSort(arr, m + 1, r);
 
         // Merge the sorted halves.
-        MergeAlt(arr, l, m, r);
+        Merge(arr, l, m, r);
     }
 }
 
-template void MergeAlt<IntFrag>(IntFrag arr[], int l, int m, int r);
-template void MergeAlt<WstringFrag>(WstringFrag arr[], int l, int m, int r);
-template void MergeSortAlt<IntFrag>(IntFrag arr[], int l, int r);
-template void MergeSortAlt<WstringFrag>(WstringFrag arr[], int l, int r);
+template void Merge<IntFrag>(IntFrag arr[], int l, int m, int r);
+template void Merge<WstrFrag>(WstrFrag arr[], int l, int m, int r);
+template void MergeSort<IntFrag>(IntFrag arr[], int l, int r);
+template void MergeSort<WstrFrag>(WstrFrag arr[], int l, int r);

@@ -17,9 +17,10 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY, BASE };
+//enum { DURATION, TITLE, DIRECTOR, YEAR, MONTH, DAY, BASE };
 enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
-
+enum { DUR, YEA, MON, DAY };
+enum { TTL, DIR };
 
 /**
  * @brief OS agnostic clear screen function.
@@ -54,14 +55,22 @@ int main(){
     /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
         each movie list is sorted according to a different property
         (duration, title, director, release year, release month, release day). */
-    Movie ttlList[totalMovies + 3001];
+    /*Movie ttlList[totalMovies + 3001];
     Movie durList[totalMovies + 3001];
     Movie dirList[totalMovies + 3001];
     Movie yeaList[totalMovies + 3001];
     Movie monList[totalMovies + 3001];
-    Movie dayList[totalMovies + 3001];
+    Movie dayList[totalMovies + 3001];*/
     Movie baseList[totalMovies + 3001];
-    Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
+    IntFrag durList[totalMovies + 3001];
+    IntFrag yeaList[totalMovies + 3001];
+    IntFrag monList[totalMovies + 3001];
+    IntFrag dayList[totalMovies + 3001];
+    WstrFrag ttlList[totalMovies + 3001];
+    WstrFrag dirList[totalMovies + 3001];
+    IntFrag* intFrags[4] = { durList, yeaList, monList, dayList };
+    WstrFrag* wstrFrags[2] = { ttlList, dirList };
+    //Movie* movList[6] = { durList, ttlList, dirList, yeaList, monList, dayList };
 
     wstring username;
     wfstream openTest(USRDATA_PATH);
@@ -92,28 +101,39 @@ int main(){
     try{ PopulateMovieList(baseList, totalMovies, CSV_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    IntFrag durFrag[totalMovies + 3001];
-
     /* Copy the duration movie list elements to all of the other lists. */
-    for(int i = 1; i <= totalMovies; i++){
-        durFrag[i].ID = baseList[i].ID;
-        durFrag[i].data = (baseList[i].duration);
 
+    for(int i = 1; i <= totalMovies; i++){
+        for(int j = 0; j < 4; j++){ intFrags[j][i].ID = baseList[i].ID; }
+        for(int j = 0; j < 2; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
+        intFrags[DUR][i].data = baseList[i].duration;
+        intFrags[YEA][i].data = baseList[i].release.year;
+        intFrags[MON][i].data = baseList[i].release.month;
+        intFrags[DAY][i].data = baseList[i].release.day;
+        wstrFrags[TTL][i].data = baseList[i].title;
+        wstrFrags[DIR][i].data = baseList[i].director;
+    }
     /*    movList[DURATION][i] = baseList[i];
         movList[TITLE][i]    = baseList[i];
         movList[DIRECTOR][i] = baseList[i];
         movList[YEAR][i]     = baseList[i];
         movList[MONTH][i]    = baseList[i];
-        movList[DAY][i]      = baseList[i];*/
-    }
+        movList[DAY][i]      = baseList[i];
+    }*/
 
-    /* Sort each list. */
     //for(int i = 0; i < 6; i++)
      //   MergeSort(movList[i], 1, totalMovies, i);
+    
+    /* Sort each list. */
+    wcout << intFrags[DUR][1].data << '\n';       // debug
+    wcout << wstrFrags[TTL][1].data << '\n';
+    for(int i = 0; i < 4; i++)
+        MergeSort(intFrags[i], 1, totalMovies);
+    for(int i = 0; i < 2; i++)
+        MergeSort(wstrFrags[i], 1, totalMovies);
 
-    wcout << durFrag[1].data << '\n';
-    MergeSortAlt(durFrag, 1, totalMovies);
-    wcout << durFrag[1].data << '\n';
+    wcout << intFrags[DUR][1].data << '\n';       // debug
+    wcout << wstrFrags[TTL][1].data << '\n';
 
     wcin.get();
     wcin.get();
@@ -197,7 +217,7 @@ int main(){
                         << "Select option: ";
 
                 wcin >> action;
-                while(action < (DURATION + 1) || action > (DAY + 1)){
+                while(action < 1 || action > 6){
                     wcout << "INVALID OPTION.\nSelect option: ";
                     wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     wcin >> action;
@@ -212,31 +232,31 @@ int main(){
                  * perform the search, and store the matching movies in the "matches" movie list array.
                  */
                 switch(action){
-                    case DURATION + 1:
+                    case 1:
                         wcout << "Duration to search for: ";
                         getline(wcin, search);
                         toMatch.duration = stoi(search);
-                        BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
+                        //BinSearch(movList[DURATION], matches, 1, totalMovies, toMatch, DURATION);
                         break;
-                    case TITLE + 1:
+                    case 2:
                         wcout << "Title to search for: ";
                         getline(wcin, search);
                         toMatch.title = search;
-                        BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
+                        //BinSearch(movList[TITLE], matches, 1, totalMovies, toMatch, TITLE);
                         break;
-                    case DIRECTOR + 1:
+                    case 3:
                         wcout << "Director to search for: ";
                         getline(wcin, search);
                         toMatch.director = search;
-                        BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
+                        //BinSearch(movList[DIRECTOR], matches, 1, totalMovies, toMatch, DIRECTOR);
                         break;
-                    case YEAR + 1:
+                    case 4:
                         wcout << "Year to search for: ";
                         getline(wcin, search);
                         toMatch.release.year = stoi(search);
-                        BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
+                        //BinSearch(movList[YEAR], matches, 1, totalMovies, toMatch, YEAR);
                         break;
-                    case MONTH + 1:
+                    case 5:
                         wcout << "Month to search for: ";
                         getline(wcin, search);
                         while(stoi(search) < 1 || stoi(search) > 12){
@@ -244,9 +264,9 @@ int main(){
                             getline(wcin, search);
                         }
                         toMatch.release.month = stoi(search);
-                        BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
+                        //BinSearch(movList[MONTH], matches, 1, totalMovies, toMatch, MONTH);
                         break;
-                    case DAY + 1:
+                    case 6:
                         wcout << "Day to search for: ";
                         getline(wcin, search);
                         while(stoi(search) < 1 || stoi(search) > 31){
@@ -254,7 +274,7 @@ int main(){
                             getline(wcin, search);
                         }
                         toMatch.release.day = stoi(search);
-                        BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
+                        //BinSearch(movList[DAY], matches, 1, totalMovies, toMatch, DAY);
                         break;
                     default:
                         wcerr << "[ ERR ] THIS SHOULD NEVER EXECUTE. IT'S ONLY HERE FOR DEBUG PURPOSES.\n";     // debug
@@ -320,12 +340,12 @@ int main(){
                  * Update each of the movie lists with the added movie, while preserving the
                  * sorting order in each of them.
                  */
-                StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
+                /*StoreNewMovie(movList[DURATION], 1, totalMovies, toStore, DURATION);
                 StoreNewMovie(movList[TITLE], 1, totalMovies, toStore, TITLE);
                 StoreNewMovie(movList[DIRECTOR], 1, totalMovies, toStore, DIRECTOR);
                 StoreNewMovie(movList[YEAR], 1, totalMovies, toStore, YEAR);
                 StoreNewMovie(movList[MONTH], 1, totalMovies, toStore, MONTH);
-                StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);
+                StoreNewMovie(movList[DAY], 1, totalMovies, toStore, DAY);*/
 
                 wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
             }
@@ -343,8 +363,8 @@ int main(){
 
                 // Search for the movie to rent, and throw an error if it doesn't exist in the database. //
                 // If it exists, it will get stored in the toRent[] array.                               //
-                if(BinSearch(ttlList, toRent, 1, totalMovies, toRent[0], TITLE) == -1)
-                    wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                /*if(BinSearch(ttlList, toRent, 1, totalMovies, toRent[0], TITLE) == -1)
+                    wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";*/
 
                 wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
 
