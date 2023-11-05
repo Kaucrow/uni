@@ -11,3 +11,8 @@ struct Movie{
         int year = 0, month = 0, day = 0;
     } release;
 };
+
+struct User{
+    int ID = 0;
+    wstring name, movies;
+};
