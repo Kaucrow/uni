@@ -66,16 +66,14 @@ int main(){
     wfstream openTest(USRDATA_PATH);
     wstring appendLine;
     int userNum = 0;
-    bool userDataExists = false;
     if(!openTest){
-        wcout << "-> Input your full name: ";
+        wcout   << "[ INFO ] No user_data.csv file was found. Please input the name\n"
+                << "         of the first user, so the file may be created: ";
         wcin >> username;
         appendLine = L"1," + username + L",\n";
         AppendLine(USRDATA_PATH, L"id,name,movies\n" + appendLine);
-    } else{
-        userDataExists = true;
-        openTest.close();
     }
+    else openTest.close();
 
     try{ userNum = GetLastLineFirstNum(USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
@@ -109,7 +107,7 @@ int main(){
     /***************************
     /*  Main loop.
      **************************/
-    int action;
+    int action, currUser;
     while(true){
         ClrScr();
         wcout   << "*** MENU ***\n"
@@ -125,9 +123,21 @@ int main(){
         }
 
         ClrScr(); 
+        currUser = 0;
         wcout   << "*** LOGIN ***\n"
                 << "-> User: ";
         wcin >> username;
+
+        for(int i = 1; i <= userNum; i++){
+            if(userList[i].name == username){
+                currUser = userList[i].ID;
+            }
+        }
+        if(currUser == 0){
+            userNum++;
+            AppendLine(USRDATA_PATH, std::to_wstring(userNum) + L',' + username + L",\n");
+            currUser = userNum;
+        }
 
         while(true){
             ClrScr();
