@@ -4,30 +4,30 @@
 using std::getline;
 
 /**
+ * @brief Gets the position of the Nth comma in a line.
+ * @param line - wstring object containing the line to search.
+ * @param commaNum - Number of comma in the line to get the position of.
+ * @return Position of the Nth comma in the line (zero-based).
+*/
+int GetNthCommaPos(wstring line, int commaNum){
+    int commaCounter = 0, totalPos = 0, currPos = 0;
+    while(commaCounter != commaNum){
+        currPos = (line.find_first_of(','));
+        totalPos += currPos;
+        if(commaCounter > 0) totalPos += 1;
+        line = line.substr(currPos + 1);
+        commaCounter++;
+    }
+    return totalPos;
+};
+
+/**
  * @name RentMovieImplem 
  * This function creates a write.csv file, copies the contents of movies.csv
  * to it while also updating the line of the rented movie, and lastly deletes
  * the curr movies.csv and renames write.csv to movies.csv.
 */
-void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring date){
-    /**
-     * @brief Lambda function to get the position of the Nth comma in a line.
-     * @param line - wstring object containing the line to search.
-     * @param commaNum - Number of comma in the line to get the position of.
-     * @return Position of the Nth comma in the line (zero-based).
-    */
-    auto GetNthCommaPos = [](wstring line, int commaNum) -> int{
-        int commaCounter = 0, totalPos = 0, currPos = 0;
-        while(commaCounter != commaNum){
-            currPos = (line.find_first_of(','));
-            totalPos += currPos;
-            if(commaCounter > 0) totalPos += 1;
-            line = line.substr(currPos + 1);
-            commaCounter++;
-        }
-        return totalPos;
-    };
-
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date){
     std::wifstream csvFile(csvFilePath);             // Open the csvFile.
 
     wstring readingLine;
@@ -46,4 +46,8 @@ void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring d
     readingLine.append(L',' + username + L',' + date + L',' + L"rented");
     csvFile.close();
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
+}
+
+void UpdateUsersData(){
+
 }

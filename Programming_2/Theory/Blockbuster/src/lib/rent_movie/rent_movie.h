@@ -10,4 +10,4 @@ using std::wstring;
  * @param date - wstring object containing the date of the rent.
  * @see RentMovieImplem
  */
-void RentMovie(const char* csvFilePath, int movieID, wstring username, wstring date);
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date);

@@ -11,7 +11,7 @@
 #include <rent_movie.h>
 #include <file_ops.h>
 
-#define USRDATA_PATH "./data/user_data.csv"
+#define USRDATA_PATH "./data/users_data.csv"
 #define CSV_PATH "./data/movies.csv"
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
@@ -40,12 +40,14 @@ int main(){
     std::locale loc = gen("en_US");             // Create an "en_US" locale
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
-    _setmode(_fileno(stdin), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
+    _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
 
     //wstring csvFileName = L"./data/movies.csv";
     //wfstream csvFile(CSV_PATH);
     //if(!csvFile){ wcerr << "ERR: FILE \"" << CSV_PATH << "\" COULD NOT BE OPENED."; return 1; }
     //csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
+
+    CheckMoviesCsv(CSV_PATH);
 
     int totalMovies = 0;
     try{ totalMovies = GetLastLineFirstNum(CSV_PATH); }     // Get the number of movies in the movies.csv file.
@@ -69,7 +71,7 @@ int main(){
     wstring appendLine;
     int userNum = 0;
     if(!openTest){
-        wcout   << "[ INFO ] No user_data.csv file was found. Please input the name\n"
+        wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
                 << "         of the first user, so the file may be created: ";
         wcin >> username;
         appendLine = L"1," + username + L",\n";
@@ -334,7 +336,7 @@ int main(){
                 wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
 
                 // Update the movies.csv file with the rent information.
-                RentMovie(CSV_PATH, rentPos, username, currDate);
+                UpdateMoviesCsv(CSV_PATH, rentPos, username, currDate);
 
                 wcin.get();
             }

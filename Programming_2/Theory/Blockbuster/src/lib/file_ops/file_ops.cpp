@@ -72,6 +72,34 @@ int GetLastLineFirstNum(const char* filePath){
 // ==================================
 //      FILE-SPECIFIC
 // ==================================
+void CheckMoviesCsv(const char* movFilePath){
+    wifstream movFile(movFilePath);
+    wstring readingLine;
+    getline(movFile, readingLine);
+    int commaNum = 0;
+    while(true){
+        std::size_t nextComma = readingLine.find(',');
+        if(nextComma == std::string::npos) break;
+        readingLine = readingLine.substr(nextComma + 1);
+        commaNum++;
+    }
+    if(commaNum == 8){
+        movFile.seekg(0, std::ios::beg);
+        getline(movFile, readingLine);
+        readingLine.append(L",expiry\n");
+        wofstream write("./write.csv");
+        write << readingLine;
+        while(getline(movFile, readingLine)){
+            readingLine.append(L",\n");
+            write << readingLine;
+        }
+        movFile.close();
+        write.close();
+        remove(movFilePath);
+        rename("./write.csv", movFilePath);
+    }
+    movFile.close();
+}
 void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
     wstring openExc = L"[ ERR ] movies.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
     wifstream movFile(movFilePath);
