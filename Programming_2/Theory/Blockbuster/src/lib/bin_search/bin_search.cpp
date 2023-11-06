@@ -5,7 +5,9 @@ using std::wstring;
 
 template<typename FragT, typename DataT>
 void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, const DataT search){
-    int storeIndex = 0;
+    int storeIndex = 0;     // Next index to store a match at.
+
+    // Search down the searchArr for matches. //
     for(int offset = 0; (searchArr[someMatchPos + offset].data == search); offset--){
         storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
@@ -13,11 +15,16 @@ void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, con
     }
     std::wcout << "REACHED\n";      // debug
     std::wcout << searchArr[someMatchPos - storeIndex].data << '\n';        // debug
+    
+    // Search up the searchArr for matches. //
     for(int offset = 1; (searchArr[someMatchPos + offset].data == search); offset++){
         storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
         std::wcout << "FOUNDR\n";   // debug
     }
+
+    // Store a 0 in the array element that comes after the last match element,
+    // in order to mark the end of the matches in the array.
     storeArr[storeIndex] = 0;
 }
 
@@ -45,13 +52,13 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
 }
 
 template<typename FragT, typename DataT>
-int BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search){
+void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search){
     int m = BinSearch(searchArr, l, r, search);
     if(m != -1){ StoreMatches(searchArr, storeArr, m, search); }
-    return m;
+    else storeArr[0] = 0;
 }
 
 template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search, bool retClosest);
 template int BinSearch<WstrFrag, wstring>(const WstrFrag searchArr[], int l, int r, const wstring search, bool retClosest);
-template int BinSearchStoreMatches<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search);
-template int BinSearchStoreMatches<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search);
+template void BinSearchStoreMatches<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search);
+template void BinSearchStoreMatches<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search);

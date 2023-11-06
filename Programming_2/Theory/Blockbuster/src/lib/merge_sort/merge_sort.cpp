@@ -4,14 +4,14 @@
 using std::function;
 
 /* For use only by MergeSort() */
-template<typename T>
-void Merge(T arr[], int l, int m, int r){
+template<typename FragT>
+void Merge(FragT arr[], int l, int m, int r){
     int n1 = m - l + 1;     // Amount of elements of the L subarray.
     int n2 = r - m;         // Amount of elements of the R subarray.
 
     // Create temp L and R arrays.
-    T* L{ new T [n1] };
-    T* R{ new T [n2] };
+    FragT* L{ new FragT [n1] };
+    FragT* R{ new FragT [n2] };
 
     // Copy data to temp arrays L[] and R[].
     for(int i = 0; i < n1; i++)
@@ -53,8 +53,8 @@ void Merge(T arr[], int l, int m, int r){
     delete [] L; delete [] R;
 }
 
-template<typename T>
-void MergeSort(T arr[], int l, int r){
+template<typename FragT>
+void MergeSort(FragT arr[], int l, int r){
     if(l < r){
         // Same as (l + r) / 2, but avoids overflow for large l and r.
         int m = l + (r - l) / 2;

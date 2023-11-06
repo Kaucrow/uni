@@ -2,10 +2,10 @@
 #include "../structs.h"
 
 /**
- * @brief Merge sort function implementation.
- * @param arr - Array to sort.
+ * @brief Merge sort function implementation for sorting frag lists.
+ * @param arr - Frag list array to sort.
  * @param l - First index of the array.
  * @param r - Last index of the array.
  */
-template <typename T>
-void MergeSort(T arr[], int l, int r);
+template <typename FragT>
+void MergeSort(FragT arr[], int l, int r);

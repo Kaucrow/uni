@@ -81,7 +81,7 @@ int main(){
     User userList[userNum + 101];       // List which holds the users in the users_data.csv file and their data.
 
     // Populate the user list. //
-    try{ PopulateUserList(userList, userNum, USRDATA_PATH); }
+    try{ PopulateUserList(userList, USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     // Populate the base movie list. //
