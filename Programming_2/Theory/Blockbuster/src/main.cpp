@@ -24,6 +24,11 @@ enum { TTL, DIR };                      // wstring frag types.
  */
 void ClrScr();
 
+ /**
+ * @brief Gets the current date, or the current date plus 14 days.
+ * @param add14Days - Depending on its value, 14 days are added to the current date or not.
+ * @return Returns a wstring object with the date in "Y-M-d" format.
+ */
 wstring GetDate(bool add14Days = false);
 
 int main(){
@@ -35,16 +40,18 @@ int main(){
 
     GetDate();          // debug
 
-    CheckMoviesCsv(MOVFILE_PATH);
+    CheckMoviesCsv(MOVFILE_PATH);       // Ensure that the movies.csv has all the required fields.
 
     int totalMovies = 0;
     try{ totalMovies = GetLastLineFirstNum(MOVFILE_PATH); }     // Get the number of movies in the movies.csv file.
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
-        each movie list is sorted according to a different property
-        (duration, title, director, release year, release month, release day). */
-    Movie baseList[totalMovies + 3001];
+    Movie baseList[totalMovies + 3001];     // Create a base list of movies (sorted by ID), where the first element is unused.
+    // ==================
+    // Create lists of movie fragments, where the first element of the array is unused.
+    // Each frag list is sorted according to the movie data it contains 
+    // (duration, title, director, release year, release month, release day).
+    // ==================
     IntFrag durList[totalMovies + 3001];
     IntFrag yeaList[totalMovies + 3001];
     IntFrag monList[totalMovies + 3001];
@@ -54,8 +61,8 @@ int main(){
     IntFrag* intFrags[4] = { durList, yeaList, monList, dayList };
     WstrFrag* wstrFrags[2] = { ttlList, dirList };
 
-    wstring username;
-    int userNum = 0;
+    wstring username;           // Username of the active user.
+    int userNum = 0;            // Number of users in the users_data.csv file.
     {
         wfstream openTest(USRDATA_PATH);
         if(!openTest){
@@ -71,19 +78,17 @@ int main(){
     try{ userNum = GetLastLineFirstNum(USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    User userList[userNum + 101];
+    User userList[userNum + 101];       // List which holds the users in the users_data.csv file and their data.
+
+    // Populate the user list. //
     try{ PopulateUserList(userList, userNum, USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    wcout << userList[1].name << '\n';      // debug
-    wcin.get();     // debug
-    wcin.get();     // debug
-
-    /* Populate the base movie list. */
+    // Populate the base movie list. //
     try{ PopulateMovieList(baseList, totalMovies, MOVFILE_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
-    /* Copy the base movie list elements data to each frag list. */
+    // Copy the base movie list elements data to each frag list. //
     for(int i = 1; i <= totalMovies; i++){
         for(int j = 0; j < 4; j++){ intFrags[j][i].ID = baseList[i].ID; }
         for(int j = 0; j < 2; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
@@ -95,25 +100,19 @@ int main(){
         wstrFrags[DIR][i].data = baseList[i].director;
     }
  
-    /* Sort each list. */
-    wcout << intFrags[DUR][1].data << '\n';         // debug
-    wcout << wstrFrags[TTL][1].data << '\n';        // debug
+    // Sort each frag list. //
     for(int i = 0; i < 4; i++)
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
         MergeSort(wstrFrags[i], 1, totalMovies);
 
-    wcout << intFrags[DUR][1].data << '\n';         // debug
-    wcout << wstrFrags[TTL][1].data << '\n';
-
-    wcin.get();     // debug
-    wcin.get();     // debug
-
-    /***************************
-    /*  Main loop.
-     **************************/
-    int action, currUser;
+    // =========================
+    //  Main loop.
+    // =========================
+    int action;
+    int currUser;       // ID of the active user.
     while(true){
+        // Main menu screen. //
         ClrScr();
         wcout   << "*** MENU ***\n"
                 << "(1) Login\n"
@@ -127,12 +126,15 @@ int main(){
                 return 0;
         }
 
+        // Login screen. //
         ClrScr(); 
         currUser = 0;
         wcout   << "*** LOGIN ***\n"
                 << "-> User: ";
         wcin >> username;
 
+        // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
+        // If it's not, add it, and set the currUser ID.
         for(int i = 1; i <= userNum; i++){
             if(userList[i].name == username){
                 currUser = userList[i].ID;
@@ -145,6 +147,7 @@ int main(){
         }
 
         while(true){
+            // Main actions screen. //
             ClrScr();
             wcout   << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search with filters\n"
@@ -161,9 +164,9 @@ int main(){
             }
             wcin.ignore(1);
 
-            /***************************
-            /*  Search with filters.
-            **************************/
+            //=========================
+            //  Search with filters.
+            // ========================
             if(action == FILTER){
                 ClrScr();
                 int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
@@ -187,10 +190,10 @@ int main(){
 
                 wstring wstrSearch;
                 int intSearch;
-                /**
-                 * Generate the "toMatch" movie according to the selected filter,
-                 * perform the search, and store the matching movies in the "matches" movie list array.
-                 */
+                // ========================
+                // Generate the "toMatch" movie according to the selected filter,
+                // perform the search, and store the ID of the matching movies in the "idMatches" array.
+                // ========================
                 ClrScr();
                 switch(action){
                     case 1:
@@ -231,33 +234,36 @@ int main(){
                         }
                         BinSearchStoreMatches(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
                         break;
-                    default:
-                        wcerr << "[ ERR ] THIS SHOULD NEVER EXECUTE. IT'S ONLY HERE FOR DEBUG PURPOSES.\n";     // debug
-                        break;
                 }
 
+                // Print the matching movies from the "idMatches" array. //
                 ClrScr();
-                /* Print the matching movies from the "matches" movie list array. */
                 for(int i = 0; idMatches[i] != 0; i++){
                     wcout << baseList[idMatches[i]].title << '\n';
                 }
-                wcin.get(); 
+                wcin.get();
             }
-            /***************************
-            *  Get movie info.
-            **************************/
+            // ========================
+            //  Get movie info.
+            // ========================
             else if(action == GETMOVDATA){
                 ClrScr();
                 wstring search;
                 wcout << "-> Movie title: ";
                 wcin >> search;
+                wcin.ignore(1);
+
+                // Perform a search by title for the entered movie. //
                 int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, search);
+
+                // If it doesn't exist in the title frag list, output an error and go to the next loop iteration. //
                 if(ttlPos == -1){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
-                    wcin.ignore(1);
                     wcin.get();
                     continue;
                 }
+
+                // If it exists, get its ID, and print its data from the base list. //
                 int moviePos = wstrFrags[TTL][ttlPos].ID;
                 wcout   << L"[ INFO ] Found movie \"" << search << L"\".\n\n"
                         << L"-> Title: " << baseList[moviePos].title << L'\n'
@@ -267,26 +273,28 @@ int main(){
                         << L"-> Genres:\n";
                 for(int i = 0; baseList[moviePos].genres[i] != L""; i++)
                     wcout << L"  * " << baseList[moviePos].genres[i] << L'\n';
+
+                // The rent data is only printed if the movie has actually been rented to someone. //
                 if(baseList[moviePos].rentedTo != L""){
                     wcout   << L"-> Rented to: " << baseList[moviePos].rentedTo << L'\n'
                             << L"-> Rented on: " << baseList[moviePos].rentedOn.year << L'-' << baseList[moviePos].rentedOn.month << L'-' << baseList[moviePos].rentedOn.day << L'\n'
                             << L"-> Expiry: " << baseList[moviePos].expiry.year << L'-' << baseList[moviePos].expiry.month << L'-' << baseList[moviePos].expiry.day << L'\n';
                 }
                 wcin.get();
-                wcin.get();
             }
-            /***************************
-            *  Add a movie.
-            **************************/
+            // ========================
+            //  Add a movie.
+            // ========================
             else if(action == ADD){
                 ClrScr();
                 Movie toStore;
                 wstring storeDat;
                 totalMovies++;              // Increase the count of movies.
+                toStore.ID = totalMovies;
 
                 wcout << "*** NEW MOVIE DATA ***\n";
 
-                /* Get each of the 6 data fields of the movie that will be added. */
+                /* Get each of the 6 basic data fields, and update the toStore movie accordingly. */
                 wcout << "-> Duration: ";
                 getline(wcin, storeDat);
                 while(stoi(storeDat) <= 0){
@@ -323,11 +331,12 @@ int main(){
                 getline(wcin, storeDat);
                 toStore.release.day = stoi(storeDat);
                 
+                // Store the movie in the baseList. //
                 baseList[totalMovies] = toStore;
-                /**
-                 * Update each of the frag lists with the added movie data,
-                 * while preserving the sorting order in each of them.
-                 */
+                // ======================
+                // Update each of the frag lists with the added movie data,
+                // while preserving the sorting order in each of them.
+                // ======================
                 StoreNewFrag(intFrags[DUR], 1, totalMovies, toStore.duration);
                 StoreNewFrag(intFrags[YEA], 1, totalMovies, toStore.release.year);
                 StoreNewFrag(intFrags[MON], 1, totalMovies, toStore.release.month);
@@ -336,10 +345,12 @@ int main(){
                 StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
 
                 wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
+                wcin.ignore(1);
+                wcin.get();
             }
-            /***************************
-            /*  Rent a movie.
-            **************************/
+            // ========================
+            //  Rent a movie.
+            // ========================
             else if(action == RENT){
                 ClrScr();
                 wstring rentName;
@@ -347,8 +358,8 @@ int main(){
                 wcout << "Input the name of the movie: ";
                 wcin >> rentName;
 
-                // Search for the movie to rent, and throw an error if it doesn't exist in the database. //
-                // If it exists, it will get stored in the toRent[] array.                               //
+                // Search for the title of the movie to rent, and throw an error if it doesn't 
+                // exist in title frag list.
                 int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, rentName);
                 if(ttlPos == -1){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
@@ -356,6 +367,7 @@ int main(){
                     wcin.get();
                     continue;
                 }
+                // If the title exists in the title frag list, the frag ID will get stored in the rentPos. //
                 int rentPos = wstrFrags[TTL][ttlPos].ID;
 
                 wstring currDate = GetDate();           // Get the current date.
@@ -364,7 +376,7 @@ int main(){
                 // Update the movies.csv file with the rent information.
                 UpdateMoviesCsv(MOVFILE_PATH, rentPos, username, currDate, expiryDate);
                 
-                // Update the rented movie data with the rent information.
+                // Update the base list movie data with the rent information.
                 UpdateMovieData(baseList, rentPos, username, currDate, expiryDate);
 
                 wcin.get();
