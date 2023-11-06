@@ -241,6 +241,7 @@ int main(){
                 for(int i = 0; idMatches[i] != 0; i++){
                     wcout << baseList[idMatches[i]].title << '\n';
                 }
+                wcin.ignore(1);
                 wcin.get();
             }
             // ========================
@@ -250,8 +251,7 @@ int main(){
                 ClrScr();
                 wstring search;
                 wcout << "-> Movie title: ";
-                wcin >> search;
-                wcin.ignore(1);
+                getline(wcin, search);
 
                 // Perform a search by title for the entered movie. //
                 int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, search);
@@ -265,7 +265,7 @@ int main(){
 
                 // If it exists, get its ID, and print its data from the base list. //
                 int moviePos = wstrFrags[TTL][ttlPos].ID;
-                wcout   << L"[ INFO ] Found movie \"" << search << L"\".\n\n"
+                wcout   << L"\n[ INFO ] Found movie \"" << search << L"\".\n"
                         << L"-> Title: " << baseList[moviePos].title << L'\n'
                         << L"-> Duration: " << baseList[moviePos].duration << L" min.\n"
                         << L"-> Director: " << baseList[moviePos].director << L'\n'
@@ -345,7 +345,6 @@ int main(){
                 StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
 
                 wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
-                wcin.ignore(1);
                 wcin.get();
             }
             // ========================
@@ -356,7 +355,7 @@ int main(){
                 wstring rentName;
                 wcout << "*** MOVIE RENT ***\n";
                 wcout << "Input the name of the movie: ";
-                wcin >> rentName;
+                getline(wcin, rentName);
 
                 // Search for the title of the movie to rent, and throw an error if it doesn't 
                 // exist in title frag list.
@@ -386,7 +385,6 @@ int main(){
             }
             // Executes if the user selects the "Exit" action. //
             else break;
-            wcin.get();
         }
     }
     return 0;
