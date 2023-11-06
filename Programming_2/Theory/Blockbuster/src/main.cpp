@@ -1,8 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <fcntl.h>              // for _setmode().
-#include <ctime>
-#include <iomanip>
+#include <fcntl.h>              // For _setmode().
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
@@ -12,28 +10,21 @@
 #include <file_ops.h>
 
 #define USRDATA_PATH "./data/users_data.csv"
-#define CSV_PATH "./data/movies.csv"
+#define MOVFILE_PATH "./data/movies.csv"
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, EXIT = 5 };
-enum { DUR, YEA, MON, DAY };
-enum { TTL, DIR };
+enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, EXIT = 5 };       // Actions.
+enum { DUR, YEA, MON, DAY };            // int frag types.
+enum { TTL, DIR };                      // wstring frag types.
 
 /**
  * @brief OS agnostic clear screen function.
  */
 void ClrScr();
 
-wstring GetDateTime(bool add14Days = false);
-
-/**
- * @brief Gets the number of movies in the movies.csv file.
- * @param inFile - wifstream object that contains the movies.csv file.
- * @return Number of movies in the movies.csv file.
- * @see GetNumMoviesImplem "GetNumMovies() implementation details".
- */
+wstring GetDate(bool add14Days = false);
 
 int main(){
     boost::locale::generator gen;               // Create the locale generator.
@@ -42,17 +33,12 @@ int main(){
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
 
-    GetDateTime();
+    GetDate();          // debug
 
-    //wstring csvFileName = L"./data/movies.csv";
-    //wfstream csvFile(CSV_PATH);
-    //if(!csvFile){ wcerr << "ERR: FILE \"" << CSV_PATH << "\" COULD NOT BE OPENED."; return 1; }
-    //csvFile.imbue(loc);                          // Apply the locale to the movies.csv stream object.
-
-    CheckMoviesCsv(CSV_PATH);
+    CheckMoviesCsv(MOVFILE_PATH);
 
     int totalMovies = 0;
-    try{ totalMovies = GetLastLineFirstNum(CSV_PATH); }     // Get the number of movies in the movies.csv file.
+    try{ totalMovies = GetLastLineFirstNum(MOVFILE_PATH); }     // Get the number of movies in the movies.csv file.
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     /*  Create lists of movies which hold 4000 movies each, where the first index of the array is unused.
@@ -69,17 +55,18 @@ int main(){
     WstrFrag* wstrFrags[2] = { ttlList, dirList };
 
     wstring username;
-    wfstream openTest(USRDATA_PATH);
-    wstring appendLine;
     int userNum = 0;
-    if(!openTest){
-        wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
-                << "         of the first user, so the file may be created: ";
-        wcin >> username;
-        appendLine = L"1," + username + L",\n";
-        AppendLine(USRDATA_PATH, L"id,name,movies\n" + appendLine);
+    {
+        wfstream openTest(USRDATA_PATH);
+        if(!openTest){
+            wstring appendLine;
+            wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
+                    << "         of the first user, so the file may be created: ";
+            wcin >> username;
+            appendLine = L"1," + username + L",\n";
+            AppendLine(USRDATA_PATH, L"id,name,movies\n" + appendLine);
+        }
     }
-    else openTest.close();
 
     try{ userNum = GetLastLineFirstNum(USRDATA_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
@@ -93,7 +80,7 @@ int main(){
     wcin.get();     // debug
 
     /* Populate the base movie list. */
-    try{ PopulateMovieList(baseList, totalMovies, CSV_PATH); }
+    try{ PopulateMovieList(baseList, totalMovies, MOVFILE_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     /* Copy the base movie list elements data to each frag list. */
@@ -109,18 +96,18 @@ int main(){
     }
  
     /* Sort each list. */
-    wcout << intFrags[DUR][1].data << '\n';       // debug
-    wcout << wstrFrags[TTL][1].data << '\n';
+    wcout << intFrags[DUR][1].data << '\n';         // debug
+    wcout << wstrFrags[TTL][1].data << '\n';        // debug
     for(int i = 0; i < 4; i++)
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
         MergeSort(wstrFrags[i], 1, totalMovies);
 
-    wcout << intFrags[DUR][1].data << '\n';       // debug
+    wcout << intFrags[DUR][1].data << '\n';         // debug
     wcout << wstrFrags[TTL][1].data << '\n';
 
-    wcin.get();
-    wcin.get();
+    wcin.get();     // debug
+    wcin.get();     // debug
 
     /***************************
     /*  Main loop.
@@ -299,7 +286,7 @@ int main(){
 
                 wcout << "*** NEW MOVIE DATA ***\n";
 
-                /* Get each of the 6 data fields of the movie that will be added.*/
+                /* Get each of the 6 data fields of the movie that will be added. */
                 wcout << "-> Duration: ";
                 getline(wcin, storeDat);
                 while(stoi(storeDat) <= 0){
@@ -371,11 +358,11 @@ int main(){
                 }
                 int rentPos = wstrFrags[TTL][ttlPos].ID;
 
-                wstring currDate = GetDateTime();           // Get the current date.
-                wstring expiryDate = GetDateTime(true);     // Get the expiry date.
+                wstring currDate = GetDate();           // Get the current date.
+                wstring expiryDate = GetDate(true);     // Get the expiry date.
 
                 // Update the movies.csv file with the rent information.
-                UpdateMoviesCsv(CSV_PATH, rentPos, username, currDate, expiryDate);
+                UpdateMoviesCsv(MOVFILE_PATH, rentPos, username, currDate, expiryDate);
                 
                 // Update the rented movie data with the rent information.
                 UpdateMovieData(baseList, rentPos, username, currDate, expiryDate);
@@ -390,7 +377,7 @@ int main(){
     return 0;
 }
 
-wstring GetDateTime(bool add14Days){
+wstring GetDate(bool add14Days){
     time_t rawtime;
     struct tm timeinfo;
     wchar_t buffer[20];

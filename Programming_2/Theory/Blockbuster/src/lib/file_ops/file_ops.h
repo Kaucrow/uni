@@ -7,6 +7,12 @@ using std::wstring, std::wofstream, std::wifstream, std::getline;
 
 void AppendLine(const char* filePath, wstring line);
 void ReplaceLine(const char* filePath, wstring line, int lineNum);
+/**
+ * @brief Gets the number of movies in the movies.csv file.
+ * @param inFile - wifstream object that contains the movies.csv file.
+ * @return Number of movies in the movies.csv file.
+ * @see GetNumMoviesImplem "GetNumMovies() implementation details".
+ */
 int GetLastLineFirstNum(const char* filePath);
 
 void CheckMoviesCsv(const char* movFilePath);

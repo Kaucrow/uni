@@ -1,42 +1,10 @@
 #include "bin_search.h"
-#include <iostream>
+#include <iostream>     // For debug.
 #include <string>
-#include <functional>
-using std::wstring, std::function;
+using std::wstring;
 
-template <typename T>
-bool CompareFunc(T searchArrDat, T toCompareDat, bool equality){
-    return equality ? searchArrDat == toCompareDat : searchArrDat < toCompareDat;
-}
-
-/**
- * @brief   Polymorphic function wrapper used to compare the data fields of two movies,
- *          either by greatness or equality.
- * @param searchArr - Movie list array which contains the movie to be compared against.
- * @param pos - Index of the movie to be compared against.
- * @param toCompare - Movie to be compared from.
- * @param equality - If true, performs a comparison based on equality. If false,
- *                   performs a comparison based on greatness.
- * @return If equality is true, will return searchArr[pos].dataType == toCompare.dataType,
- *         if equality is false, will return searchArr[pos].dataType < toCompare.dataType.
-*/
-function<bool(const Movie searchArr[], int pos, const Movie &toCompare, bool equality)> BinCompare[6] = {
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].duration, toCompare.duration, equality); },
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].title, toCompare.title, equality); },
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].director, toCompare.director, equality); },
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].release.year, toCompare.release.year, equality); },
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].release.month, toCompare.release.month, equality); },
-    [](const Movie searchArr[], int pos, const Movie &toCompare, bool equality) -> bool{ 
-        return CompareFunc(searchArr[pos].release.day, toCompare.release.day, equality); }
-};
-
-template<typename T, typename U>
-void StoreMatches(const T searchArr[], int storeArr[], int someMatchPos, const U search){
+template<typename FragT, typename DataT>
+void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, const DataT search){
     int storeIndex = 0;
     for(int offset = 0; (searchArr[someMatchPos + offset].data == search); offset--){
         storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
@@ -53,8 +21,8 @@ void StoreMatches(const T searchArr[], int storeArr[], int someMatchPos, const U
     storeArr[storeIndex] = 0;
 }
 
-template<typename T, typename U>
-int BinSearch(const T searchArr[], int l, int r, const U search, bool retClosest){
+template<typename FragT, typename DataT>
+int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool retClosest){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
@@ -76,8 +44,8 @@ int BinSearch(const T searchArr[], int l, int r, const U search, bool retClosest
     else return -1;
 }
 
-template<typename T, typename U>
-int BinSearchStoreMatches(const T searchArr[], int storeArr[], int l, int r, const U search){
+template<typename FragT, typename DataT>
+int BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search){
     int m = BinSearch(searchArr, l, r, search);
     if(m != -1){ StoreMatches(searchArr, storeArr, m, search); }
     return m;

@@ -29,8 +29,8 @@ void ReplaceLine(const char* filePath, wstring line, int lineNum){
         write << readingLine << '\n';
     }
 
-    // Close the file and the writeFile. Then delete the file and //
-    // rename the writeFile to the file.                                 //
+    // Close the file and the writeFile. Then delete the file and       //
+    // rename the writeFile to the file.                                //
     file.close();
     write.close();
 

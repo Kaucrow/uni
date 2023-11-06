@@ -1,16 +1,9 @@
 #include "../bin_search/bin_search.h"
 #include <string>
-#include <functional>
-using std::wstring, std::function;
+using std::wstring;
 
 /**
- * @file ../bin_search/bin_search.h
- * @see BinCompareDesc "BinCompare description"
- */
-//extern function<bool(const Movie searchArr[], int pos, Movie toCompare, bool equality)> BinCompare[6];
-
-/**
- * @name StoreNewMovieImplem
+ * @name StoreNewFragImplem
  * Firstly, performs a binary search on the movie list provided, looking for a movie with
  * a data field matching the one of the "toStore" movie. If a movie match is found,
  * its index gets set as the pivot. Otherwise, the index of the closest match gets
