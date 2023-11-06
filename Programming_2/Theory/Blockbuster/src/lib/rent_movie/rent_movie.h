@@ -13,4 +13,4 @@ using std::wstring;
  */
 void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate);
 
-void UpdateMovieData(Movie baseList[], int movieID, wstring rentDate, wstring expiryDate);
+void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate);

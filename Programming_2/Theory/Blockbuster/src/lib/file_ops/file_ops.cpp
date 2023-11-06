@@ -121,7 +121,7 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
 
     for(int i = 1; i <= movieNum; i++){
         getline(movFile, readingLine);  // Get the next line
-        for(int j = 0; j < 8; j++){     // And store each of the 6 data fields.
+        for(int j = 0; j <= 9; j++){     // And store each of the 6 data fields.
             nextComma = readingLine.find(',');
             switch(j){
                 /* ID */
@@ -189,6 +189,10 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
                 case 8:
                     break;
                 case 9:
+                    std::wcout << "HERE\n";
+                    std::wcout << readingLine << '\n';
+                    std::wcin.get();
+                    std::wcin.get();
                     movList[i].expiry.year  = stoi(readingLine.substr(0, 4));
                     movList[i].expiry.month = stoi(readingLine.substr(5, 2));
                     movList[i].expiry.day   = stoi(readingLine.substr(8, 2));

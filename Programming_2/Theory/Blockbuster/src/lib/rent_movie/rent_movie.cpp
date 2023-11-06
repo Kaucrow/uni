@@ -49,7 +49,8 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateMovieData(Movie baseList[], int movieID, wstring rentDate, wstring expiryDate){
+void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate){
+    baseList[movieID].rentedTo = username;
     for(int i = 0; i < 3; i++){
         switch(i){
             case 0:

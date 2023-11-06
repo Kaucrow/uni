@@ -17,7 +17,7 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { SEARCH = 1, ADD = 2, RENT = 3, EXIT = 4 };
+enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, EXIT = 5 };
 enum { DUR, YEA, MON, DAY };
 enum { TTL, DIR };
 
@@ -161,12 +161,13 @@ int main(){
             ClrScr();
             wcout   << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search with filters\n"
-                    << "(2) Add a movie\n"
-                    << "(3) Rent a movie\n"
-                    << "(4) Exit\n"
+                    << "(2) Get movie info\n"
+                    << "(3) Add a movie\n"
+                    << "(4) Rent a movie\n"
+                    << "(5) Exit\n"
                     << "Select option: ";
             wcin >> action;
-            while(action < SEARCH || action > EXIT){
+            while(action < FILTER || action > EXIT){
                 wcout << "INVALID OPTION.\nSelect option: ";
                 wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 wcin >> action;
@@ -176,7 +177,7 @@ int main(){
             /***************************
             /*  Search with filters.
             **************************/
-            if(action == SEARCH){
+            if(action == FILTER){
                 ClrScr();
                 int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
 
@@ -256,7 +257,39 @@ int main(){
                 wcin.get(); 
             }
             /***************************
-            /*  Add a movie.
+            *  Get movie info.
+            **************************/
+            else if(action == GETMOVDATA){
+                ClrScr();
+                wstring search;
+                wcout << "-> Movie title: ";
+                wcin >> search;
+                int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, search);
+                if(ttlPos == -1){
+                    wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                    wcin.ignore(1);
+                    wcin.get();
+                    continue;
+                }
+                int moviePos = wstrFrags[TTL][ttlPos].ID;
+                wcout   << L"[ INFO ] Found movie \"" << search << L"\".\n\n"
+                        << L"-> Title: " << baseList[moviePos].title << L'\n'
+                        << L"-> Duration: " << baseList[moviePos].duration << L" min.\n"
+                        << L"-> Director: " << baseList[moviePos].director << L'\n'
+                        << L"-> Release date: " << baseList[moviePos].release.year << L'-' << baseList[moviePos].release.month << L'-' << baseList[moviePos].release.day << L'\n'
+                        << L"-> Genres:\n";
+                for(int i = 0; baseList[moviePos].genres[i] != L""; i++)
+                    wcout << L"  * " << baseList[moviePos].genres[i] << L'\n';
+                if(baseList[moviePos].rentedTo != L""){
+                    wcout   << L"-> Rented to: " << baseList[moviePos].rentedTo << L'\n'
+                            << L"-> Rented on: " << baseList[moviePos].rentedOn.year << L'-' << baseList[moviePos].rentedOn.month << L'-' << baseList[moviePos].rentedOn.day << L'\n'
+                            << L"-> Expiry: " << baseList[moviePos].expiry.year << L'-' << baseList[moviePos].expiry.month << L'-' << baseList[moviePos].expiry.day << L'\n';
+                }
+                wcin.get();
+                wcin.get();
+            }
+            /***************************
+            *  Add a movie.
             **************************/
             else if(action == ADD){
                 ClrScr();
@@ -345,7 +378,7 @@ int main(){
                 UpdateMoviesCsv(CSV_PATH, rentPos, username, currDate, expiryDate);
                 
                 // Update the rented movie data with the rent information.
-                UpdateMovieData(baseList, rentPos, currDate, expiryDate);
+                UpdateMovieData(baseList, rentPos, username, currDate, expiryDate);
 
                 wcin.get();
             }
