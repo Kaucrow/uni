@@ -9,7 +9,7 @@ using std::getline;
  * @param line - wstring object containing the line to search.
  * @param commaNum - Number of comma in the line to get the position of.
  * @return Position of the Nth comma in the line (zero-based).
-*/
+ */
 int GetNthCommaPos(wstring line, int commaNum){
     int commaCounter = 0, totalPos = 0, currPos = 0;
     while(commaCounter != commaNum){
@@ -22,12 +22,6 @@ int GetNthCommaPos(wstring line, int commaNum){
     return totalPos;
 };
 
-/**
- * @name RentMovieImplem 
- * This function creates a write.csv file, copies the contents of movies.csv
- * to it while also updating the line of the rented movie, and lastly deletes
- * the curr movies.csv and renames write.csv to movies.csv.
-*/
 void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring rentDate, wstring expiryDate){
     std::wifstream csvFile(csvFilePath);             // Open the csvFile.
 
@@ -37,7 +31,6 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     // until the line to update is reached.             //
     while(counter != movieID - 1){
         getline(csvFile, readingLine);
-        std::wcout << readingLine << '\n';
         counter++;
     }
     
@@ -47,6 +40,25 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     readingLine.append(L',' + username + L',' + rentDate + L",rented," + expiryDate);
     csvFile.close();
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
+}
+
+void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl){
+    std::wifstream usersDataFile(usersDataFilePath);
+
+    wstring readingLine;
+    int counter = -1;
+    while(counter != currUser - 1){
+        getline(usersDataFile, readingLine);
+        counter++;
+    }
+
+    getline(usersDataFile, readingLine);
+
+    wstring currMovies = readingLine.substr(GetNthCommaPos(readingLine, 2));
+    readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 2));
+    readingLine.append(currMovies.append(L'|' + movieTtl));
+    usersDataFile.close();
+    ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate){

@@ -373,10 +373,13 @@ int main(){
                 wstring currDate = GetDate();           // Get the current date.
                 wstring expiryDate = GetDate(true);     // Get the expiry date.
 
-                // Update the movies.csv file with the rent information.
+                // Update the movies.csv file with the rent information. //
                 UpdateMoviesCsv(MOVFILE_PATH, rentPos, username, currDate, expiryDate);
+
+                // Update the users_data.csv file with the rent information. //
+                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[rentPos].title);
                 
-                // Update the base list movie data with the rent information.
+                // Update the base list movie data with the rent information. //
                 UpdateMovieData(baseList, rentPos, username, currDate, expiryDate);
 
                 wcin.get();

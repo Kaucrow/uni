@@ -9,8 +9,9 @@ using std::wstring;
  * @param movieID - ID number of the movie to be rented.
  * @param username - Username of the person renting the movie.
  * @param date - wstring object containing the date of the rent.
- * @see RentMovieImplem
  */
 void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate);
+
+void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl);
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate);
