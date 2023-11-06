@@ -1,4 +1,5 @@
 #include "rent_movie.h"
+#include "../structs.h"
 #include "../file_ops/file_ops.h"
 #include <iostream>
 using std::getline;
@@ -27,7 +28,7 @@ int GetNthCommaPos(wstring line, int commaNum){
  * to it while also updating the line of the rented movie, and lastly deletes
  * the curr movies.csv and renames write.csv to movies.csv.
 */
-void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date){
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring rentDate, wstring expiryDate){
     std::wifstream csvFile(csvFilePath);             // Open the csvFile.
 
     wstring readingLine;
@@ -43,11 +44,28 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     getline(csvFile, readingLine);          // Read the line to update.
     // Update the line, and write it to writeFile. //
     readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 6));
-    readingLine.append(L',' + username + L',' + date + L',' + L"rented");
+    readingLine.append(L',' + username + L',' + rentDate + L",rented," + expiryDate);
     csvFile.close();
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateUsersData(){
-
+void UpdateMovieData(Movie baseList[], int movieID, wstring rentDate, wstring expiryDate){
+    for(int i = 0; i < 3; i++){
+        switch(i){
+            case 0:
+                baseList[movieID].rentedOn.year = stoi(rentDate);
+                baseList[movieID].expiry.year = stoi(expiryDate);
+                break;
+            case 1:
+                baseList[movieID].rentedOn.month = stoi(rentDate);
+                baseList[movieID].expiry.month = stoi(expiryDate);
+                break;
+            case 2:
+                baseList[movieID].rentedOn.day = stoi(rentDate);
+                baseList[movieID].expiry.day = stoi(expiryDate);
+                break;
+        }
+        rentDate = rentDate.substr(rentDate.find('-') + 1);
+        expiryDate = expiryDate.substr(expiryDate.find('-') + 1);
+    }
 }

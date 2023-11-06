@@ -26,7 +26,7 @@ enum { TTL, DIR };
  */
 void ClrScr();
 
-wstring GetDateTime();
+wstring GetDateTime(bool add14Days = false);
 
 /**
  * @brief Gets the number of movies in the movies.csv file.
@@ -41,6 +41,8 @@ int main(){
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
+
+    GetDateTime();
 
     //wstring csvFileName = L"./data/movies.csv";
     //wfstream csvFile(CSV_PATH);
@@ -333,10 +335,14 @@ int main(){
                     continue;
                 }
 
-                wstring currDate = GetDateTime().substr(0, 10);     // Get the current date.
+                wstring currDate = GetDateTime();           // Get the current date.
+                wstring expiryDate = GetDateTime(true);     // Get the expiry date.
 
                 // Update the movies.csv file with the rent information.
-                UpdateMoviesCsv(CSV_PATH, rentPos, username, currDate);
+                UpdateMoviesCsv(CSV_PATH, rentPos, username, currDate, expiryDate);
+                
+                // Update the rented movie data with the rent information.
+                UpdateMovieData(baseList, rentPos, currDate, expiryDate);
 
                 wcin.get();
             }
@@ -348,15 +354,20 @@ int main(){
     return 0;
 }
 
-wstring GetDateTime(){
+wstring GetDateTime(bool add14Days){
     time_t rawtime;
     struct tm timeinfo;
     wchar_t buffer[20];
 
     time(&rawtime);
+    if(add14Days) rawtime += 1209600;
+
     localtime_s(&timeinfo, &rawtime);
 
-    wcsftime(buffer, 20, L"%Y-%m-%d %H:%M:%S", &timeinfo);
+    wcsftime(buffer, 20, L"%Y-%m-%d", &timeinfo);
+
+    std::wcout << buffer << '\n';
+    std::wcin.get();
 
     return buffer;
 }

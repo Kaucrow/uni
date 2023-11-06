@@ -1,4 +1,5 @@
 #pragma once
+#include "../structs.h"
 #include <fstream>
 using std::wstring;
 
@@ -10,4 +11,6 @@ using std::wstring;
  * @param date - wstring object containing the date of the rent.
  * @see RentMovieImplem
  */
-void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date);
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate);
+
+void UpdateMovieData(Movie baseList[], int movieID, wstring rentDate, wstring expiryDate);
