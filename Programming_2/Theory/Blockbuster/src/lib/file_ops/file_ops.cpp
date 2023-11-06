@@ -100,6 +100,7 @@ void CheckMoviesCsv(const char* movFilePath){
     }
     movFile.close();
 }
+
 void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
     wstring openExc = L"[ ERR ] movies.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
     wifstream movFile(movFilePath);
@@ -111,6 +112,7 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
     /* Vars for setting the movie genres. */
     int nextPipe = 0;           // Stores the pos of the next pipe in the tempReadingLine.
     bool exitSuccess = false;   // True if no more than 6 genres were found, false otherwise.
+    bool getNextLine = false;
     wstring tempReadingLine;    // Temp copy of the curr line.
     wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
 
@@ -119,7 +121,7 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
 
     for(int i = 1; i <= movieNum; i++){
         getline(movFile, readingLine);  // Get the next line
-        for(int j = 0; j < 7; j++){     // And store each of the 6 data fields.
+        for(int j = 0; j < 8; j++){     // And store each of the 6 data fields.
             nextComma = readingLine.find(',');
             switch(j){
                 /* ID */
@@ -176,8 +178,23 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
                     movList[i].release.day   = stoi(readingLine.substr(8, 2));
                     break;
                 case 6:
-                    if(readingLine == L",,,"){ break; }
-            } 
+                    if(readingLine == L",,,"){ getNextLine = true; break; }
+                    movList[i].rentedTo = readingLine.substr(0, nextComma);
+                    break;
+                case 7:
+                    movList[i].rentedOn.year  = stoi(readingLine.substr(0, 4));
+                    movList[i].rentedOn.month = stoi(readingLine.substr(5, 2));
+                    movList[i].rentedOn.day   = stoi(readingLine.substr(8, 2));
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    movList[i].expiry.year  = stoi(readingLine.substr(0, 4));
+                    movList[i].expiry.month = stoi(readingLine.substr(5, 2));
+                    movList[i].expiry.day   = stoi(readingLine.substr(8, 2));
+                    break;
+            }
+            if(getNextLine){ getNextLine = false; break; }
             readingLine = readingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
         }
     }
