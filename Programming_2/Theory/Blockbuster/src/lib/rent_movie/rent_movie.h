@@ -15,3 +15,5 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
 void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl);
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate);
+
+int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title);

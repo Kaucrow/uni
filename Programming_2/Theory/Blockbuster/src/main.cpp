@@ -357,29 +357,32 @@ int main(){
                 wcout << "Input the name of the movie: ";
                 getline(wcin, rentName);
 
-                // Search for the title of the movie to rent, and throw an error if it doesn't 
-                // exist in title frag list.
-                int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, rentName);
-                if(ttlPos == -1){
+                // Search for the title of the movie to rent, throw an error if it doesn't exist,
+                // and print some information if the movie exists but is already rented.
+                int rentResult = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName);
+                if(rentResult == -1){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
-                    wcin.ignore(1);
                     wcin.get();
                     continue;
                 }
-                // If the title exists in the title frag list, the frag ID will get stored in the rentPos. //
-                int rentPos = wstrFrags[TTL][ttlPos].ID;
+                else if(rentResult == 0){
+                    wcout << L"[ INFO ] The movie is already rented by someone.\n";
+                    wcin.get();
+                    continue;
+                }
 
+                // If the movie exists and is not rented, rent it. //
                 wstring currDate = GetDate();           // Get the current date.
                 wstring expiryDate = GetDate(true);     // Get the expiry date.
 
                 // Update the movies.csv file with the rent information. //
-                UpdateMoviesCsv(MOVFILE_PATH, rentPos, username, currDate, expiryDate);
+                UpdateMoviesCsv(MOVFILE_PATH, rentResult, username, currDate, expiryDate);
 
                 // Update the users_data.csv file with the rent information. //
-                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[rentPos].title);
+                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[rentResult].title);
                 
                 // Update the base list movie data with the rent information. //
-                UpdateMovieData(baseList, rentPos, username, currDate, expiryDate);
+                UpdateMovieData(baseList, rentResult, username, currDate, expiryDate);
 
                 wcin.get();
             }

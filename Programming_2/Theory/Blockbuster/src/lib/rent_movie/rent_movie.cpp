@@ -1,6 +1,7 @@
 #include "rent_movie.h"
 #include "../structs.h"
 #include "../file_ops/file_ops.h"
+#include "../bin_search/bin_search.h"
 #include <iostream>
 using std::getline;
 
@@ -81,4 +82,17 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
         rentDate = rentDate.substr(rentDate.find('-') + 1);
         expiryDate = expiryDate.substr(expiryDate.find('-') + 1);
     }
+}
+
+enum { NOTFOUND = -1, RENTED = 0 };
+int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title){
+    // Perform a search by title for the entered movie. //
+    int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
+    
+    if(ttlPos == -1) return NOTFOUND;
+
+    int movPos = ttlFrag[ttlPos].ID;
+
+    if(baseList[movPos].rentedTo != L"") return RENTED;
+    else return movPos;
 }
