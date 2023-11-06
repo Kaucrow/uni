@@ -329,11 +329,14 @@ int main(){
 
                 // Search for the movie to rent, and throw an error if it doesn't exist in the database. //
                 // If it exists, it will get stored in the toRent[] array.                               //
-                int rentPos = wstrFrags[TTL][BinSearch(wstrFrags[TTL], 1, totalMovies, rentName)].ID;
-                if(rentPos == -1){
+                int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, rentName);
+                if(ttlPos == -1){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                    wcin.ignore(1);
+                    wcin.get();
                     continue;
                 }
+                int rentPos = wstrFrags[TTL][ttlPos].ID;
 
                 wstring currDate = GetDateTime();           // Get the current date.
                 wstring expiryDate = GetDateTime(true);     // Get the expiry date.

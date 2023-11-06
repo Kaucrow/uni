@@ -23,7 +23,7 @@ using std::wstring, std::function;
 template<typename T, typename U>
 void StoreNewFrag(T arr[], int l, int r, const U toStore){
     /* Get the pivot. */
-    int pivot = BinSearch(arr, l, r - 1, toStore);
+    int pivot = BinSearch(arr, l, r - 1, toStore, true);
 
     /* Go back a number of elements. */
     if(pivot > 10){ pivot -= 10; }

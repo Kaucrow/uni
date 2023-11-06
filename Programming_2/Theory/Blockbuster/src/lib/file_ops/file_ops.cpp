@@ -119,7 +119,7 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
 
     for(int i = 1; i <= movieNum; i++){
         getline(movFile, readingLine);  // Get the next line
-        for(int j = 0; j < 6; j++){     // And store each of the 6 data fields.
+        for(int j = 0; j < 7; j++){     // And store each of the 6 data fields.
             nextComma = readingLine.find(',');
             switch(j){
                 /* ID */
@@ -175,6 +175,8 @@ void PopulateMovieList(Movie movList[], int movieNum, const char* movFilePath){
                     movList[i].release.month = stoi(readingLine.substr(5, 2));
                     movList[i].release.day   = stoi(readingLine.substr(8, 2));
                     break;
+                case 6:
+                    if(readingLine == L",,,"){ break; }
             } 
             readingLine = readingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
         }
