@@ -84,15 +84,15 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
     }
 }
 
-enum { NOTFOUND = -1, RENTED = 0 };
-int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title){
+int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
     
-    if(ttlPos == -1) return NOTFOUND;
+    if(ttlPos == -1) return QUERY_RENT_NOTFOUND;
 
     int movPos = ttlFrag[ttlPos].ID;
+    queryMovieID = movPos;
 
-    if(baseList[movPos].rentedTo != L"") return RENTED;
-    else return movPos;
+    if(baseList[movPos].rentedTo != L"") return QUERY_RENT_RENTED;
+    else return QUERY_RENT_NOTRENTED;
 }

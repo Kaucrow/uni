@@ -357,15 +357,16 @@ int main(){
                 wcout << "Input the name of the movie: ";
                 getline(wcin, rentName);
 
+                int queryMovieID = 0; 
                 // Search for the title of the movie to rent, throw an error if it doesn't exist,
                 // and print some information if the movie exists but is already rented.
-                int rentResult = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName);
-                if(rentResult == -1){
+                int rentResult = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName, queryMovieID);
+                if(rentResult == QUERY_RENT_NOTFOUND){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
                     wcin.get();
                     continue;
                 }
-                else if(rentResult == 0){
+                else if(rentResult == QUERY_RENT_RENTED){
                     wcout << L"[ INFO ] The movie is already rented by someone.\n";
                     wcin.get();
                     continue;
@@ -376,13 +377,13 @@ int main(){
                 wstring expiryDate = GetDate(true);     // Get the expiry date.
 
                 // Update the movies.csv file with the rent information. //
-                UpdateMoviesCsv(MOVFILE_PATH, rentResult, username, currDate, expiryDate);
+                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate);
 
                 // Update the users_data.csv file with the rent information. //
-                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[rentResult].title);
+                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title);
                 
                 // Update the base list movie data with the rent information. //
-                UpdateMovieData(baseList, rentResult, username, currDate, expiryDate);
+                UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate);
 
                 wcin.get();
             }
