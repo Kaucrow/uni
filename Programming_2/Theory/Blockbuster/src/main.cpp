@@ -414,7 +414,7 @@ int main(){
                     continue;
                 }
                 else if(baseList[queryMovieID].rentedTo != username){
-                    wcout << "L[ INFO ] You are not the owner of the rent.\n";
+                    wcout << L"[ INFO ] You are not the owner of the rent.\n";
                     wcin.get();
                     continue;
                 }
