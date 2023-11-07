@@ -16,5 +16,7 @@ void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring mov
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate);
 
+void UpdateUsersData(User userList[], int currUser, wstring movieTtl);
+
 enum { QUERY_RENT_NOTFOUND = -1, QUERY_RENT_NOTRENTED = 0, QUERY_RENT_RENTED = 1 };
 int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID);

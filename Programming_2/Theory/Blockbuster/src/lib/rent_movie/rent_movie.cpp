@@ -84,6 +84,10 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
     }
 }
 
+void UpdateUsersData(User userList[], int currUser, wstring movieTtl){
+    userList[currUser].movies.append(L'|' + movieTtl);
+}
+
 int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);

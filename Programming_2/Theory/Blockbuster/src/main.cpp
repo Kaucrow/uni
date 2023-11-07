@@ -385,6 +385,9 @@ int main(){
                 // Update the base list movie data with the rent information. //
                 UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate);
 
+                // Update the user list data with the rent information. //
+                UpdateUsersData(userList, currUser, baseList[queryMovieID].title);
+
                 wcin.get();
             }
             // Executes if the user selects the "Exit" action. //
