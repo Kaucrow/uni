@@ -81,7 +81,8 @@ void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring mov
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
-void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate){
+void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
+    if(rentOrReturn == UPDATE_RETURN){ baseList[movieID].status = MOV_STATUS_RETURNED; return; }
     baseList[movieID].status = MOV_STATUS_RENTED;
     baseList[movieID].rentedTo = username;
     for(int i = 0; i < 3; i++){
@@ -104,8 +105,14 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
     }
 }
 
-void UpdateUsersData(User userList[], int currUser, wstring movieTtl){
-    userList[currUser].movies.append(L'|' + movieTtl);
+void UpdateUsersData(User userList[], int currUser, wstring movieTtl, bool rentOrReturn){
+    if(rentOrReturn == UPDATE_RENT){ userList[currUser].movies.append(L'|' + movieTtl); return; }
+    wstring temp = userList[currUser].movies;
+    temp = temp.substr(0, temp.find(movieTtl) - 1);
+    temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));
+    std::wcout << L"HERE: " << temp << '\n';
+    std::wcin.get();
+    userList[currUser].movies = temp;
 }
 
 int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){

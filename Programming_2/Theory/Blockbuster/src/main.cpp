@@ -384,10 +384,10 @@ int main(){
                 UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title, UPDATE_RENT);
                 
                 // Update the base list movie data with the rent information. //
-                UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate);
+                UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
 
                 // Update the user list data with the rent information. //
-                UpdateUsersData(userList, currUser, baseList[queryMovieID].title);
+                UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RENT);
 
                 wcin.get();
             }
@@ -431,6 +431,8 @@ int main(){
 
                 UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
                 UpdateUsersDataCsv(USRDATA_PATH, currUser, returnName, UPDATE_RETURN);
+                UpdateMovieData(baseList, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
+                UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RETURN);
             }
             // Executes if the user selects the "Exit" action. //
             else break;
