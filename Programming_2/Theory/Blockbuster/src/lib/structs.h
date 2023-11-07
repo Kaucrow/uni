@@ -6,12 +6,15 @@ struct Date{
     int year = 0, month = 0, day = 0;
 };
 
+enum MovStatus{ MOV_STATUS_RETURNED, MOV_STATUS_RENTED, MOV_STATUS_EXPIRED };
+
 struct Movie{
     int ID = 0, duration = 0;
     wstring title;
     wstring genres[6] = {};
     wstring director;
     Date release;
+    MovStatus status;
     wstring rentedTo = L"";
     Date rentedOn;
     Date expiry;

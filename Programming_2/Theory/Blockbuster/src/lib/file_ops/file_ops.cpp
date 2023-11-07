@@ -114,6 +114,7 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
     bool getNextLine = false;
     wstring tempReadingLine;    // Temp copy of the curr line.
     wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
+    wstring statusExc = L"[ ERR ] UNEXPECTED STATUS FOUND ON MOVIE NUMBER ";
 
     movFile.seekg(0);
     getline(movFile, readingLine);          // Ignore the first line in the inFile.
@@ -192,6 +193,17 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     break;
                 // Status. //
                 case 8:
+                    tempReadingLine = readingLine.substr(0, nextComma);
+                    if(tempReadingLine == L"returned"){
+                        baseList[i].status = MOV_STATUS_RETURNED;
+                    } else if(tempReadingLine == L"rented"){
+                        baseList[i].status = MOV_STATUS_RENTED;
+                    } else if(tempReadingLine == L"expired"){
+                        baseList[i].status = MOV_STATUS_EXPIRED;
+                    } else{
+                        statusExc.append(std::to_wstring(i));
+                        throw statusExc;
+                    }
                     break;
                 // Expiry. //
                 case 9:

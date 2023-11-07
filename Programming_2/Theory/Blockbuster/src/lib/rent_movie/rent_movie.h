@@ -3,6 +3,7 @@
 #include <fstream>
 using std::wstring;
 
+enum { UPDATE_RENT, UPDATE_RETURN };
 /**
  * @brief Updates the movies.csv file when renting a movie.
  * @param csvFileName - Path to the movies.csv file.
@@ -10,9 +11,9 @@ using std::wstring;
  * @param username - Username of the person renting the movie.
  * @param date - wstring object containing the date of the rent.
  */
-void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate);
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate, bool rentOrReturn);
 
-void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl);
+void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl, bool rentOrReturn);
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate);
 

@@ -15,7 +15,7 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, EXIT = 5 };       // Actions.
+enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, RETURNMOV = 5, EXIT = 6 };       // Actions.
 enum { DUR, YEA, MON, DAY };            // int frag types.
 enum { TTL, DIR };                      // wstring frag types.
 
@@ -154,7 +154,8 @@ int main(){
                     << "(2) Get movie info\n"
                     << "(3) Add a movie\n"
                     << "(4) Rent a movie\n"
-                    << "(5) Exit\n"
+                    << "(5) Return a movie\n"
+                    << "(6) Exit\n"
                     << "Select option: ";
             wcin >> action;
             while(action < FILTER || action > EXIT){
@@ -275,7 +276,7 @@ int main(){
                     wcout << L"  * " << baseList[moviePos].genres[i] << L'\n';
 
                 // The rent data is only printed if the movie has actually been rented to someone. //
-                if(baseList[moviePos].rentedTo != L""){
+                if(baseList[moviePos].status != MOV_STATUS_RETURNED){
                     wcout   << L"-> Rented to: " << baseList[moviePos].rentedTo << L'\n'
                             << L"-> Rented on: " << baseList[moviePos].rentedOn.year << L'-' << baseList[moviePos].rentedOn.month << L'-' << baseList[moviePos].rentedOn.day << L'\n'
                             << L"-> Expiry: " << baseList[moviePos].expiry.year << L'-' << baseList[moviePos].expiry.month << L'-' << baseList[moviePos].expiry.day << L'\n';
@@ -354,19 +355,19 @@ int main(){
                 ClrScr();
                 wstring rentName;
                 wcout << "*** MOVIE RENT ***\n";
-                wcout << "Input the name of the movie: ";
+                wcout << "Input the title of the movie: ";
                 getline(wcin, rentName);
 
                 int queryMovieID = 0; 
                 // Search for the title of the movie to rent, throw an error if it doesn't exist,
                 // and print some information if the movie exists but is already rented.
-                int rentResult = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName, queryMovieID);
-                if(rentResult == QUERY_RENT_NOTFOUND){
+                int rentStatus = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName, queryMovieID);
+                if(rentStatus == QUERY_RENT_NOTFOUND){
                     wcerr << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
                     wcin.get();
                     continue;
-                }
-                else if(rentResult == QUERY_RENT_RENTED){
+                } 
+                else if(rentStatus == QUERY_RENT_RENTED){
                     wcout << L"[ INFO ] The movie is already rented by someone.\n";
                     wcin.get();
                     continue;
@@ -377,10 +378,10 @@ int main(){
                 wstring expiryDate = GetDate(true);     // Get the expiry date.
 
                 // Update the movies.csv file with the rent information. //
-                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate);
+                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
 
                 // Update the users_data.csv file with the rent information. //
-                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title);
+                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title, UPDATE_RENT);
                 
                 // Update the base list movie data with the rent information. //
                 UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate);
@@ -389,6 +390,47 @@ int main(){
                 UpdateUsersData(userList, currUser, baseList[queryMovieID].title);
 
                 wcin.get();
+            }
+            // ========================
+            //  Return a movie.
+            // ========================
+            else if(action == RETURNMOV){
+                ClrScr();
+                int queryMovieID = 0;
+                wstring returnName;
+                wcout << "*** MOVIE RETURN ***\n";
+                wcout << "Input the title of the movie: ";
+                getline(wcin, returnName);
+
+                int rentStatus = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, returnName, queryMovieID);
+                if(rentStatus == QUERY_RENT_NOTFOUND){
+                    wcout << L"[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                    wcin.get();
+                    continue;
+                }
+                else if(rentStatus == QUERY_RENT_NOTRENTED){
+                    wcout << L"[ INFO ] The movie has not been rented.\n";
+                    wcin.get();
+                    continue;
+                }
+                else if(baseList[queryMovieID].rentedTo != username){
+                    wcout << "L[ INFO ] You are not the owner of the rent.\n";
+                    wcin.get();
+                    continue;
+                }
+
+                wstring rentDate =
+                std::to_wstring(baseList[queryMovieID].rentedOn.year) + L"-" +
+                std::to_wstring(baseList[queryMovieID].rentedOn.month) + L"-" +
+                std::to_wstring(baseList[queryMovieID].rentedOn.day);
+
+                wstring expiryDate =
+                std::to_wstring(baseList[queryMovieID].expiry.year) + L"-" +
+                std::to_wstring(baseList[queryMovieID].expiry.month) + L"-" +
+                std::to_wstring(baseList[queryMovieID].expiry.day);
+
+                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
+                UpdateUsersDataCsv(USRDATA_PATH, currUser, returnName, UPDATE_RETURN);
             }
             // Executes if the user selects the "Exit" action. //
             else break;
