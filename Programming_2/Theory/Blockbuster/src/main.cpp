@@ -63,6 +63,8 @@ int main(){
 
     wstring username;           // Username of the active user.
     int userNum = 0;            // Number of users in the users_data.csv file.
+    
+    // Check if the users_data.csv file exists. If it doesn't, output a prompt to create it. //
     {
         wfstream openTest(USRDATA_PATH);
         if(!openTest){
@@ -379,13 +381,10 @@ int main(){
 
                 // Update the movies.csv file with the rent information. //
                 UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-
                 // Update the users_data.csv file with the rent information. //
                 UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title, UPDATE_RENT);
-                
                 // Update the base list movie data with the rent information. //
                 UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-
                 // Update the user list data with the rent information. //
                 UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RENT);
 
@@ -429,9 +428,13 @@ int main(){
                 std::to_wstring(baseList[queryMovieID].expiry.month) + L"-" +
                 std::to_wstring(baseList[queryMovieID].expiry.day);
 
+                // Update the movies.csv file with the return information. //
                 UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
+                // Update the users_data.csv file with the return information. //
                 UpdateUsersDataCsv(USRDATA_PATH, currUser, returnName, UPDATE_RETURN);
+                // Update the base list movie data with the return information. //
                 UpdateMovieData(baseList, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
+                // Update the user list data with the return information. //
                 UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RETURN);
             }
             // Executes if the user selects the "Exit" action. //

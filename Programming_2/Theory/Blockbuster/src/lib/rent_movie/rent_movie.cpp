@@ -24,21 +24,23 @@ int GetNthCommaPos(wstring line, int commaNum){
 };
 
 void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
-    std::wifstream csvFile(csvFilePath);             // Open the csvFile.
+    std::wifstream csvFile(csvFilePath);        // Open the movies.csv file.
+ 
+    wstring statusType;
+    // Executes if the action is a RENT. //
+    if(rentOrReturn == UPDATE_RENT) statusType = L"rented";
+    // Executes if the action is a RETURN. //
+    else if(rentOrReturn == UPDATE_RETURN) statusType = L"returned";
 
+    int counter = -1;       // Counts the lines read.
     wstring readingLine;
-    int counter = -1;                       // Counts the lines read.
-    // Keep reading lines and writing them to writeFile //
-    // until the line to update is reached.             //
+    // Keep reading lines until the line to update is reached. //
     while(counter != movieID - 1){
         getline(csvFile, readingLine);
         counter++;
     }
-
-    wstring statusType;
-    if(rentOrReturn == UPDATE_RENT) statusType = L"rented";
-    else if(rentOrReturn == UPDATE_RETURN) statusType = L"returned";
     getline(csvFile, readingLine);          // Read the line to update.
+
     // Update the line, and write it to writeFile. //
     readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 6));
     readingLine.append(L',' + username + L',' + rentDate + L',' + statusType + L',' + expiryDate);
@@ -47,42 +49,50 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
 }
 
 void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl, bool rentOrReturn){
-    std::wifstream usersDataFile(usersDataFilePath);
+    std::wifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
 
     wstring readingLine;
     int counter = -1;
+    // Keep reading lines until the line to update is reached. //
     while(counter != currUser - 1){
         getline(usersDataFile, readingLine);
         counter++;
     }
 
-    getline(usersDataFile, readingLine);
+    getline(usersDataFile, readingLine);    // Read the line to update.
 
+    // Get the current user's movies (comma included). E.g: ",|Cleanskin|Ignition|Big Hero 6". //
     wstring currMovies = readingLine.substr(GetNthCommaPos(readingLine, 2));
     readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 2));
+
+    // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){
         readingLine.append(currMovies.append(L'|' + movieTtl));
-    } else if(rentOrReturn == UPDATE_RETURN){
+    } 
+    // Executes if the action is a RETURN. //
+    else if(rentOrReturn == UPDATE_RETURN){
         wstring temp;
-        std::wcout << currMovies.find_last_of('|') << '\n';     // debug
+        // Executes if there's more than one movie. //
         if(currMovies.find_last_of('|') != 1){
-            temp = currMovies.substr(0, currMovies.find(movieTtl));
-            temp.append(currMovies.substr(currMovies.find(movieTtl) + movieTtl.length() + 1));
-            readingLine.append(temp);
-            std::wcout << readingLine << '\n';      // debug
-            std::wcin.get();                        // debug
-            std::wcin.get();                        // debug
+            temp = currMovies.substr(0, currMovies.find(movieTtl));     // Get the movies string up to the one to return.
+            temp.append(currMovies.substr(currMovies.find(movieTtl) + movieTtl.length() + 1));      // Append the substr that comes after the movie to return.
+            readingLine.append(temp);       // Append the updated movies to the readingLine.
         }
         else{
-            readingLine.append(L",");
+            readingLine.append(L",");       // If there's only one movie, just append a comma to the readingLine.
         }
     }
     usersDataFile.close();
+
+    // Update the line. //
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
 void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
+    // Executes if the action is a RETURN. //
     if(rentOrReturn == UPDATE_RETURN){ baseList[movieID].status = MOV_STATUS_RETURNED; return; }
+
+    // Executes if the action is a RENT. //
     baseList[movieID].status = MOV_STATUS_RENTED;
     baseList[movieID].rentedTo = username;
     for(int i = 0; i < 3; i++){
@@ -106,21 +116,24 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
 }
 
 void UpdateUsersData(User userList[], int currUser, wstring movieTtl, bool rentOrReturn){
+    // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){ userList[currUser].movies.append(L'|' + movieTtl); return; }
+    
+    // Executes if the action is a RETURN. //
     wstring temp = userList[currUser].movies;
-    temp = temp.substr(0, temp.find(movieTtl) - 1);
-    temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));
-    std::wcout << L"HERE: " << temp << '\n';
-    std::wcin.get();
-    userList[currUser].movies = temp;
+    temp = temp.substr(0, temp.find(movieTtl) - 1);     // Get the user's movies, up to the one to return.
+    temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));    // Get the substr that comes after the movie to return.
+    userList[currUser].movies = temp;   // Update the movies.
 }
 
 int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
-    
-    if(ttlPos == -1) return QUERY_RENT_NOTFOUND;
 
+    // If not found, return. // 
+    if(ttlPos == -1) return QUERY_RENT_NOTFOUND;
+    
+    // If found, get its ID, then return a rent or returned status. //
     int movPos = ttlFrag[ttlPos].ID;
     queryMovieID = movPos;
 

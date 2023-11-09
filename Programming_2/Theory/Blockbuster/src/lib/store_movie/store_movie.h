@@ -2,14 +2,14 @@
 #include "../structs.h"
 
 /**
- * @file store_movie.cpp
- * @brief Stores a movie in the movie list provided, while preserving its sorting order.
- * @param arr - Movie list array to store the movie in.
+ * @brief Stores a movie frag in the frag list provided, while preserving its sorting order.
+ * @param arr - Frag list array to store the movie frag in.
  * @param l - First arr index.
  * @param r - Last arr index.
- * @param toStore - Movie struct to store in the arr.
+ * @param toStore - Data to store in the frag list.
  * @see StoreNewMovieImplem "StoreNewMovie() implementation details".
+ * This function uses the value of param 'r' both as the last arr index to check
+ * for the position to store the frag at and the ID of the frag stored.
  */
-//void StoreNewMovie(Movie arr[], int l, int r, const Movie &toStore, const int type);
-template<typename T, typename U>
-void StoreNewFrag(T arr[], int l, int r, const U toStore);
+template<typename FragT, typename DataT>
+void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore);

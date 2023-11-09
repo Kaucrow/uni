@@ -234,12 +234,15 @@ void PopulateUserList(User userList[], const char* userDataFilePath){
         for(int j = 0; j < 3; j++){
             nextComma = readingLine.find(',');
             switch(j){
+                // ID. //
                 case 0:
                     userList[i].ID = stoi(readingLine);
                     break;
+                // Name. //
                 case 1:
                     userList[i].name = readingLine.substr(0, nextComma);
                     break;
+                // Rented movies. //
                 case 2:
                     userList[i].movies = readingLine;
                     break;
