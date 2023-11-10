@@ -400,8 +400,6 @@ int main(){
                 UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
                 // Update the users_data.csv file and user list data with the rent information. //
                 UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
-
-                wcin.get();
             }
             // ========================
             //  Return a movie.
@@ -466,9 +464,6 @@ wstring GetDate(bool add14Days){
     localtime_s(&timeinfo, &rawtime);
 
     wcsftime(buffer, 20, L"%Y-%m-%d", &timeinfo);
-
-    std::wcout << buffer << '\n';
-    std::wcin.get();
 
     return buffer;
 }
