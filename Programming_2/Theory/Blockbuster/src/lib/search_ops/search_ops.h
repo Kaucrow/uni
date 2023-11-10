@@ -20,6 +20,8 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
  * @brief Performs a binary search and stores the ID of all matches in the storeArr.
  * All params included have the same function as the ones in BinSearch(), except for:
  * @param storeArr - int array to store the IDs of the matches in.
+ * @param lesserMatch   - If false, the search will only store the ID of elements that have a data that is exactly equal to the search.
+ *                      - If true, the search will store the ID of every element that has a data equal or less than the search.
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
 template<typename FragT, typename DataT>

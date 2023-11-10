@@ -22,10 +22,13 @@ void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, con
         }
     }
     else{
+        // Get the topPos, which is the highest data in the searchArr that is equal or less than the search. //
         int offset = 0, topPos = 0;
         while(searchArr[someMatchPos + offset].data <= search && searchArr[someMatchPos + offset].ID != 0) offset += 10;
         while(searchArr[someMatchPos + offset].data > search && searchArr[someMatchPos + offset].ID != 0) offset--;
         topPos = someMatchPos + offset;
+
+        // Get the ID of every element that comes before the searchArr topPos index. //
         if(searchArr[topPos].ID != 0){
             for(offset = 0; searchArr[topPos + offset].ID != 0; offset--){
                 storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
