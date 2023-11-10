@@ -1,7 +1,7 @@
 #include "rent_movie.h"
 #include "../structs.h"
 #include "../file_ops/file_ops.h"
-#include "../bin_search/bin_search.h"
+#include "../search_ops/search_ops.h"
 #include <iostream>
 using std::getline;
 

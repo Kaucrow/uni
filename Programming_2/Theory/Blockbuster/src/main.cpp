@@ -4,9 +4,9 @@
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
-#include <bin_search.h>
 #include <store_movie.h>
 #include <rent_movie.h>
+#include <search_ops.h>
 #include <file_ops.h>
 
 #define USRDATA_PATH "./data/users_data.csv"
@@ -175,14 +175,15 @@ int main(){
                 wcout   << "*** FILTERS ***\n"
                         << "(1) Duration\n"
                         << "(2) Title\n"
-                        << "(3) Director\n"
-                        << "(4) Release year\n"
-                        << "(5) Release month\n"
-                        << "(6) Release day\n"
+                        << "(3) Genre\n"
+                        << "(4) Director\n"
+                        << "(5) Release year\n"
+                        << "(6) Release month\n"
+                        << "(7) Release day\n"
                         << "Select option: ";
 
                 wcin >> action;
-                while(action < 1 || action > 6){
+                while(action < 1 || action > 7){
                     wcout << "INVALID OPTION.\nSelect option: ";
                     wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     wcin >> action;
@@ -200,6 +201,7 @@ int main(){
                     case 1:
                         wcout << "Duration to search for: ";
                         wcin >> intSearch;
+                        wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[DUR], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 2:
@@ -208,41 +210,55 @@ int main(){
                         BinSearchStoreMatches(wstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 3:
+                        wcout << "Genre to search for: ";
+                        getline(wcin, wstrSearch);
+                        GenreSearchStoreMatches(baseList, idMatches, 1, totalMovies, wstrSearch);
+                        break;
+                    case 4:
                         wcout << "Director to search for: ";
                         getline(wcin, wstrSearch);
                         BinSearchStoreMatches(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
-                    case 4:
+                    case 5:
                         wcout << "Year to search for: ";
                         wcin >> intSearch;
+                        wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
                         break;
-                    case 5:
+                    case 6:
                         wcout << "Month to search for: ";
                         wcin >> intSearch;
                         while(intSearch < 1 || intSearch > 12){
                             wcout << "Please input a valid month.\n";
                             wcin >> intSearch;
                         }
+                        wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[MON], idMatches, 1, totalMovies, intSearch);
                         break;
-                    case 6:
+                    case 7:
                         wcout << "Day to search for: ";
                         wcin >> intSearch;
                         while(intSearch < 1 || intSearch > 31){
                             wcout << "Please input a valid day.\n";
                             wcin >> intSearch;
                         }
+                        wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
                         break;
                 }
 
-                // Print the matching movies from the "idMatches" array. //
                 ClrScr();
-                for(int i = 0; idMatches[i] != 0; i++){
-                    wcout << baseList[idMatches[i]].title << '\n';
+                // If no matches were found, output a message. //
+                if(idMatches[0] == 0){
+                    wcout << L"*** FOUND NO MATCHES ***\n";
+                } 
+                // If matches were found, print the matching movies from the "idMatches" array. //
+                else{
+                    wcout << L"*** FOUND MATCHES ***\n";
+                    for(int i = 0; idMatches[i] != 0; i++){
+                        wcout << baseList[idMatches[i]].title << '\n';
+                    }
                 }
-                wcin.ignore(1);
                 wcin.get();
             }
             // ========================

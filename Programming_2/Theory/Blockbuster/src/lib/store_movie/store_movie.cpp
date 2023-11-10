@@ -1,4 +1,4 @@
-#include "../bin_search/bin_search.h"
+#include "../search_ops/search_ops.h"
 #include <string>
 using std::wstring;
 

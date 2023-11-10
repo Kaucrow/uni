@@ -1,4 +1,4 @@
-#include "bin_search.h"
+#include "search_ops.h"
 #include <iostream>     // For debug.
 #include <string>
 using std::wstring;
@@ -56,6 +56,19 @@ void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r
     int m = BinSearch(searchArr, l, r, search);
     if(m != -1){ StoreMatches(searchArr, storeArr, m, search); }
     else storeArr[0] = 0;
+}
+
+void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search){
+    int storeAt = 0;
+    for(l; l <= r; l++){
+        for(int j = 0; (baseList[l].genres[j] != L""); j++){
+            if(baseList[l].genres[j] == search){
+                storeArr[storeAt] = l;
+                storeAt++;
+                break;
+            }
+        }
+    }
 }
 
 template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search, bool retClosest);

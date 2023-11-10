@@ -24,3 +24,5 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
 */
 template<typename FragT, typename DataT>
 void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search);
+
+void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search);
