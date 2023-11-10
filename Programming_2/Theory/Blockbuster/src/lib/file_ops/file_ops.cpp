@@ -68,28 +68,28 @@ void CheckMoviesCsv(const char* movFilePath){
     wifstream movFile(movFilePath);
     wstring readingLine;
     getline(movFile, readingLine);      // Get the first line in the movies.csv file.
-    int commaNum = 0;
+    int delimNum = 0;
 
-    // Get the number of commas in the line. //
+    // Get the number of semicolons in the line. //
     while(true){
-        std::size_t nextComma = readingLine.find(',');
-        if(nextComma == std::string::npos) break;
-        readingLine = readingLine.substr(nextComma + 1);
-        commaNum++;
+        std::size_t nextDelim = readingLine.find(';');
+        if(nextDelim == std::string::npos) break;
+        readingLine = readingLine.substr(nextDelim + 1);
+        delimNum++;
     }
 
-    // The movies.csv file should have 10 fields, and thus, the first line should have
-    // 9 commas. If 8 were found, add the missing field to the first line, and add a comma
+    // The movies.csv file should have 11 fields, and thus, the first line should have
+    // 10 semicolons. If 9 were found, add the missing field to the first line, and add a semicolon
     // at the end of every other line.
-    if(commaNum == 8){
+    if(delimNum == 9){
         movFile.seekg(0, std::ios::beg);
         getline(movFile, readingLine);
-        readingLine.append(L",expiry\n");
+        readingLine.append(L";expiry\n");
         wofstream write("./write.csv");
         write << readingLine;
 
         while(getline(movFile, readingLine)){
-            readingLine.append(L",\n");
+            readingLine.append(L";\n");
             write << readingLine;
         }
 
@@ -105,12 +105,12 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
     wifstream movFile(movFilePath);
     if(!movFile){ throw openExc; }
 
-    int nextComma;              // Stores the pos of the next comma in the curr line.
+    int nextDelim;              // Stores the pos of the next semicolon in the curr line.
     wstring readingLine;        // Stores the curr line.
 
     // Vars for setting the movie genres. //
     int nextPipe = 0;           // Stores the pos of the next pipe in the tempReadingLine.
-    bool exitSuccess = false;   // True if no more than 6 genres were found, false otherwise.
+    bool exitSuccess = false;   // True if no more than 7 genres were found, false otherwise.
     bool getNextLine = false;
     wstring tempReadingLine;    // Temp copy of the curr line.
     wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
@@ -121,8 +121,8 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
 
     for(int i = 1; i <= movieNum; i++){
         getline(movFile, readingLine);      // Get the next line
-        for(int j = 0; j <= 9; j++){        // And store each of the 6 data fields.
-            nextComma = readingLine.find(',');
+        for(int j = 0; j < 11; j++){        // And store each of the 11 data fields.
+            nextDelim = readingLine.find(';');
             switch(j){
                 // ID. //
                 case 0: 
@@ -130,20 +130,14 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     break;
                 // Title. //
                 case 1:
-                    // If the first character is a double quote, adjust the value of nextComma to actually
-                    // contain the pos of the comma after the title.
-                    /**
-                     * WARNING: Assumes the last double quote char is within the title, and nowhere else.
-                     */
-                    if(readingLine[0] == '"') nextComma = (readingLine.substr(1)).find_last_of('"') + 2;
-                    baseList[i].title = readingLine.substr(0, nextComma);
+                    baseList[i].title = readingLine.substr(0, nextDelim);
                     break;
                 // Genres. //
                 case 2:
                     // Create a temp copy of the curr line with only the movie genres in it. //
-                    tempReadingLine = readingLine.substr(0, nextComma);
-                    // Store a max of 6 genres. //
-                    for(int k = 0; k < 6; k++){         
+                    tempReadingLine = readingLine.substr(0, nextDelim);
+                    // Store a max of 7 genres. //
+                    for(int k = 0; k < 7; k++){         
                         nextPipe = tempReadingLine.find('|');
                         // If no pipe character was found on the temp line, assign the last genre and stop storing any more. //
                         if(nextPipe == -1){ baseList[i].genres[k] = tempReadingLine; exitSuccess = true; break; }
@@ -155,7 +149,7 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     }
                     // =====================
                     // Throw an exception if the loop never encountered a break statement, meaning there were
-                    // more than 6 genres in the readingLine.
+                    // more than 7 genres in the readingLine.
                     // =====================
                     if(exitSuccess){ exitSuccess = false; break; }
                     else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
@@ -165,10 +159,14 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     break;
                 // Director. //
                 case 4:
-                    baseList[i].director = readingLine.substr(0, nextComma);
+                    baseList[i].director = readingLine.substr(0, nextDelim);
+                    break;
+                // Price. //
+                case 5:
+                    baseList[i].price = stof(readingLine.substr(0, nextDelim));
                     break;
                 // Release. //
-                case 5:
+                case 6:
                     /**
                      * WARNING: Assumes that the release date is in Y-M-d format, the year
                      * is 4 characters long, and the month and day are two characters long each.
@@ -178,22 +176,22 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     baseList[i].release.day   = stoi(readingLine.substr(8, 2));
                     break;
                 // Rent to. //
-                case 6:
-                    if(readingLine == L",,,"){ getNextLine = true; break; }
-                    baseList[i].rentedTo = readingLine.substr(0, nextComma);
+                case 7:
+                    if(readingLine == L";;;"){ getNextLine = true; break; }
+                    baseList[i].rentedTo = readingLine.substr(0, nextDelim);
                     break;
                 // Rent date. //
-                case 7:
+                case 8:
                     /**
-                     * WARNING: Same considerations as case 5.
+                     * WARNING: Same considerations as case 6.
                      */
                     baseList[i].rentedOn.year  = stoi(readingLine.substr(0, 4));
                     baseList[i].rentedOn.month = stoi(readingLine.substr(5, 2));
                     baseList[i].rentedOn.day   = stoi(readingLine.substr(8, 2));
                     break;
                 // Status. //
-                case 8:
-                    tempReadingLine = readingLine.substr(0, nextComma);
+                case 9:
+                    tempReadingLine = readingLine.substr(0, nextDelim);
                     if(tempReadingLine == L"returned"){
                         baseList[i].status = MOV_STATUS_RETURNED;
                     } else if(tempReadingLine == L"rented"){
@@ -206,9 +204,9 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     }
                     break;
                 // Expiry. //
-                case 9:
+                case 10:
                     /**
-                     * WARNING: Same considerations as case 5.
+                     * WARNING: Same considerations as case 6.
                      */ 
                     baseList[i].expiry.year  = stoi(readingLine.substr(0, 4));
                     baseList[i].expiry.month = stoi(readingLine.substr(5, 2));
@@ -216,7 +214,7 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
                     break;
             }
             if(getNextLine){ getNextLine = false; break; }
-            readingLine = readingLine.substr(nextComma + 1);  // Remove the stored data field from the curr line.
+            readingLine = readingLine.substr(nextDelim + 1);  // Remove the stored data field from the curr line.
         }
     }
 }
@@ -226,13 +224,13 @@ void PopulateUserList(User userList[], const char* userDataFilePath){
     wifstream userDataFile(userDataFilePath);
     if(!userDataFile){ throw openExc; }
 
-    int nextComma;
+    int nextDelim;
     wstring readingLine;
     getline(userDataFile, readingLine);
 
     for(int i = 1; getline(userDataFile, readingLine); i++){
         for(int j = 0; j < 3; j++){
-            nextComma = readingLine.find(',');
+            nextDelim = readingLine.find(',');
             switch(j){
                 // ID. //
                 case 0:
@@ -240,14 +238,14 @@ void PopulateUserList(User userList[], const char* userDataFilePath){
                     break;
                 // Name. //
                 case 1:
-                    userList[i].name = readingLine.substr(0, nextComma);
+                    userList[i].name = readingLine.substr(0, nextDelim);
                     break;
                 // Rented movies. //
                 case 2:
                     userList[i].movies = readingLine;
                     break;
             }
-            readingLine = readingLine.substr(nextComma + 1);
+            readingLine = readingLine.substr(nextDelim + 1);
         }
     }
 }

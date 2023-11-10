@@ -10,8 +10,9 @@ enum MovStatus{ MOV_STATUS_RETURNED, MOV_STATUS_RENTED, MOV_STATUS_EXPIRED };
 
 struct Movie{
     int ID = 0, duration = 0;
+    float price;
     wstring title;
-    wstring genres[7] = {};     // A max of 6 genres can be stored here. The arr has 7 elements for boundary checks.
+    wstring genres[8] = {};     // A max of 7 genres can be stored here. The arr has 8 elements for boundary checks.
     wstring director;
     Date release;
     MovStatus status;

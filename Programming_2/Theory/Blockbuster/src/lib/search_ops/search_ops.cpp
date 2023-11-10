@@ -11,16 +11,12 @@ void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, con
     for(int offset = 0; (searchArr[someMatchPos + offset].data == search); offset--){
         storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
-        std::wcout << "FOUNDL\n";   // debug
     }
-    std::wcout << "REACHED\n";      // debug
-    std::wcout << searchArr[someMatchPos - storeIndex].data << '\n';        // debug
     
     // Search up the searchArr for matches. //
     for(int offset = 1; (searchArr[someMatchPos + offset].data == search); offset++){
         storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
         storeIndex++;
-        std::wcout << "FOUNDR\n";   // debug
     }
 
     // Store a 0 in the array element that comes after the last match element,
