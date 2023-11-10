@@ -23,7 +23,7 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
 template<typename FragT, typename DataT>
-void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search);
+void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search, bool lesserMatch = false);
 
 /**
  * @brief Performs a linear search in the base movie list looking for movies with 

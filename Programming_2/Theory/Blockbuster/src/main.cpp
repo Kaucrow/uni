@@ -16,7 +16,7 @@ using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
 enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, RETURNMOV = 5, EXIT = 6 };       // Actions.
-enum { DUR, YEA, MON, DAY };            // int frag types.
+enum { DUR, PRC, YEA, MON, DAY };            // int frag types.
 enum { TTL, DIR };                      // wstring frag types.
 
 /**
@@ -51,12 +51,13 @@ int main(){
     // (duration, title, director, release year, release month, release day).
     // ==================
     IntFrag durList[totalMovies + 3001];
+    IntFrag prcList[totalMovies + 3001];
     IntFrag yeaList[totalMovies + 3001];
     IntFrag monList[totalMovies + 3001];
     IntFrag dayList[totalMovies + 3001];
     WstrFrag ttlList[totalMovies + 3001];
     WstrFrag dirList[totalMovies + 3001];
-    IntFrag* intFrags[4] = { durList, yeaList, monList, dayList };
+    IntFrag* intFrags[5] = { durList, prcList, yeaList, monList, dayList };
     WstrFrag* wstrFrags[2] = { ttlList, dirList };
 
     wstring username;           // Username of the active user.
@@ -90,9 +91,10 @@ int main(){
 
     // Copy the base movie list elements data to each frag list. //
     for(int i = 1; i <= totalMovies; i++){
-        for(int j = 0; j < 4; j++){ intFrags[j][i].ID = baseList[i].ID; }
-        for(int j = 0; j < 2; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
+        for(int j = DUR; j <= DAY; j++){ intFrags[j][i].ID = baseList[i].ID; }
+        for(int j = TTL; j <= DIR ; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
         intFrags[DUR][i].data = baseList[i].duration;
+        intFrags[PRC][i].data = baseList[i].price;
         intFrags[YEA][i].data = baseList[i].release.year;
         intFrags[MON][i].data = baseList[i].release.month;
         intFrags[DAY][i].data = baseList[i].release.day;
@@ -178,13 +180,14 @@ int main(){
                         << "(2) Title\n"
                         << "(3) Genre\n"
                         << "(4) Director\n"
-                        << "(5) Release year\n"
-                        << "(6) Release month\n"
-                        << "(7) Release day\n"
+                        << "(5) Price\n"
+                        << "(6) Rease year\n"
+                        << "(7) Release month\n"
+                        << "(8) Release day\n"
                         << "Select option: ";
 
                 wcin >> action;
-                while(action < 1 || action > 7){
+                while(action < 1 || action > 8){
                     wcout << "INVALID OPTION.\nSelect option: ";
                     wcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     wcin >> action;
@@ -221,12 +224,18 @@ int main(){
                         BinSearchStoreMatches(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 5:
+                        wcout << "Max price: ";
+                        wcin >> intSearch;
+                        wcin.ignore(1);
+                        BinSearchStoreMatches(intFrags[PRC], idMatches, 1, totalMovies, intSearch, true);
+                        break;
+                    case 6:
                         wcout << "Year to search for: ";
                         wcin >> intSearch;
                         wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
                         break;
-                    case 6:
+                    case 7:
                         wcout << "Month to search for: ";
                         wcin >> intSearch;
                         while(intSearch < 1 || intSearch > 12){
@@ -236,7 +245,7 @@ int main(){
                         wcin.ignore(1);
                         BinSearchStoreMatches(intFrags[MON], idMatches, 1, totalMovies, intSearch);
                         break;
-                    case 7:
+                    case 8:
                         wcout << "Day to search for: ";
                         wcin >> intSearch;
                         while(intSearch < 1 || intSearch > 31){
