@@ -38,8 +38,6 @@ int main(){
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
 
-    GetDate();          // debug
-
     CheckMoviesCsv(MOVFILE_PATH);       // Ensure that the movies.csv has all the required fields.
 
     int totalMovies = 0;
@@ -381,12 +379,10 @@ int main(){
 
                 // Update the movies.csv file with the rent information. //
                 UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the users_data.csv file with the rent information. //
-                UpdateUsersDataCsv(USRDATA_PATH, currUser, baseList[queryMovieID].title, UPDATE_RENT);
                 // Update the base list movie data with the rent information. //
-                UpdateMovieData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the user list data with the rent information. //
-                UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RENT);
+                UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
+                // Update the users_data.csv file and user list data with the rent information. //
+                UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
 
                 wcin.get();
             }
@@ -430,12 +426,10 @@ int main(){
 
                 // Update the movies.csv file with the return information. //
                 UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
-                // Update the users_data.csv file with the return information. //
-                UpdateUsersDataCsv(USRDATA_PATH, currUser, returnName, UPDATE_RETURN);
                 // Update the base list movie data with the return information. //
-                UpdateMovieData(baseList, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
-                // Update the user list data with the return information. //
-                UpdateUsersData(userList, currUser, baseList[queryMovieID].title, UPDATE_RETURN);
+                UpdateMovieLiveData(baseList, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
+                // Update the users_data.csv file and user list data with the return information. //
+                UpdateUsersData(USRDATA_PATH, userList, currUser, returnName, UPDATE_RETURN);
             }
             // Executes if the user selects the "Exit" action. //
             else break;

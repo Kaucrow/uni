@@ -7,7 +7,7 @@ using std::wstring;
 enum { UPDATE_RENT, UPDATE_RETURN };
 
 /**
- * Param rentOrReturn appears in 4 functions here. This is its description:
+ * Param rentOrReturn appears in 3 functions here. This is its description:
 * @param rentOrRenturn - Flag which tells the function whether the action to perform is a movie rent or return.
 */
 
@@ -22,28 +22,22 @@ enum { UPDATE_RENT, UPDATE_RETURN };
 void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring date, wstring expiryDate, bool rentOrReturn);
 
 /**
- * @brief Updates the users_data.csv file when renting/returning a movie.
- * @param usersDataFilePath - Path to the users_data.csv file.
- * @param currUser - ID of the user renting/returning the movie.
- * @param movieTtl - wstring object containing the title of the movie to rent/return.
-*/
-void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl, bool rentOrReturn);
-
-/**
  * @brief Updates the base list data when renting/returning a movie.
  * @param movieID - ID of the movie to rent/return.
  * @param username - Name of the person renting/returning the movie.
  * @param rentDate - wstring object containing the date of the rent, in Y-M-d format.
  * @param expiryDate - wstring object containing the date of the rent expiry, in Y-M-d format.
 */
-void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn);
+void UpdateMovieLiveData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn);
 
 /**
- * @brief Updates the user list data when renting/returning a movie.
+ * @brief Updates the users_data.csv file and the live user list data when renting/returning a movie.
+ * @param usersDataFilePath - Path to the users_data.csv file.
+ * @param userList - User list.
  * @param currUser - ID of the user renting/returning the movie.
  * @param movieTtl - wstring object containing the title of the movie to rent/return.
 */
-void UpdateUsersData(User userList[], int currUser, wstring movieTtl, bool rentOrReturn);
+void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, wstring movieTtl, bool rentOrReturn);
 
 /**
  * @brief Queries the base list for the status of a movie.

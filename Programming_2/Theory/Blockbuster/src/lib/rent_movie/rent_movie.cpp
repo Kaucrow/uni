@@ -48,7 +48,7 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring movieTtl, bool rentOrReturn){
+void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, wstring movieTtl, bool rentOrReturn){
     std::wifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
 
     wstring readingLine;
@@ -61,34 +61,32 @@ void UpdateUsersDataCsv(const char* usersDataFilePath, int currUser, wstring mov
 
     getline(usersDataFile, readingLine);    // Read the line to update.
 
-    // Get the current user's movies (comma included). E.g: ",|Cleanskin|Ignition|Big Hero 6". //
-    wstring currMovies = readingLine.substr(GetNthCommaPos(readingLine, 2));
-    readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 2));
+    usersDataFile.close();
+
+    // Get the line, up to the movies substr. E.g: readingLine will be something like "1,User1,". //
+    readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 2) + 1);
 
     // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){
-        readingLine.append(currMovies.append(L'|' + movieTtl));
-    } 
+        userList[currUser].movies.append(L'|' + movieTtl);
+        readingLine.append(userList[currUser].movies);
+    }
     // Executes if the action is a RETURN. //
     else if(rentOrReturn == UPDATE_RETURN){
-        wstring temp;
-        // Executes if there's more than one movie. //
-        if(currMovies.find_last_of('|') != 1){
-            temp = currMovies.substr(0, currMovies.find(movieTtl));     // Get the movies string up to the one to return.
-            temp.append(currMovies.substr(currMovies.find(movieTtl) + movieTtl.length() + 1));      // Append the substr that comes after the movie to return.
-            readingLine.append(temp);       // Append the updated movies to the readingLine.
-        }
-        else{
-            readingLine.append(L",");       // If there's only one movie, just append a comma to the readingLine.
-        }
-    }
-    usersDataFile.close();
+        wstring temp = userList[currUser].movies;
+        temp = temp.substr(0, temp.find(movieTtl) - 1);     // Get the user's movies, up to the one to return.
+        temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));    // Append the substr that comes after the movie to return.
 
-    // Update the line. //
+        userList[currUser].movies = temp;   // Update the live movie data.
+
+        readingLine.append(temp);           // Append the updated movies to the readingLine.
+    }
+
+    // Update the users_data.csv line. //
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
-void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
+void UpdateMovieLiveData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
     // Executes if the action is a RETURN. //
     if(rentOrReturn == UPDATE_RETURN){ baseList[movieID].status = MOV_STATUS_RETURNED; return; }
 
@@ -113,17 +111,6 @@ void UpdateMovieData(Movie baseList[], int movieID, wstring username, wstring re
         rentDate = rentDate.substr(rentDate.find('-') + 1);
         expiryDate = expiryDate.substr(expiryDate.find('-') + 1);
     }
-}
-
-void UpdateUsersData(User userList[], int currUser, wstring movieTtl, bool rentOrReturn){
-    // Executes if the action is a RENT. //
-    if(rentOrReturn == UPDATE_RENT){ userList[currUser].movies.append(L'|' + movieTtl); return; }
-    
-    // Executes if the action is a RETURN. //
-    wstring temp = userList[currUser].movies;
-    temp = temp.substr(0, temp.find(movieTtl) - 1);     // Get the user's movies, up to the one to return.
-    temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));    // Get the substr that comes after the movie to return.
-    userList[currUser].movies = temp;   // Update the movies.
 }
 
 int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){
