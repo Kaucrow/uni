@@ -25,4 +25,10 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
 template<typename FragT, typename DataT>
 void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search);
 
+/**
+ * @brief Performs a linear search in the base movie list looking for movies with 
+ * a genre matching the search arg, and stores the ID of all matches in the storeArr.
+ * All params included have the same function as the ones in BinSearch().
+ * If no match is found, a 0 will be stored in the first index of the storeArr.
+*/
 void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search);

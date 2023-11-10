@@ -59,16 +59,19 @@ void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r
 }
 
 void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search){
-    int storeAt = 0;
+    int storeIndex = 0;
     for(l; l <= r; l++){
         for(int j = 0; (baseList[l].genres[j] != L""); j++){
             if(baseList[l].genres[j] == search){
-                storeArr[storeAt] = l;
-                storeAt++;
+                storeArr[storeIndex] = l;
+                storeIndex++;
                 break;
             }
         }
     }
+    // Store a 0 in the array element that comes after the last match element,
+    // in order to mark the end of the matches in the array.
+    storeArr[storeIndex] = 0;
 }
 
 template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search, bool retClosest);
