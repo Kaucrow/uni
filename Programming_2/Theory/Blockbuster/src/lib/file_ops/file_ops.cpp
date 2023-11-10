@@ -230,7 +230,7 @@ void PopulateUserList(User userList[], const char* userDataFilePath){
 
     for(int i = 1; getline(userDataFile, readingLine); i++){
         for(int j = 0; j < 3; j++){
-            nextDelim = readingLine.find(',');
+            nextDelim = readingLine.find(';');
             switch(j){
                 // ID. //
                 case 0:

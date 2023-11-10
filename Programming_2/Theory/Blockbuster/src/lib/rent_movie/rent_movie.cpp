@@ -6,19 +6,19 @@
 using std::getline;
 
 /**
- * @brief Gets the position of the Nth comma in a line.
+ * @brief Gets the position of the Nth semicolon in a line.
  * @param line - wstring object containing the line to search.
- * @param commaNum - Number of comma in the line to get the position of.
- * @return Position of the Nth comma in the line (zero-based).
+ * @param commaNum - Number of semicolon in the line to get the position of.
+ * @return Position of the Nth semicolon in the line (zero-based).
  */
-int GetNthCommaPos(wstring line, int commaNum){
-    int commaCounter = 0, totalPos = 0, currPos = 0;
-    while(commaCounter != commaNum){
-        currPos = (line.find_first_of(','));
+int GetNthDelimPos(wstring line, int delimNum){
+    int delimCounter = 0, totalPos = 0, currPos = 0;
+    while(delimCounter != delimNum){
+        currPos = (line.find_first_of(';'));
         totalPos += currPos;
-        if(commaCounter > 0) totalPos += 1;
+        if(delimCounter > 0) totalPos += 1;
         line = line.substr(currPos + 1);
-        commaCounter++;
+        delimCounter++;
     }
     return totalPos;
 };
@@ -42,8 +42,8 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
     getline(csvFile, readingLine);          // Read the line to update.
 
     // Update the line, and write it to writeFile. //
-    readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 6));
-    readingLine.append(L',' + username + L',' + rentDate + L',' + statusType + L',' + expiryDate);
+    readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 7));
+    readingLine.append(L';' + username + L';' + rentDate + L';' + statusType + L';' + expiryDate);
     csvFile.close();
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
@@ -63,8 +63,8 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
 
     usersDataFile.close();
 
-    // Get the line, up to the movies substr. E.g: readingLine will be something like "1,User1,". //
-    readingLine = readingLine.substr(0, GetNthCommaPos(readingLine, 2) + 1);
+    // Get the line, up to the movies substr. E.g: readingLine will be something like "1;User1;". //
+    readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 2) + 1);
 
     // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){

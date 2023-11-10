@@ -70,8 +70,8 @@ int main(){
             wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
                     << "         of the first user, so the file may be created: ";
             wcin >> username;
-            appendLine = L"1," + username + L",\n";
-            AppendLine(USRDATA_PATH, L"id,name,movies\n" + appendLine);
+            appendLine = L"1;" + username + L";\n";
+            AppendLine(USRDATA_PATH, L"id;name;movies\n" + appendLine);
         }
     }
 
@@ -142,7 +142,7 @@ int main(){
         }
         if(currUser == 0){
             userNum++;
-            AppendLine(USRDATA_PATH, std::to_wstring(userNum) + L',' + username + L",\n");
+            AppendLine(USRDATA_PATH, std::to_wstring(userNum) + L';' + username + L";\n");
             currUser = userNum;
         }
 
