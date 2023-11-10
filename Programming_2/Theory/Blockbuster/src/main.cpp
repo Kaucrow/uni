@@ -16,8 +16,8 @@ using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
 enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, RETURNMOV = 5, EXIT = 6 };       // Actions.
-enum { DUR, PRC, YEA, MON, DAY };            // int frag types.
-enum { TTL, DIR };                      // wstring frag types.
+enum { DUR, PRC, YEA, MON, DAY };           // int frag types.
+enum { TTL, DIR };                          // wstring frag types.
 
 /**
  * @brief OS agnostic clear screen function.
@@ -296,6 +296,7 @@ int main(){
                         << L"-> Title: " << baseList[moviePos].title << L'\n'
                         << L"-> Duration: " << baseList[moviePos].duration << L" min.\n"
                         << L"-> Director: " << baseList[moviePos].director << L'\n'
+                        << L"-> Price: " << baseList[moviePos].price << L"$\n"
                         << L"-> Release date: " << baseList[moviePos].release.year << L'-' << baseList[moviePos].release.month << L'-' << baseList[moviePos].release.day << L'\n'
                         << L"-> Genres:\n";
                 for(int i = 0; baseList[moviePos].genres[i] != L""; i++)
