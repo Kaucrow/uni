@@ -69,7 +69,7 @@ int main(){
             wstring appendLine;
             wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
                     << "         of the first user, so the file may be created: ";
-            wcin >> username;
+            getline(wcin, username);
             appendLine = L"1;" + username + L";\n";
             AppendLine(USRDATA_PATH, L"id;name;movies\n" + appendLine);
         }
@@ -125,13 +125,14 @@ int main(){
                 wcout << "\nTerminating execution...\n";
                 return 0;
         }
+        wcin.ignore(1);
 
         // Login screen. //
         ClrScr(); 
         currUser = 0;
         wcout   << "*** LOGIN ***\n"
                 << "-> User: ";
-        wcin >> username;
+        getline(wcin, username);
 
         // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
         // If it's not, add it, and set the currUser ID.
