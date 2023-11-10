@@ -11,6 +11,7 @@
 
 #define USRDATA_PATH "./data/users_data.csv"
 #define MOVFILE_PATH "./data/movies.csv"
+#define TTLFILE_PATH "./data/title.txt"
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
@@ -63,11 +64,24 @@ int main(){
     wstring username;           // Username of the active user.
     int userNum = 0;            // Number of users in the users_data.csv file.
     
+    // Display the program title. //
+    ClrScr();
+    {
+        wstring readingLine;
+        wifstream titleFile(TTLFILE_PATH);
+        if(!titleFile){ wcerr << L"[ ERR ] COULD NOT OPEN TITLE FILE.\n"; return 1; }
+        while(getline(titleFile, readingLine)){
+            wcout << readingLine << '\n';
+        }
+    }
+    wcin.get();
+    
     // Check if the users_data.csv file exists. If it doesn't, output a prompt to create it. //
     {
         wfstream openTest(USRDATA_PATH);
         if(!openTest){
             wstring appendLine;
+            ClrScr();
             wcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
                     << "         of the first user, so the file may be created: ";
             getline(wcin, username);
@@ -107,6 +121,7 @@ int main(){
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
         MergeSort(wstrFrags[i], 1, totalMovies);
+
 
     // =========================
     //  Main loop.
