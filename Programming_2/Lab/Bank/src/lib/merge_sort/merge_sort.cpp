@@ -1,9 +1,7 @@
 #include "merge_sort.h"
-#include <iostream>
-#include <functional>
-using std::function;
+#include <iostream>     // For debugging.
 
-/* For use only by MergeSort() */
+// For use only by MergeSort(). //
 template<typename FragT>
 void Merge(FragT arr[], int l, int m, int r){
     int n1 = m - l + 1;     // Amount of elements of the L subarray.

@@ -1,8 +1,9 @@
 #pragma once
-#include <iostream>
+#include <iostream>     // For debugging.
 #include <string>
 #include <fstream>
 #include "../structs.h"
+
 using std::string, std::ofstream, std::ifstream, std::getline;
 
 // ================================
@@ -24,31 +25,26 @@ void AppendLine(const char* filePath, string line);
 void ReplaceLine(const char* filePath, string line, int replaceNum);
 
 /**
- * @brief Gets the first number in the last line of the specified file.
+ * @brief Get the number of lines in a file.
  * @param filePath - Path to the file.
- * @return First number in the last line of the file.
- * WARNING: An exception will be thrown at runtime if the last line of the file does not
- * contain a number as its first character.
- */
-//int GetLastLineFirstNum(const char* filePath);
-
+ * @param ignoreBlankLines - If true, the count will ignore all blank lines.
+ * @return Number of lines in the file.
+*/
 int GetFileNumOfLines(const char* filePath, bool ignoreBlankLines = false);
 
 // ==================================
 //      FILE-SPECIFIC
 // ==================================
 /**
- * @brief Ensures that the movies.csv file has the required fields.
- * If it doesn't have the required fields, they are added to the file.
- * @param movFilePath - Path to the movies.csv file.
- */
-//void CheckMoviesCsv(const char* movFilePath);
-
-/**
  * @brief Stores the movies from the movies.csv file into the base list array.
  * @param baseList - Base list array to store the movies in.
  * @param movFilePath - Path to the movies.csv file.
  */
-void PopulateClientList(Client baseList[], const char* movFilePath);
+void PopulateClientList(Client baseList[], const char* clientFilePath);
 
+/**
+ * @brief Stores the balance data from the client_ops.csv file into the base list array.
+ * @param baseList - Base client list array to store the balance data in.
+ * @param clientOpsPath - Path to the client_ops.csv file.
+*/
 void PopulateClientListBalance(Client baseList[], const char* clientOpsPath);
