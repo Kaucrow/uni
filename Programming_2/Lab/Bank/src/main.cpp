@@ -6,6 +6,7 @@
 //#include <boost/locale.hpp>
 #include <structs.h>
 #include <file_ops.h>
+#include <merge_sort.h>
 
 #define CLTFILE_PATH "./data/clients.csv"
 
@@ -40,4 +41,8 @@ int main(){
         nameList[i].ID      = baseList[i].ID;
         nameList[i].data    = baseList[i].name;
     }
+
+    MergeSort(ciList, 1, totalClients);
+    MergeSort(accNumList, 1, totalClients);
+    MergeSort(nameList, 1, totalClients);
 }

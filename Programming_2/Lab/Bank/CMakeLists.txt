@@ -19,14 +19,14 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_B
 
 add_executable(bank ./src/main.cpp)
 
-#add_subdirectory(./src/lib/merge_sort)
+add_subdirectory(./src/lib/merge_sort)
 #add_subdirectory(./src/lib/store_movie)
 #add_subdirectory(./src/lib/search_ops)
 add_subdirectory(./src/lib/file_ops)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
-    #PUBLIC ./src/lib/merge_sort
+    PUBLIC ./src/lib/merge_sort
     #PUBLIC ./src/lib/store_movie
     #PUBLIC ./src/lib/search_ops
     PUBLIC ./src/lib/file_ops
@@ -45,14 +45,14 @@ target_include_directories(${PROJECT_NAME}
 #endif()
 
 target_link_directories(${PROJECT_NAME}
-    #PRIVATE merge_sort
+    PRIVATE merge_sort
     #PRIVATE store_movie
     PRIVATE file_ops
     #PRIVATE search_ops
 )
 
 target_link_libraries(${PROJECT_NAME}
-    #PRIVATE merge_sort
+    PRIVATE merge_sort
     #PRIVATE store_movie
     #PRIVATE search_ops
     PRIVATE file_ops
