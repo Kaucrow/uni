@@ -161,9 +161,14 @@ int main(){
             }
         }
         if(currUser == 0){
-            userNum++;
+            userNum++;              // Increment the user count. //
+
+            // Update the users_data.csv and the live users data with the new user's data. //
             AppendLine(USRDATA_PATH, std::to_wstring(userNum) + L';' + username + L";\n");
-            currUser = userNum;
+            userList[userNum].ID = userNum;
+            userList[userNum].name = username;
+
+            currUser = userNum;     // Set the currUser. //
         }
 
         while(true){
