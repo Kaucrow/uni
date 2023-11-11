@@ -174,7 +174,7 @@ void PopulateClientList(Client baseList[], const char* movFilePath){
                     break;
                 // Suspend status. //
                 case 4:
-                    readingLine == "true" ? baseList[i].suspend = true : baseList[i].suspend = false;
+                    readingLine == "true" ? baseList[i].suspended = true : baseList[i].suspended = false;
                     break;
             }
             readingLine = readingLine.substr(nextDelim + 1);  // Remove the stored data field from the curr line.

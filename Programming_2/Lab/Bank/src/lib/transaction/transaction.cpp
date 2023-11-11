@@ -51,9 +51,23 @@ void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string a
         baseList[userID].balance.dollars--;
         baseList[userID].balance.cents += 100;
     }
-    
+
     string lineUpdate = to_string(baseList[userID].CI) + ',' + baseList[userID].name + ',' + 
                         to_string(baseList[userID].balance.dollars) + '.' + to_string(baseList[userID].balance.cents) + ",-" + 
                         to_string(withdrawDollars) + '.' + to_string(withdrawCents);
     ReplaceLine(clientOpsPath, lineUpdate, userID + 1);
+}
+
+void Transfer(const char* clientOpsPath, Client baseList[], int userFromID, int userToID, string amount){
+    int transferDollars = 0, transferCents;
+    StrToMoney(amount, transferDollars, transferCents);
+
+    try{ Withdraw(clientOpsPath, baseList, userFromID, amount); }
+    catch(string exc){ exc = "[ ERR ] You don't have enough money to perform this transfer.\n"; throw exc; } 
+    Deposit(clientOpsPath, baseList, userToID, amount);
+
+    string lineUpdate = to_string(baseList[userFromID].CI) + ',' + baseList[userFromID].name + ',' + 
+                        to_string(baseList[userFromID].balance.dollars) + '.' + to_string(baseList[userFromID].balance.cents) + ',' + 
+                        to_string(transferDollars) + '.' + to_string(transferCents) + "->" + baseList[userToID].name;
+    ReplaceLine(clientOpsPath, lineUpdate, userFromID + 1);
 }

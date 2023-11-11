@@ -11,7 +11,7 @@ struct Client{
     } balance;
     long long int accNum;
     string name, accType;
-    bool suspend;
+    bool suspended;
 };
 
 struct Frag{

@@ -32,7 +32,6 @@ int main(){
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.*/
     assert(sizeof(long long int) >= 8);
 
-
     int totalClients = GetFileNumOfLines(CLTFILE_PATH) - 1;
 
     Client baseList[totalClients + 4001];
@@ -169,7 +168,7 @@ int main(){
                             << "-> Account number: " << setfill('0') << setw(10) << baseList[matchID].accNum << '\n'
                             << "-> Account type: " << baseList[matchID].accType << '\n'
                             << "-> Account status: ";
-                    (baseList[matchID].suspend == true) ? cout << "Suspended\n" : cout << "Active\n";
+                    (baseList[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
                 }
                 else{
                     cout << "*** FOUND NO MATCHES ***\n";
@@ -180,7 +179,7 @@ int main(){
                 ClrScr();
                 cout    << "*** TRANSACTION TYPE ***\n"
                         << "(1) Deposit\n"
-                        << "(2) Withdrawal\n"
+                        << "(2) Withdraw\n"
                         << "(3) Transfer\n"
                         << "Select option: ";
 
@@ -193,6 +192,8 @@ int main(){
                 cin.ignore(1);
 
                 string amount;
+                string transferToName;
+                int transferToID;
                 ClrScr();
                 switch(action){
                     case 1:
@@ -202,12 +203,37 @@ int main(){
                         Deposit(OPSFILE_PATH, baseList, currUser, amount);
                         break;
                     case 2:
-                        cout << "Withdrawal amount: ";
+                        cout << "Withdraw amount: ";
                         cin >> amount;
                         cin.ignore(1);
                         try{ Withdraw(OPSFILE_PATH, baseList, currUser, amount); }
                         catch(string exc){ cerr << exc; cin.get(); }
                         break;
+                    case 3:
+                        cout << "Name of the beneficiary: ";
+                        getline(cin, transferToName);
+                        transferToID = BinSearch(nameList, 1, totalClients, transferToName);
+                        if(transferToID == -1){
+                            cerr << "[ ERR ] The beneficiary does not exist.\n";
+                            cin.get();
+                            break;
+                        }
+                        else{
+                            transferToID = nameList[transferToID].ID;
+                            if((baseList[transferToID].suspended)){ 
+                                cerr << "[ ERR ] The beneficiary account is suspended.\n";
+                                cin.get();
+                                break;
+                            }
+                            else{
+                                cout << "Transfer amount: ";
+                                cin >> amount;
+                                cin.ignore(1);
+                                try{ Transfer(OPSFILE_PATH, baseList, currUser, transferToID, amount); }
+                                catch(string exc){ cerr << exc; cin.get(); }
+                                break;
+                            }
+                        } 
                 }
             }
             else break;
