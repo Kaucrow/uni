@@ -100,4 +100,4 @@ Programming_2/Theory/Blockbuster/data/*.bin
 Programming_2/Theory/Blockbuster/data/users_data.csv
 
 # Bank
-Programming_2/Lab/Bank/data/clients_ops.csv
+Programming_2/Lab/Bank/data/client_ops.csv

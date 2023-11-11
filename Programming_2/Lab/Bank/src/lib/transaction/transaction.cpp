@@ -19,7 +19,7 @@ void StrToMoney(string moneyStr, int& dollars, int& cents){
     }
 }
 
-void Deposit(const char* clientsOpsPath, Client baseList[], int userID, string amount){
+void Deposit(const char* clientOpsPath, Client baseList[], int userID, string amount){
     int addDollars = 0, addCents = 0;
     StrToMoney(amount, addDollars, addCents);
     baseList[userID].balance.dollars += addDollars;
@@ -32,10 +32,10 @@ void Deposit(const char* clientsOpsPath, Client baseList[], int userID, string a
     string lineUpdate = to_string(baseList[userID].CI) + ',' + baseList[userID].name + ',' + 
                         to_string(baseList[userID].balance.dollars) + '.' + to_string(baseList[userID].balance.cents) + ",+" + 
                         to_string(addDollars) + '.' + to_string(addCents);
-    ReplaceLine(clientsOpsPath, lineUpdate, userID + 1);
+    ReplaceLine(clientOpsPath, lineUpdate, userID + 1);
 }
 
-void Withdraw(const char* clientsOpsPath, Client baseList[], int userID, string amount){
+void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string amount){
     int withdrawDollars = 0, withdrawCents = 0;
     StrToMoney(amount, withdrawDollars, withdrawCents);
 
@@ -55,5 +55,5 @@ void Withdraw(const char* clientsOpsPath, Client baseList[], int userID, string 
     string lineUpdate = to_string(baseList[userID].CI) + ',' + baseList[userID].name + ',' + 
                         to_string(baseList[userID].balance.dollars) + '.' + to_string(baseList[userID].balance.cents) + ",-" + 
                         to_string(withdrawDollars) + '.' + to_string(withdrawCents);
-    ReplaceLine(clientsOpsPath, lineUpdate, userID + 1);
+    ReplaceLine(clientOpsPath, lineUpdate, userID + 1);
 }

@@ -12,7 +12,7 @@
 #include <transaction.h>
 
 #define CLTFILE_PATH "./data/clients.csv"
-#define OPSFILE_PATH "./data/clients_ops.csv"
+#define OPSFILE_PATH "./data/client_ops.csv"
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
@@ -59,14 +59,18 @@ int main(){
     MergeSort(nameList, 1, totalClients);
     
     {
-        ifstream openTest(OPSFILE_PATH);
-        if(!openTest){
-            ofstream clientsOps(OPSFILE_PATH, std::ios::app);
-            clientsOps << "ci,client,balance,last_op\n";
+        ifstream clientOpsFile(OPSFILE_PATH);
+        if(!clientOpsFile){
+            ofstream clientOpsFile(OPSFILE_PATH, std::ios::app);
+            clientOpsFile << "ci,client,balance,last_op\n";
             for(int i = 1; i <= totalClients; i++){
-                clientsOps  << setfill('0') << setw(8) << baseList[i].CI << ','
+                clientOpsFile << setfill('0') << setw(8) << baseList[i].CI << ','
                             << baseList[i].name << ",0.0,\n";
             }
+        }
+        else{
+            clientOpsFile.close();
+            PopulateClientListBalance(baseList, OPSFILE_PATH);
         }
     }
 

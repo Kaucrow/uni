@@ -4,6 +4,6 @@
 #include "../structs.h"
 using std::string;
 
-void Deposit(const char* clientsOpsPath, Client baseList[], int userID, string amount);
+void Deposit(const char* clientOpsPath, Client baseList[], int userID, string amount);
 
-void Withdraw(const char* clientsOpsPath, Client baseList[], int userID, string amount);
+void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string amount);

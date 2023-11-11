@@ -50,3 +50,5 @@ int GetFileNumOfLines(const char* filePath, bool ignoreBlankLines = false);
  * @param movFilePath - Path to the movies.csv file.
  */
 void PopulateClientList(Client baseList[], const char* movFilePath);
+
+void PopulateClientListBalance(Client baseList[], const char* clientOpsPath);

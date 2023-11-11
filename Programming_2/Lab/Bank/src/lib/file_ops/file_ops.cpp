@@ -149,7 +149,6 @@ void PopulateClientList(Client baseList[], const char* movFilePath){
     int nextDelim;              // Stores the pos of the next comma in the curr line.
     string readingLine;         // Stores the curr line.
 
-    movFile.seekg(0);
     getline(movFile, readingLine);          // Ignore the first line in the inFile.
 
     for(int i = 1; getline(movFile, readingLine); i++){
@@ -180,5 +179,21 @@ void PopulateClientList(Client baseList[], const char* movFilePath){
             }
             readingLine = readingLine.substr(nextDelim + 1);  // Remove the stored data field from the curr line.
         }
+    }
+}
+
+void PopulateClientListBalance(Client baseList[], const char* clientOpsPath){
+    string openExc = "[ ERR ] \"clients_ops.csv\" FILE DOES NOT EXIST IN THE PROVIDED PATH.";
+    ifstream clientOps(clientOpsPath);
+    if(!clientOps){ throw openExc; }
+
+    string readingLine;         // Stores the curr line.
+
+    getline(clientOps, readingLine);          // Ignore the first line in the inFile.
+
+    for(int i = 1; getline(clientOps, readingLine); i++){
+        readingLine = readingLine.substr(GetNthDelimPos(readingLine, 2) + 1);
+        baseList[i].balance.dollars = stoi(readingLine);
+        baseList[i].balance.cents = stoi(readingLine.substr(readingLine.find_first_of('.') + 1));
     }
 }
