@@ -193,8 +193,9 @@ int main(){
                             << "-> Name: " << baseList[matchID].name << '\n'
                             << "-> C.I.: " << setfill('0') << setw(8) << baseList[matchID].CI << '\n'
                             << "-> Account number: " << setfill('0') << setw(10) << baseList[matchID].accNum << '\n'
-                            << "-> Account type: " << baseList[matchID].accType << '\n'
-                            << "-> Account status: ";
+                            << "-> Account type: ";
+                    (baseList[matchID].accType == ACC_CURRENT) ? cout << "Current\n" : cout << "Debit\n";
+                    cout    << "-> Account status: ";
                     (baseList[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
                 }
                 else{
@@ -266,13 +267,17 @@ int main(){
             else if(action == SUSPEND){
                 ClrScr();
                 baseList[currUser].suspended = true;
+
                 std::stringstream lineUpdate;
                 lineUpdate  << setfill('0') << setw(8) << baseList[currUser].CI << ','
                             << baseList[currUser].name << ','
-                            << setfill('0') << setw(10) << baseList[currUser].accNum << ','
-                            << baseList[currUser].accType << ','
-                            << "true";
+                            << setfill('0') << setw(10) << baseList[currUser].accNum << ',';
+                (baseList[currUser].accType == ACC_CURRENT) ? 
+                    lineUpdate  << "current," : lineUpdate << "debit";
+                lineUpdate  << "true";
+
                 ReplaceLine(CLTFILE_PATH, lineUpdate.str(), currUser + 1);
+
                 cout << "[ INFO ] The account has been suspended successfully.\n";
                 cin.get();
                 break;

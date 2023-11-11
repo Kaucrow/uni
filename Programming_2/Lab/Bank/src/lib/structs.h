@@ -2,7 +2,7 @@
 #include <string>
 using std::string;
 
-enum MovStatus{ MOV_STATUS_RETURNED, MOV_STATUS_RENTED, MOV_STATUS_EXPIRED };
+enum AccType{ ACC_DEBIT, ACC_CURRENT };
 
 struct Client{
     int ID = 0, CI = 0;
@@ -10,7 +10,8 @@ struct Client{
         int dollars = 0, cents = 0;
     } balance;
     long long int accNum;
-    string name, accType;
+    AccType accType;
+    string name;
     bool suspended;
 };
 

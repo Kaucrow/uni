@@ -170,7 +170,8 @@ void PopulateClientList(Client baseList[], const char* movFilePath){
                     break;
                 // Account type. //
                 case 3:
-                    baseList[i].accType = readingLine.substr(0, nextDelim);
+                    (readingLine.substr(0, nextDelim) == "current") ?
+                        baseList[i].accType = ACC_CURRENT : baseList[i].accType = ACC_DEBIT;
                     break;
                 // Suspend status. //
                 case 4:
