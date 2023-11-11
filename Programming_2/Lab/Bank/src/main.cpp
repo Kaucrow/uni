@@ -8,6 +8,7 @@
 #include <structs.h>
 #include <file_ops.h>
 #include <merge_sort.h>
+#include <search_ops.h>
 
 #define CLTFILE_PATH "./data/clients.csv"
 
@@ -97,7 +98,7 @@ int main(){
             if(action == SEARCH){
                 ClrScr();
                 cout    << "*** CLIENT SEARCH ***\n"
-                        << "(1) Search by CI\n"
+                        << "(1) Search by C.I.\n"
                         << "(2) Search by account number\n"
                         << "(3) Search by client name\n"
                         << "Select option: ";
@@ -113,23 +114,47 @@ int main(){
                 int intSearch;
                 long long int llintSearch;
                 string strSearch;
+                
+                int matchID;
                 ClrScr();
                 switch(action){
                     case 1:
-                        cout << "CI to search for: ";
+                        cout << "C.I. to search for: ";
                         cin >> intSearch;
                         cin.ignore(1);
+                        matchID = BinSearch(ciList, 1, totalClients, intSearch);
+                        if(matchID != -1) matchID = ciList[matchID].ID;
                         break;
                     case 2:
                         cout << "Account number to search for: ";
                         cin >> llintSearch;
                         cin.ignore(1);
+                        matchID = BinSearch(accNumList, 1, totalClients, llintSearch);
+                        if(matchID != -1) matchID = accNumList[matchID].ID;
                         break;
                     case 3:
                         cout << "Client name to search for: ";
                         getline(cin, strSearch);
+                        matchID = BinSearch(nameList, 1, totalClients, strSearch);
+                        if(matchID != -1) matchID = nameList[matchID].ID;
                         break;
-                } 
+                }
+
+                ClrScr();
+                using std::setw, std::setfill;
+                if(matchID != -1){
+                    cout    << "*** FOUND CLIENT ***\n"
+                            << "-> Name: " << baseList[matchID].name << '\n'
+                            << "-> C.I.: " << setfill('0') << setw(8) << baseList[matchID].CI << '\n'
+                            << "-> Account number: " << setfill('0') << setw(10) << baseList[matchID].accNum << '\n'
+                            << "-> Account type: " << baseList[matchID].accType << '\n'
+                            << "-> Account status: ";
+                    (baseList[matchID].suspend == true) ? cout << "Suspended\n" : cout << "Active\n";
+                }
+                else{
+                    cout << "*** FOUND NO MATCHES ***\n";
+                }
+                cin.get();
             }
             else break;
         }

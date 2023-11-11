@@ -24,8 +24,8 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
  *                      - If true, the search will store the ID of every element that has a data equal or less than the search.
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
-template<typename FragT, typename DataT>
-void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search, bool lesserMatch = false);
+//template<typename FragT, typename DataT>
+//void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search, bool lesserMatch = false);
 
 /**
  * @brief Performs a linear search in the base movie list looking for movies with 
@@ -33,4 +33,4 @@ void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r
  * All params included have the same function as the ones in BinSearch().
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
-void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search);
+//void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search);
