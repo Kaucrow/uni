@@ -65,7 +65,7 @@ int main(){
             clientsOps << "ci,client,balance,last_op\n";
             for(int i = 1; i <= totalClients; i++){
                 clientsOps  << setfill('0') << setw(8) << baseList[i].CI << ','
-                            << baseList[i].name << ",0,\n";
+                            << baseList[i].name << ",0.0,\n";
             }
         }
     }
@@ -194,7 +194,15 @@ int main(){
                     case 1:
                         cout << "Deposit amount: ";
                         cin >> amount;
+                        cin.ignore(1);
                         Deposit(OPSFILE_PATH, baseList, currUser, amount);
+                        break;
+                    case 2:
+                        cout << "Withdrawal amount: ";
+                        cin >> amount;
+                        cin.ignore(1);
+                        try{ Withdraw(OPSFILE_PATH, baseList, currUser, amount); }
+                        catch(string exc){ cerr << exc; cin.get(); }
                         break;
                 }
             }
