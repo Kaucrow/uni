@@ -23,6 +23,7 @@ add_subdirectory(./src/lib/merge_sort)
 #add_subdirectory(./src/lib/store_movie)
 add_subdirectory(./src/lib/search_ops)
 add_subdirectory(./src/lib/file_ops)
+add_subdirectory(./src/lib/transaction)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
@@ -30,6 +31,7 @@ target_include_directories(${PROJECT_NAME}
     #PUBLIC ./src/lib/store_movie
     PUBLIC ./src/lib/search_ops
     PUBLIC ./src/lib/file_ops
+    PUBLIC ./src/lib/transaction
 )
 
 #if(Boost_FOUND)
@@ -47,8 +49,9 @@ target_include_directories(${PROJECT_NAME}
 target_link_directories(${PROJECT_NAME}
     PRIVATE merge_sort
     #PRIVATE store_movie
-    PRIVATE file_ops
     PRIVATE search_ops
+    PRIVATE file_ops
+    PRIVATE transaction
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -56,4 +59,5 @@ target_link_libraries(${PROJECT_NAME}
     #PRIVATE store_movie
     PRIVATE search_ops
     PRIVATE file_ops
+    PRIVATE transaction
 )

@@ -9,13 +9,15 @@
 #include <file_ops.h>
 #include <merge_sort.h>
 #include <search_ops.h>
+#include <transaction.h>
 
 #define CLTFILE_PATH "./data/clients.csv"
+#define OPSFILE_PATH "./data/clients_ops.csv"
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
-        std::ofstream, std::ifstream;
+        std::ofstream, std::ifstream, std::setw, std::setfill;
 
-enum { SEARCH = 1, EXIT = 2 };      // Actions.
+enum { SEARCH = 1, TRANSACTIONS = 2, EXIT = 3 };      // Actions.
 
 /**
  * @brief OS agnostic clear screen function.
@@ -29,6 +31,7 @@ int main(){
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.*/
     assert(sizeof(long long int) >= 8);
+
 
     int totalClients = GetFileNumOfLines(CLTFILE_PATH) - 1;
 
@@ -54,8 +57,21 @@ int main(){
     MergeSort(ciList, 1, totalClients);
     MergeSort(accNumList, 1, totalClients);
     MergeSort(nameList, 1, totalClients);
+    
+    {
+        ifstream openTest(OPSFILE_PATH);
+        if(!openTest){
+            ofstream clientsOps(OPSFILE_PATH, std::ios::app);
+            clientsOps << "ci,client,balance,last_op\n";
+            for(int i = 1; i <= totalClients; i++){
+                clientsOps  << setfill('0') << setw(8) << baseList[i].CI << ','
+                            << baseList[i].name << ",0,\n";
+            }
+        }
+    }
 
     int action;
+    int currUser = 1;
     string username;
     while(true){
         // Main menu screen. //
@@ -84,7 +100,8 @@ int main(){
             ClrScr();
             cout    << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search for a client\n"
-                    << "(2) Exit\n"
+                    << "(2) Peform transactions\n"
+                    << "(3) Exit\n"
                     << "Select option: ";
 
             cin >> action;
@@ -141,7 +158,6 @@ int main(){
                 }
 
                 ClrScr();
-                using std::setw, std::setfill;
                 if(matchID != -1){
                     cout    << "*** FOUND CLIENT ***\n"
                             << "-> Name: " << baseList[matchID].name << '\n'
@@ -155,6 +171,32 @@ int main(){
                     cout << "*** FOUND NO MATCHES ***\n";
                 }
                 cin.get();
+            }
+            else if(action == TRANSACTIONS){
+                ClrScr();
+                cout    << "*** TRANSACTION TYPE ***\n"
+                        << "(1) Deposit\n"
+                        << "(2) Withdrawal\n"
+                        << "(3) Transfer\n"
+                        << "Select option: ";
+
+                cin >> action;
+                while(action < 1 || action > 3){
+                    cout << "INVALID OPTION.\nSelect option: ";
+                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    cin >> action;
+                }
+                cin.ignore(1);
+
+                string amount;
+                ClrScr();
+                switch(action){
+                    case 1:
+                        cout << "Deposit amount: ";
+                        cin >> amount;
+                        Deposit(OPSFILE_PATH, baseList, currUser, amount);
+                        break;
+                }
             }
             else break;
         }
