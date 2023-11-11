@@ -14,6 +14,7 @@
 
 #define CLTFILE_PATH "./data/clients.csv"
 #define OPSFILE_PATH "./data/client_ops.csv"
+#define TTLFILE_PATH "./data/title.txt"
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
@@ -73,6 +74,17 @@ int main(){
             PopulateClientListBalance(baseList, OPSFILE_PATH);
         }
     }
+
+    ClrScr();
+    {
+        string readingLine;
+        ifstream titleFile(TTLFILE_PATH);
+        if(!titleFile){ cerr << "[ ERR ] title.txt COULD NOT BE OPENED.\n"; return 1; }
+        while(getline(titleFile, readingLine)){
+            cout << readingLine << '\n';
+        }
+    }
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     int action;
     int currUser;
