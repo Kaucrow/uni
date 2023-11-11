@@ -19,9 +19,7 @@ void StrToMoney(string moneyStr, int& dollars, int& cents){
     }
 }
 
-void Deposit(const char* clientOpsPath, Client baseList[], int userID, string amount){
-    int addDollars = 0, addCents = 0;
-    StrToMoney(amount, addDollars, addCents);
+void DepositCall(const char* clientOpsPath, Client baseList[], int userID, int addDollars, int addCents){
     baseList[userID].balance.dollars += addDollars;
     baseList[userID].balance.cents += addCents;
     if(baseList[userID].balance.cents >= 100){
@@ -35,10 +33,13 @@ void Deposit(const char* clientOpsPath, Client baseList[], int userID, string am
     ReplaceLine(clientOpsPath, lineUpdate, userID + 1);
 }
 
-void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string amount){
-    int withdrawDollars = 0, withdrawCents = 0;
-    StrToMoney(amount, withdrawDollars, withdrawCents);
+void Deposit(const char* clientOpsPath, Client baseList[], int userID, string amount){
+    int addDollars = 0, addCents = 0;
+    StrToMoney(amount, addDollars, addCents);
+    DepositCall(clientOpsPath, baseList, userID, addDollars, addCents);
+}
 
+void WithdrawCall(const char* clientOpsPath, Client baseList[], int userID, int withdrawDollars, int withdrawCents){
     if(withdrawDollars >= baseList[userID].balance.dollars){
         string notEnoughMoney("[ ERR ] You don't have enough money to perform this withdrawal.\n");
         if(withdrawDollars > baseList[userID].balance.dollars) throw notEnoughMoney;
@@ -58,13 +59,20 @@ void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string a
     ReplaceLine(clientOpsPath, lineUpdate, userID + 1);
 }
 
+void Withdraw(const char* clientOpsPath, Client baseList[], int userID, string amount){
+    int withdrawDollars = 0, withdrawCents = 0;
+    StrToMoney(amount, withdrawDollars, withdrawCents);
+    try{ WithdrawCall(clientOpsPath, baseList, userID, withdrawDollars, withdrawCents); }
+    catch(string exc){ throw; }
+}
+
 void Transfer(const char* clientOpsPath, Client baseList[], int userFromID, int userToID, string amount){
     int transferDollars = 0, transferCents;
     StrToMoney(amount, transferDollars, transferCents);
 
-    try{ Withdraw(clientOpsPath, baseList, userFromID, amount); }
+    try{ WithdrawCall(clientOpsPath, baseList, userFromID, transferDollars, transferCents); }
     catch(string exc){ exc = "[ ERR ] You don't have enough money to perform this transfer.\n"; throw exc; } 
-    Deposit(clientOpsPath, baseList, userToID, amount);
+    DepositCall(clientOpsPath, baseList, userToID, transferDollars, transferCents);
 
     string lineUpdate = to_string(baseList[userFromID].CI) + ',' + baseList[userFromID].name + ',' + 
                         to_string(baseList[userFromID].balance.dollars) + '.' + to_string(baseList[userFromID].balance.cents) + ',' + 

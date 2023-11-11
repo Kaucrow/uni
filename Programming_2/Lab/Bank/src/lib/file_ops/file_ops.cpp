@@ -183,7 +183,7 @@ void PopulateClientList(Client baseList[], const char* movFilePath){
 }
 
 void PopulateClientListBalance(Client baseList[], const char* clientOpsPath){
-    string openExc = "[ ERR ] \"clients_ops.csv\" FILE DOES NOT EXIST IN THE PROVIDED PATH.";
+    string openExc = "[ ERR ] \"client_ops.csv\" FILE DOES NOT EXIST IN THE PROVIDED PATH.";
     ifstream clientOps(clientOpsPath);
     if(!clientOps){ throw openExc; }
 
