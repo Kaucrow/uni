@@ -3,6 +3,7 @@
 #include <limits>
 #include <iomanip>
 #include <cassert>
+#include <sstream>
 //#include <fcntl.h>              // For _setmode().
 //#include <boost/locale.hpp>
 #include <structs.h>
@@ -17,7 +18,7 @@
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
 
-enum { SEARCH = 1, TRANSACTIONS = 2, EXIT = 3 };      // Actions.
+enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4 };       // Actions.
 
 /**
  * @brief OS agnostic clear screen function.
@@ -74,7 +75,7 @@ int main(){
     }
 
     int action;
-    int currUser = 1;
+    int currUser;
     string username;
     while(true){
         // Main menu screen. //
@@ -83,20 +84,33 @@ int main(){
                 << "(1) Login\n"
                 << "(2) Exit\n"
                 << "Select option: ";
-        //cin >> action;
+        cin >> action;
         switch(action){
             case 1: break;
             case 2:
                 cout << "\nTerminating execution...\n";
                 return 0;
         }
-        //cin.ignore(1);
+        cin.ignore(1);
 
         // Login screen. //
         ClrScr();
         cout    << "*** LOGIN ***\n"
-                << "-> User: ";
-        //getline(cin, username);
+                << "-> Client full name: ";
+        getline(cin, username);
+
+        currUser = BinSearch(nameList, 1, totalClients, username);
+        if(currUser == -1){
+            cerr << "[ ERR ] The client could not be found.\n";
+            cin.get();
+            continue;
+        }
+        currUser = nameList[currUser].ID;
+        if(baseList[currUser].suspended){
+            cerr << "[ INFO ] This account is currently suspended.\n";
+            cin.get();
+            continue;
+        }
 
         while(true){
             // Main actions screen. //
@@ -104,7 +118,8 @@ int main(){
             cout    << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search for a client\n"
                     << "(2) Peform transactions\n"
-                    << "(3) Exit\n"
+                    << "(3) Suspend current user\n"
+                    << "(4) Exit\n"
                     << "Select option: ";
 
             cin >> action;
@@ -235,6 +250,20 @@ int main(){
                             }
                         } 
                 }
+            }
+            else if(action == SUSPEND){
+                ClrScr();
+                baseList[currUser].suspended = true;
+                std::stringstream lineUpdate;
+                lineUpdate  << setfill('0') << setw(8) << baseList[currUser].CI << ','
+                            << baseList[currUser].name << ','
+                            << setfill('0') << setw(10) << baseList[currUser].accNum << ','
+                            << baseList[currUser].accType << ','
+                            << "true";
+                ReplaceLine(CLTFILE_PATH, lineUpdate.str(), currUser + 1);
+                cout << "[ INFO ] The account has been suspended successfully.\n";
+                cin.get();
+                break;
             }
             else break;
         }
