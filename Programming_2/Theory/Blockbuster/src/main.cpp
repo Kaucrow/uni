@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 #include <fcntl.h>              // For _setmode().
 #include <boost/locale.hpp>
 #include <structs.h>
@@ -352,7 +354,7 @@ int main(){
                 toStore.title = storeDat;
 
                 wcout << "-> Genres\n";
-                for(int i = 0; i < 6; i++){
+                for(int i = 0; i < 7; i++){
                     wcout << "   * " << i + 1 << ": ";
                     getline(wcin, storeDat);
                     toStore.genres[i] = storeDat;
@@ -361,6 +363,10 @@ int main(){
                 wcout << "-> Director: ";
                 getline(wcin, storeDat);
                 toStore.director = storeDat;
+                
+                wcout << "-> Price: ";
+                getline(wcin, storeDat);
+                toStore.price = stof(storeDat);
 
                 wcout << "-> Release year: ";
                 getline(wcin, storeDat);
@@ -381,13 +387,29 @@ int main(){
                 // while preserving the sorting order in each of them.
                 // ======================
                 StoreNewFrag(intFrags[DUR], 1, totalMovies, toStore.duration);
+                StoreNewFrag(intFrags[PRC], 1, totalMovies, int(toStore.price));
                 StoreNewFrag(intFrags[YEA], 1, totalMovies, toStore.release.year);
                 StoreNewFrag(intFrags[MON], 1, totalMovies, toStore.release.month);
                 StoreNewFrag(intFrags[DAY], 1, totalMovies, toStore.release.day);
                 StoreNewFrag(wstrFrags[TTL], 1, totalMovies, toStore.title);
                 StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
 
-                wcout << "[ INFO ] THE MOVIE WAS ADDED SUCCESSFULLY.\n";
+                std::wostringstream appendLine;
+                appendLine << totalMovies << L';' << toStore.title << L';';
+                for(int i = 0; toStore.genres[i] != L"" && i < 7; i++){
+                    appendLine << toStore.genres[i] << L'|';
+                }
+                appendLine.seekp(-1, std::ios_base::end);
+                appendLine  << L';' << toStore.duration << L';'
+                            << toStore.director << L';'
+                            << std::setprecision(4) << toStore.price << L';'
+                            << std::setfill(L'0') << std::setw(4) << toStore.release.year << L'-'
+                            << std::setfill(L'0') << std::setw(2) << toStore.release.month << L'-'
+                            << std::setfill(L'0') << std::setw(2) << toStore.release.day << L";;;;\n";
+
+                AppendLine(MOVFILE_PATH, appendLine.str());
+
+                wcout << "[ INFO ] The movie was added successfully.\n";
                 wcin.get();
             }
             // ========================
