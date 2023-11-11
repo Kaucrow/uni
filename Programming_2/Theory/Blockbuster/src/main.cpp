@@ -176,6 +176,7 @@ int main(){
                     << "(4) Rent a movie\n"
                     << "(5) Return a movie\n"
                     << "(6) Exit\n"
+                    << "\nActive user: " << username << "\n\n"
                     << "Select option: ";
             wcin >> action;
             while(action < FILTER || action > EXIT){
@@ -394,6 +395,7 @@ int main(){
                 StoreNewFrag(wstrFrags[TTL], 1, totalMovies, toStore.title);
                 StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
 
+                // Build the line containing the added movie data, and append it to the movies.csv file. //
                 std::wostringstream appendLine;
                 appendLine << totalMovies << L';' << toStore.title << L';';
                 for(int i = 0; toStore.genres[i] != L"" && i < 7; i++){
