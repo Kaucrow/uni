@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <sstream>
 #include <fcntl.h>              // For _setmode().
+#include <libloaderapi.h>
+#include <sys/stat.h>
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
@@ -11,9 +13,9 @@
 #include <search_ops.h>
 #include <file_ops.h>
 
-#define USRDATA_PATH "./data/users_data.csv"
-#define MOVFILE_PATH "./data/movies.csv"
-#define TTLFILE_PATH "./data/title.txt"
+//#define USRDATA_PATH "./data/users_data.csv"
+//#define MOVFILE_PATH "./data/movies.csv"
+//#define TTLFILE_PATH "./data/title.txt"
 
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
@@ -26,6 +28,12 @@ enum { TTL, DIR };                          // wstring frag types.
  * @brief OS agnostic clear screen function.
  */
 void ClrScr();
+
+/**
+ * @brief Gets the path to the "data" dir.
+ * @return The path to the data dir, if found. Otherwise, returns an empty wstring.
+*/
+std::string GetDataDir();
 
  /**
  * @brief Gets the current date, or the current date plus 14 days.
@@ -41,7 +49,22 @@ int main(){
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
     _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
 
-    CheckMoviesCsv(MOVFILE_PATH);       // Ensure that the movies.csv has all the required fields.
+    // Set the file paths. //
+    std::string dataDir = GetDataDir();
+
+    if(dataDir == ""){ wcerr << L"[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
+
+    char USRDATA_PATH[dataDir.length() + 16];
+    strcpy(USRDATA_PATH, (dataDir + "\\users_data.csv").c_str());
+
+    char MOVFILE_PATH[dataDir.length() + 12];
+    strcpy(MOVFILE_PATH, (dataDir + "\\movies.csv").c_str());
+
+    char TTLFILE_PATH[dataDir.length() + 11];
+    strcpy(TTLFILE_PATH, (dataDir + "\\title.txt").c_str());
+    
+    // Ensure that the movies.csv file has all the required fields. //
+    CheckMoviesCsv(MOVFILE_PATH);
 
     int totalMovies = 0;
     try{ totalMovies = GetLastLineFirstNum(MOVFILE_PATH); }     // Get the number of movies in the movies.csv file.
@@ -530,4 +553,33 @@ void ClrScr(){
         // Assuming POSIX OS
         std::system("clear");
     #endif
+}
+
+std::string GetDataDir(){
+    using std::string;
+    auto ValidDataDir = [](string path) -> bool{
+        struct stat s;
+        if((stat(path.c_str(), &s) == 0)){
+            if(s.st_mode & S_IFDIR)
+                return true;
+        }
+        return false;
+    };
+
+    char pBuf[256];
+    size_t len = sizeof(pBuf);
+    GetModuleFileName(NULL, pBuf, len);
+
+    string path(pBuf);
+    path.append("\\data");
+    if(ValidDataDir(path)) return path;
+    path.erase(path.find_last_of('\\'));
+
+    for(int i = 0; i < 3; i++){
+        path.erase(path.find_last_of('\\'));
+        path.append("\\data");
+        if(ValidDataDir(path)) return path;
+        path.erase(path.find_last_of('\\'));
+    }
+    return "";
 }
