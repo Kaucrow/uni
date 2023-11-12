@@ -4,15 +4,13 @@
 #include <iomanip>
 #include <cassert>
 #include <sstream>
+#include <libloaderapi.h>
+#include <sys/stat.h>
 #include <structs.h>
 #include <file_ops.h>
 #include <merge_sort.h>
 #include <search_ops.h>
 #include <transaction.h>
-
-#define CLTFILE_PATH "./data/clients.csv"
-#define OPSFILE_PATH "./data/client_ops.csv"
-#define TTLFILE_PATH "./data/title.txt"
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
@@ -24,8 +22,28 @@ enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4 };       // Actions.
  */
 void ClrScr();
 
+/**
+ * @brief Gets the path to the "data" dir.
+ * @return The path to the data dir, if found. Otherwise, returns an empty string.
+*/
+string GetDataDir();
+
 int main(){
     assert(sizeof(long long int) >= 8);
+
+    // Set the file paths. //
+    string dataDir = GetDataDir();
+
+    if(dataDir == ""){ cerr << "[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
+
+    char CLTFILE_PATH[dataDir.length() + 13];
+    strcpy(CLTFILE_PATH, (dataDir + "\\clients.csv").c_str());
+
+    char OPSFILE_PATH[dataDir.length() + 16];
+    strcpy(OPSFILE_PATH, (dataDir + "\\client_ops.csv").c_str());
+
+    char TTLFILE_PATH[dataDir.length() + 11];
+    strcpy(TTLFILE_PATH, (dataDir + "\\title.txt").c_str());
 
     // Get the number of clients in the clients.csv file. //
     int totalClients = GetFileNumOfLines(CLTFILE_PATH) - 1;
@@ -341,4 +359,32 @@ void ClrScr(){
         // Assuming POSIX OS
         std::system("clear");
     #endif
+}
+
+string GetDataDir(){
+    auto ValidDataDir = [](string path) -> bool{
+        struct stat s;
+        if((stat(path.c_str(), &s) == 0)){
+            if(s.st_mode & S_IFDIR)
+                return true;
+        }
+        return false;
+    };
+
+    char pBuf[256];
+    size_t len = sizeof(pBuf);
+    GetModuleFileName(NULL, pBuf, len);
+
+    string path(pBuf);
+    path.append("\\data");
+    if(ValidDataDir(path)) return path;
+    path.erase(path.find_last_of('\\'));
+
+    for(int i = 0; i < 3; i++){
+        path.erase(path.find_last_of('\\'));
+        path.append("\\data");
+        if(ValidDataDir(path)) return path;
+        path.erase(path.find_last_of('\\'));
+    }
+    return "";
 }
