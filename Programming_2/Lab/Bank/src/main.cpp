@@ -318,7 +318,7 @@ int main(){
                             << baseList[currClient].name << ','
                             << setfill('0') << setw(10) << baseList[currClient].accNum << ',';
                 (baseList[currClient].accType == ACC_CURRENT) ? 
-                    lineUpdate  << "current," : lineUpdate << "debit";
+                    lineUpdate  << "current," : lineUpdate << "debit,";
                 lineUpdate  << "true";
 
                 ReplaceLine(CLTFILE_PATH, lineUpdate.str(), currClient + 1);
