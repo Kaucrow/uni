@@ -47,7 +47,7 @@ void CheckMoviesCsv(const char* movFilePath);
  * @param baseList - Base list array to store the movies in.
  * @param movFilePath - Path to the movies.csv file.
  */
-void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath);
+void PopulateMovieList(Movie baseList[], const char* movFilePath);
 
 /**
  * @brief Stores the users data from the users_data.csv file into each element of the user list array.

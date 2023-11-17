@@ -100,7 +100,7 @@ void CheckMoviesCsv(const char* movFilePath){
     }
 }
 
-void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
+void PopulateMovieList(Movie baseList[], const char* movFilePath){
     wstring openExc = L"[ ERR ] movies.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
     wifstream movFile(movFilePath);
     if(!movFile){ throw openExc; }
@@ -116,12 +116,10 @@ void PopulateMovieList(Movie baseList[], int movieNum, const char* movFilePath){
     wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
     wstring statusExc = L"[ ERR ] UNEXPECTED STATUS FOUND ON MOVIE NUMBER ";
 
-    movFile.seekg(0);
     getline(movFile, readingLine);          // Ignore the first line in the inFile.
-
-    for(int i = 1; i <= movieNum; i++){
-        getline(movFile, readingLine);      // Get the next line
-        for(int j = 0; j < 11; j++){        // And store each of the 11 data fields.
+    for(int i = 1; getline(movFile, readingLine); i++){
+        // Store each of the 11 data fields.
+        for(int j = 0; j < 11; j++){
             nextDelim = readingLine.find(';');
             switch(j){
                 // ID. //

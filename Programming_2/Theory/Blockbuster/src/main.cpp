@@ -13,10 +13,6 @@
 #include <search_ops.h>
 #include <file_ops.h>
 
-//#define USRDATA_PATH "./data/users_data.csv"
-//#define MOVFILE_PATH "./data/movies.csv"
-//#define TTLFILE_PATH "./data/title.txt"
-
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
@@ -47,7 +43,6 @@ int main(){
     std::locale loc = gen("en_US");             // Create an "en_US" locale
     std::locale::global(loc);                   // and set it as the global locale.
     _setmode(_fileno(stdout), _O_U8TEXT);       // Change the STDOUT mode to use UTF-8 characters.
-    _setmode(_fileno(stdin), _O_U8TEXT);        // Change the STDIN mode to use UTF-8 characters.
 
     // Set the file paths. //
     std::string dataDir = GetDataDir();
@@ -125,7 +120,7 @@ int main(){
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     // Populate the base movie list. //
-    try{ PopulateMovieList(baseList, totalMovies, MOVFILE_PATH); }
+    try{ PopulateMovieList(baseList, MOVFILE_PATH); }
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     // Copy the base movie list elements data to each frag list. //
@@ -146,7 +141,6 @@ int main(){
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
         MergeSort(wstrFrags[i], 1, totalMovies);
-
 
     // =========================
     //  Main loop.
