@@ -16,7 +16,8 @@
 using   std::wcout, std::wcerr, std::wcin, std::getline, std::wfstream,
         std::wifstream, std::wofstream, std::wstring;
 
-enum { FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4, RETURNMOV = 5, EXIT = 6 };       // Actions.
+enum {  FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4,      // Actions.
+        RETURNMOV = 5, GETCLTDATA = 6, EXIT = 7 };
 enum { DUR, PRC, YEA, MON, DAY };           // int frag types.
 enum { TTL, DIR };                          // wstring frag types.
 
@@ -114,6 +115,7 @@ int main(){
     catch(wstring exc){ wcerr << exc << '\n'; return 1; }
 
     User userList[userNum + 101];       // List which holds the users in the users_data.csv file and their data.
+    WstrFrag usernameList[userNum + 101];
 
     // Populate the user list. //
     try{ PopulateUserList(userList, USRDATA_PATH); }
@@ -141,6 +143,15 @@ int main(){
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
         MergeSort(wstrFrags[i], 1, totalMovies);
+
+    // Copy the userList elements to the username frag list. //
+    for(int i = 1; i <= userNum; i++){
+        usernameList[i].ID = userList[i].ID;
+        usernameList[i].data = userList[i].name;
+    }
+
+    // Sort the username frag list. //
+    MergeSort(usernameList, 1, userNum);
 
     // =========================
     //  Main loop.
@@ -197,7 +208,8 @@ int main(){
                     << "(3) Add a movie\n"
                     << "(4) Rent a movie\n"
                     << "(5) Return a movie\n"
-                    << "(6) Exit\n"
+                    << "(6) Get client info\n"
+                    << "(7) Exit\n"
                     << "\nActive user: " << username << "\n\n"
                     << "Select option: ";
             wcin >> action;
@@ -516,6 +528,27 @@ int main(){
                 UpdateMovieLiveData(baseList, queryMovieID, username, rentDate, expiryDate, UPDATE_RETURN);
                 // Update the users_data.csv file and user list data with the return information. //
                 UpdateUsersData(USRDATA_PATH, userList, currUser, returnName, UPDATE_RETURN);
+            }
+            else if(action == GETCLTDATA){
+                ClrScr();
+                wstring search;
+
+                wcout << "Client name: ";
+                getline(wcin, search);
+
+                int userPos = BinSearch(usernameList, 1, userNum, search);
+
+                if(userPos == -1)
+                    wcerr << "[ ERR ] The client was not found.\n";
+                else{
+                    ClrScr();
+                    userPos = usernameList[userPos].ID;
+                    wcout   << "*** FOUND CLIENT ***\n"
+                            << "-> ID: " << userList[userPos].ID << '\n'
+                            << "-> Name: " << userList[userPos].name << '\n'
+                            << "-> Rented movies: " << userList[userPos].movies << '\n';
+                }
+                wcin.get();
             }
             // Executes if the user selects the "Exit" action. //
             else break;
