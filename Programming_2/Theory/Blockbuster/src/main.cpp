@@ -90,7 +90,7 @@ int main(){
     PStrFrag ttlList[totalMovies + 3001];
     PStrFrag dirList[totalMovies + 3001];
     IntFrag* intFrags[5] = { durList, prcList, yeaList, monList, dayList };
-    PStrFrag* wstrFrags[2] = { ttlList, dirList };
+    PStrFrag* pstrFrags[2] = { ttlList, dirList };
 
     pstring username;           // Username of the active user.
     int userNum = 0;            // Number of users in the users_data.csv file.
@@ -143,21 +143,21 @@ int main(){
     // Copy the base movie list elements data to each frag list. //
     for(int i = 1; i <= totalMovies; i++){
         for(int j = DUR; j <= DAY; j++){ intFrags[j][i].ID = baseList[i].ID; }
-        for(int j = TTL; j <= DIR ; j++){ wstrFrags[j][i].ID = baseList[i].ID; }
+        for(int j = TTL; j <= DIR ; j++){ pstrFrags[j][i].ID = baseList[i].ID; }
         intFrags[DUR][i].data = baseList[i].duration;
         intFrags[PRC][i].data = baseList[i].price;
         intFrags[YEA][i].data = baseList[i].release.year;
         intFrags[MON][i].data = baseList[i].release.month;
         intFrags[DAY][i].data = baseList[i].release.day;
-        wstrFrags[TTL][i].data = baseList[i].title;
-        wstrFrags[DIR][i].data = baseList[i].director;
+        pstrFrags[TTL][i].data = baseList[i].title;
+        pstrFrags[DIR][i].data = baseList[i].director;
     }
      
     // Sort each frag list. //
     for(int i = 0; i < 4; i++)
         MergeSort(intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
-        MergeSort(wstrFrags[i], 1, totalMovies);
+        MergeSort(pstrFrags[i], 1, totalMovies);
 
     // Copy the userList elements to the username frag list. //
     for(int i = 1; i <= userNum; i++){
@@ -282,7 +282,7 @@ int main(){
                     case 2:
                         pcout << "Title to search for: ";
                         getline(pcin, wstrSearch);
-                        BinSearchStoreMatches(wstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(pstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 3:
                         pcout << "Genre to search for: ";
@@ -292,7 +292,7 @@ int main(){
                     case 4:
                         pcout << "Director to search for: ";
                         getline(pcin, wstrSearch);
-                        BinSearchStoreMatches(wstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(pstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 5:
                         pcout << "Max price: ";
@@ -352,7 +352,7 @@ int main(){
                 getline(pcin, search);
 
                 // Perform a search by title for the entered movie. //
-                int ttlPos = BinSearch(wstrFrags[TTL], 1, totalMovies, search);
+                int ttlPos = BinSearch(pstrFrags[TTL], 1, totalMovies, search);
 
                 // If it doesn't exist in the title frag list, output an error and go to the next loop iteration. //
                 if(ttlPos == -1){
@@ -362,7 +362,7 @@ int main(){
                 }
 
                 // If it exists, get its ID, and print its data from the base list. //
-                int moviePos = wstrFrags[TTL][ttlPos].ID;
+                int moviePos = pstrFrags[TTL][ttlPos].ID;
                 pcout   << "\n[ INFO ] Found movie \"" << search << "\".\n"
                         << "-> Title: " << baseList[moviePos].title << '\n'
                         << "-> Duration: " << baseList[moviePos].duration << " min.\n"
@@ -445,8 +445,8 @@ int main(){
                 StoreNewFrag(intFrags[YEA], 1, totalMovies, toStore.release.year);
                 StoreNewFrag(intFrags[MON], 1, totalMovies, toStore.release.month);
                 StoreNewFrag(intFrags[DAY], 1, totalMovies, toStore.release.day);
-                StoreNewFrag(wstrFrags[TTL], 1, totalMovies, toStore.title);
-                StoreNewFrag(wstrFrags[DIR], 1, totalMovies, toStore.director);
+                StoreNewFrag(pstrFrags[TTL], 1, totalMovies, toStore.title);
+                StoreNewFrag(pstrFrags[DIR], 1, totalMovies, toStore.director);
 
                 // Build the line containing the added movie data, and append it to the movies.csv file. //
                 pstringstream appendLine;
@@ -487,7 +487,7 @@ int main(){
                 int queryMovieID = 0; 
                 // Search for the title of the movie to rent, throw an error if it doesn't exist,
                 // and print some information if the movie exists but is already rented.
-                int rentStatus = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, rentName, queryMovieID);
+                int rentStatus = QueryMovieRent(baseList, pstrFrags[TTL], totalMovies, rentName, queryMovieID);
                 if(rentStatus == QUERY_RENT_NOTFOUND){
                     pcerr << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
                     pcin.get();
@@ -521,7 +521,7 @@ int main(){
                 pcout << "Input the title of the movie: ";
                 getline(pcin, returnName);
 
-                int rentStatus = QueryMovieRent(baseList, wstrFrags[TTL], totalMovies, returnName, queryMovieID);
+                int rentStatus = QueryMovieRent(baseList, pstrFrags[TTL], totalMovies, returnName, queryMovieID);
                 if(rentStatus == QUERY_RENT_NOTFOUND){
                     pcout << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
                     pcin.get();
