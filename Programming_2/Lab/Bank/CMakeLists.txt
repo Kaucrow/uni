@@ -2,15 +2,20 @@ cmake_minimum_required(VERSION 3.27.6)
 
 project(bank)
 
-if(MINGW)
-    link_libraries(ws2_32 wsock32)
-endif()
-
 # set a 32Mb stack size
 set(STACK_SIZE_BYTES 32000000)
 
-# append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_BYTES}")
+if(WIN32)
+    # append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_BYTES}")
+else()
+    # append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
+    set(CMAKE_EXE_LINKER_FlAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=${STACK_SIZE_BYTES}")
+endif()
+
+if(MINGW)
+    link_libraries(ws2_32 wsock32)
+endif()
 
 add_executable(bank ./src/main.cpp)
 

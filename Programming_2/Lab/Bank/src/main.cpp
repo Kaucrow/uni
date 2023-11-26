@@ -1,11 +1,19 @@
+#ifdef _WIN32
+    #include <libloaderapi.h>
+    #include <sys/stat.h> 
+#else
+    #include <libgen.h>
+    #include <unistd.h>
+    #include <linux/limits.h>
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <limits>
 #include <iomanip>
 #include <cassert>
 #include <sstream>
-#include <libloaderapi.h>
-#include <sys/stat.h>
+#include <cstring>
 #include <structs.h>
 #include <file_ops.h>
 #include <merge_sort.h>
@@ -361,6 +369,7 @@ void ClrScr(){
     #endif
 }
 
+#ifdef _WIN32
 string GetDataDir(){
     auto ValidDataDir = [](string path) -> bool{
         struct stat s;
@@ -388,3 +397,24 @@ string GetDataDir(){
     }
     return "";
 }
+#else
+string GetDataDir(){
+    using std::filesystem::is_directory;
+
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    string path;
+    if(count != -1) path = dirname(result);
+    path.append("/data");
+    if(is_directory(path)) return path;
+    path.erase(path.find_last_of('/'));
+    
+    for(int i = 0; i < 3; i++){
+        path.erase(path.find_last_of('/'));
+        path.append("/data");
+        if(is_directory(path)) return path;
+        path.erase(path.find_last_of('/'));
+    }
+    return "";
+}
+#endif
