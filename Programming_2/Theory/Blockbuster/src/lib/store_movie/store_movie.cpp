@@ -24,8 +24,8 @@ void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore){
     int storeAt = pivot;
 
     // Get the index where the frag should be stored at. //
-    for(int i = 0; arr[pivot + i].data < toStore; i++){ storeAt++; }
-
+    for(int i = 0; arr[pivot + i].data < toStore && (pivot + i) < r; i++){ storeAt++; }
+    
     // Shift every frag up, until the storeAt index is reached. //
     for(int i = r; i > storeAt; i--){ arr[i] = arr[i - 1]; }
 
