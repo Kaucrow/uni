@@ -1,4 +1,5 @@
 #pragma once
+#include "../basic_defs.h"
 #include "../structs.h"
 
 /**

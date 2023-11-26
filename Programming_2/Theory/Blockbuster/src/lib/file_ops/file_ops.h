@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "../basic_defs.h"
 #include "../structs.h"
-using std::wstring, std::wofstream, std::wifstream, std::getline;
 
 // ================================
 //      GENERAL PURPOSE
@@ -13,7 +13,7 @@ using std::wstring, std::wofstream, std::wifstream, std::getline;
  * @param filePath - Path to the file to append to.
  * @param line - Line to append.
  */
-void AppendLine(const char* filePath, wstring line);
+void AppendLine(const char* filePath, pstring line);
 
 /**
  * @brief Replaces a line with another, in the specified file.
@@ -21,7 +21,7 @@ void AppendLine(const char* filePath, wstring line);
  * @param line - Line to replace with.
  * @param replaceNum - Number of line to replace.
  */
-void ReplaceLine(const char* filePath, wstring line, int replaceNum);
+void ReplaceLine(const char* filePath, pstring line, int replaceNum);
 
 /**
  * @brief Gets the first number in the last line of the specified file.

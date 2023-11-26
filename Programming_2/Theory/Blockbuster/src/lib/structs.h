@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-using std::wstring;
+#include "./basic_defs.h"
 
 struct Date{
     int year = 0, month = 0, day = 0;
@@ -11,12 +11,12 @@ enum MovStatus{ MOV_STATUS_RETURNED, MOV_STATUS_RENTED, MOV_STATUS_EXPIRED };
 struct Movie{
     int ID = 0, duration = 0;
     float price;
-    wstring title;
-    wstring genres[8] = {};     // A max of 7 genres can be stored here. The arr has 8 elements for boundary checks.
-    wstring director;
+    pstring title;
+    pstring genres[8] = {};     // A max of 7 genres can be stored here. The arr has 8 elements for boundary checks.
+    pstring director;
     Date release;
     MovStatus status;
-    wstring rentedTo = L"";
+    pstring rentedTo;
     Date rentedOn;
     Date expiry;
 };
@@ -29,11 +29,11 @@ struct IntFrag : public Frag{
     int data;
 };
 
-struct WstrFrag : public Frag{
-    wstring data;
+struct PStrFrag : public Frag{
+    pstring data; 
 };
 
 struct User{
     int ID = 0;
-    wstring name, movies;
+    pstring name, movies;
 };

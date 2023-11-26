@@ -1,6 +1,6 @@
 #include "../search_ops/search_ops.h"
+#include "./store_movie.h"
 #include <string>
-using std::wstring;
 
 /**
  * @name StoreNewFragImplem
@@ -17,7 +17,6 @@ template<typename FragT, typename DataT>
 void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore){
     // Get the pivot. //
     int pivot = BinSearch(arr, l, r - 1, toStore, true);
-
     // Go back a number of elements. //
     if(pivot > 10){ pivot -= 10; }
     else{ pivot = 1; } 
@@ -36,4 +35,4 @@ void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore){
 }
 
 template void StoreNewFrag<IntFrag, int>(IntFrag arr[], int l, int r, const int toStore);
-template void StoreNewFrag<WstrFrag, wstring>(WstrFrag arr[], int l, int r, const wstring toStore);
+template void StoreNewFrag<PStrFrag, pstring>(PStrFrag arr[], int l, int r, const pstring toStore);

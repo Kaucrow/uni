@@ -1,7 +1,5 @@
 #include "merge_sort.h"
 #include <iostream>
-#include <functional>
-using std::function;
 
 /* For use only by MergeSort() */
 template<typename FragT>
@@ -69,6 +67,6 @@ void MergeSort(FragT arr[], int l, int r){
 }
 
 template void Merge<IntFrag>(IntFrag arr[], int l, int m, int r);
-template void Merge<WstrFrag>(WstrFrag arr[], int l, int m, int r);
+template void Merge<PStrFrag>(PStrFrag arr[], int l, int m, int r);
 template void MergeSort<IntFrag>(IntFrag arr[], int l, int r);
-template void MergeSort<WstrFrag>(WstrFrag arr[], int l, int r);
+template void MergeSort<PStrFrag>(PStrFrag arr[], int l, int r);

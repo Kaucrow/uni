@@ -1,21 +1,27 @@
 cmake_minimum_required(VERSION 3.27.6)
 
 project(blockbuster)
-set(BOOST_ROOT "C:/Boost")
-set(BOOST_INCLUDEDIR "C:/Boost/include/boost-1_83/")
-set(Boost_USE_STATIC_RUNTIME ON)
+
+# set a 32Mb stack size
+set(STACK_SIZE_BYTES 32000000)
+
+if(WIN32)
+    set(BOOST_ROOT "C:/Boost")
+    set(BOOST_INCLUDEDIR "C:/Boost/include/boost-1_83/")
+    set(Boost_USE_STATIC_RUNTIME ON)
+    # append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_BYTES}")
+else()
+    set(BOOST_INCLUDEDIR "/usr/include/boost/")
+    # append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
+    set(CMAKE_EXE_LINKER_FlAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,stack-size=${STACK_SIZE_BYTES}")
+endif()
 
 if(MINGW)
     link_libraries(ws2_32 wsock32)
 endif()
 
 find_package(Boost REQUIRED COMPONENTS locale)
-
-# set a 32Mb stack size
-set(STACK_SIZE_BYTES 32000000)
-
-# append the stack size linker option to the CMAKE_EXE_LINKER_FLAGS
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,${STACK_SIZE_BYTES}")
 
 add_executable(blockbuster ./src/main.cpp)
 

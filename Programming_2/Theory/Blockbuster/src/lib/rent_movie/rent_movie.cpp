@@ -7,11 +7,11 @@ using std::getline;
 
 /**
  * @brief Gets the position of the Nth semicolon in a line.
- * @param line - wstring object containing the line to search.
+ * @param line - pstring object containing the line to search.
  * @param commaNum - Number of semicolon in the line to get the position of.
  * @return Position of the Nth semicolon in the line (zero-based).
  */
-int GetNthDelimPos(wstring line, int delimNum){
+int GetNthDelimPos(pstring line, int delimNum){
     int delimCounter = 0, totalPos = 0, currPos = 0;
     while(delimCounter != delimNum){
         currPos = (line.find_first_of(';'));
@@ -23,17 +23,25 @@ int GetNthDelimPos(wstring line, int delimNum){
     return totalPos;
 };
 
-void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
-    std::wifstream csvFile(csvFilePath);        // Open the movies.csv file.
+void UpdateMoviesCsv(const char* csvFilePath, int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
+    pifstream csvFile(csvFilePath);        // Open the movies.csv file.
  
-    wstring statusType;
-    // Executes if the action is a RENT. //
-    if(rentOrReturn == UPDATE_RENT) statusType = L"rented";
-    // Executes if the action is a RETURN. //
-    else if(rentOrReturn == UPDATE_RETURN) statusType = L"returned";
+    pstring statusType;
+
+    #ifdef _WIN32
+        // Executes if the action is a RENT. //
+        if(rentOrReturn == UPDATE_RENT) statusType = L"rented";
+        // Executes if the action is a RETURN. //
+        else if(rentOrReturn == UPDATE_RETURN) statusType = L"returned";
+    #else
+        // Executes if the action is a RENT. //
+        if(rentOrReturn == UPDATE_RENT) statusType = "rented";
+        // Executes if the action is a RETURN. //
+        else if(rentOrReturn == UPDATE_RETURN) statusType = "returned";
+    #endif
 
     int counter = -1;       // Counts the lines read.
-    wstring readingLine;
+    pstring readingLine;
     // Keep reading lines until the line to update is reached. //
     while(counter != movieID - 1){
         getline(csvFile, readingLine);
@@ -43,15 +51,21 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, wstring username, wst
 
     // Update the line, and write it to writeFile. //
     readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 7));
-    readingLine.append(L';' + username + L';' + rentDate + L';' + statusType + L';' + expiryDate);
+
+    #ifdef _WIN32
+        readingLine.append(L';' + username + L';' + rentDate + L';' + statusType + L';' + expiryDate);
+    #else
+        readingLine.append(';' + username + ';' + rentDate + ';' + statusType + ';' + expiryDate);
+    #endif
+
     csvFile.close();
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, wstring movieTtl, bool rentOrReturn){
-    std::wifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
+void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, pstring movieTtl, bool rentOrReturn){
+    pifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
 
-    wstring readingLine;
+    pstring readingLine;
     int counter = -1;
     // Keep reading lines until the line to update is reached. //
     while(counter != currUser - 1){
@@ -68,12 +82,17 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
 
     // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){
-        userList[currUser].movies.append(L'|' + movieTtl);
+        #ifdef _WIN32
+            userList[currUser].movies.append(L'|' + movieTtl);
+        #else
+            userList[currUser].movies.append('|' + movieTtl);
+        #endif
+
         readingLine.append(userList[currUser].movies);
     }
     // Executes if the action is a RETURN. //
     else if(rentOrReturn == UPDATE_RETURN){
-        wstring temp = userList[currUser].movies;
+        pstring temp = userList[currUser].movies;
         temp = temp.substr(0, temp.find(movieTtl) - 1);     // Get the user's movies, up to the one to return.
         temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));    // Append the substr that comes after the movie to return.
 
@@ -86,7 +105,7 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
-void UpdateMovieLiveData(Movie baseList[], int movieID, wstring username, wstring rentDate, wstring expiryDate, bool rentOrReturn){
+void UpdateMovieLiveData(Movie baseList[], int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
     // Executes if the action is a RETURN. //
     if(rentOrReturn == UPDATE_RETURN){ baseList[movieID].status = MOV_STATUS_RETURNED; return; }
 
@@ -113,7 +132,7 @@ void UpdateMovieLiveData(Movie baseList[], int movieID, wstring username, wstrin
     }
 }
 
-int QueryMovieRent(Movie baseList[], WstrFrag ttlFrag[], int totalMovies, wstring title, int& queryMovieID){
+int QueryMovieRent(Movie baseList[], PStrFrag ttlFrag[], int totalMovies, pstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
 

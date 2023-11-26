@@ -2,7 +2,7 @@
 #include <iostream>     // For debug.
 #include <string>
 #include <cmath>
-using std::wstring, std::abs;
+using std::abs;
 
 template<typename FragT, typename DataT>
 void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, const DataT search, bool lesserMatch){
@@ -71,10 +71,10 @@ void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r
     else storeArr[0] = 0;
 }
 
-void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const wstring search){
+void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const pstring search){
     int storeIndex = 0;
     for(l; l <= r; l++){
-        for(int j = 0; (baseList[l].genres[j] != L""); j++){
+        for(int j = 0; !empty(baseList[l].genres[j]); j++){
             if(baseList[l].genres[j] == search){
                 storeArr[storeIndex] = l;
                 storeIndex++;
@@ -88,6 +88,6 @@ void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int 
 }
 
 template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search, bool retClosest);
-template int BinSearch<WstrFrag, wstring>(const WstrFrag searchArr[], int l, int r, const wstring search, bool retClosest);
+template int BinSearch<PStrFrag, pstring>(const PStrFrag searchArr[], int l, int r, const pstring search, bool retClosest);
 template void BinSearchStoreMatches<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search, bool lesserMatch);
-template void BinSearchStoreMatches<WstrFrag, wstring>(const WstrFrag searchArr[], int storeArr[], int l, int r, const wstring search, bool lesserMatch);
+template void BinSearchStoreMatches<PStrFrag, pstring>(const PStrFrag searchArr[], int storeArr[], int l, int r, const pstring search, bool lesserMatch);

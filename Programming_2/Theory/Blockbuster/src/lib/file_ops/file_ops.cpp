@@ -3,16 +3,16 @@
 // ================================
 //      GENERAL PURPOSE
 // ================================
-void AppendLine(const char* filePath, wstring line){
-    wofstream file(filePath, std::ios::app);
+void AppendLine(const char* filePath, pstring line){
+    pofstream file(filePath, std::ios::app);
     file << line;
 }
 
-void ReplaceLine(const char* filePath, wstring line, int replaceNum){
-    wofstream write("./write.txt");
-    wifstream file(filePath);
+void ReplaceLine(const char* filePath, pstring line, int replaceNum){
+    pofstream write("./write.txt");
+    pifstream file(filePath);
     if(!file){ std::wcerr << "[ ERR ] ReplaceLine() FAILED. FILE COULD NOT BE OPENED\n"; }
-    wstring readingLine;
+    pstring readingLine;
 
     int counter = 0;
     while(counter != replaceNum - 1){
@@ -38,16 +38,16 @@ void ReplaceLine(const char* filePath, wstring line, int replaceNum){
 }
 
 int GetLastLineFirstNum(const char* filePath){
-    wstring openExc = L"[ ERR ] movies.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
-    wifstream file(filePath);
+    pstring openExc = openExcMsg;
+    pifstream file(filePath);
     if(!file){ throw openExc; }
 
     file.seekg(0, std::ios_base::end);              // Move to the EOF.
-    std::wifstream::pos_type pos = file.tellg();    // Get the curr pos and assign to a variable.
+    std::ifstream::pos_type pos = file.tellg();    // Get the curr pos and assign to a variable.
     pos = int(pos) - 2;             // Reduce the pos by two to
     file.seekg(pos);                // Go back two chars.
 
-    wchar_t ch = ' ';
+    pchar ch = ' ';
     // Executes while a newline isn't found. //
     while(ch != '\n'){
         pos = int(pos) - 1;         // Reduce the pos by one to
@@ -55,7 +55,7 @@ int GetLastLineFirstNum(const char* filePath){
         file.get(ch);               // Get the curr char.
     }
 
-    wstring lastLine;
+    pstring lastLine;
     getline(file, lastLine);
     
     return stoi(lastLine);          // Return the first number in the last line.
@@ -65,8 +65,8 @@ int GetLastLineFirstNum(const char* filePath){
 //      FILE-SPECIFIC
 // ==================================
 void CheckMoviesCsv(const char* movFilePath){
-    wifstream movFile(movFilePath);
-    wstring readingLine;
+    pifstream movFile(movFilePath);
+    pstring readingLine;
     getline(movFile, readingLine);      // Get the first line in the movies.csv file.
     int delimNum = 0;
 
@@ -84,12 +84,20 @@ void CheckMoviesCsv(const char* movFilePath){
     if(delimNum == 9){
         movFile.seekg(0, std::ios::beg);
         getline(movFile, readingLine);
+        #ifdef _WIN32
         readingLine.append(L";expiry\n");
-        wofstream write("./write.csv");
+        #else
+        readingLine.append(";expiry\n");
+        #endif
+        pofstream write("./write.csv");
         write << readingLine;
 
         while(getline(movFile, readingLine)){
+            #ifdef _WIN32
             readingLine.append(L";\n");
+            #else
+            readingLine.append(";\n");
+            #endif
             write << readingLine;
         }
 
@@ -101,20 +109,20 @@ void CheckMoviesCsv(const char* movFilePath){
 }
 
 void PopulateMovieList(Movie baseList[], const char* movFilePath){
-    wstring openExc = L"[ ERR ] movies.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
-    wifstream movFile(movFilePath);
+    pstring openExc = openExcMsg;
+    pifstream movFile(movFilePath);
     if(!movFile){ throw openExc; }
 
     int nextDelim;              // Stores the pos of the next semicolon in the curr line.
-    wstring readingLine;        // Stores the curr line.
+    pstring readingLine;        // Stores the curr line.
 
     // Vars for setting the movie genres. //
     int nextPipe = 0;           // Stores the pos of the next pipe in the tempReadingLine.
     bool exitSuccess = false;   // True if no more than 7 genres were found, false otherwise.
     bool getNextLine = false;
-    wstring tempReadingLine;    // Temp copy of the curr line.
-    wstring genreExc = L"[ ERR ] FOUND TOO MANY GENRES ON MOVIE NUMBER ";  // Exc thrown when exitSuccess is false.
-    wstring statusExc = L"[ ERR ] UNEXPECTED STATUS FOUND ON MOVIE NUMBER ";
+    pstring tempReadingLine;    // Temp copy of the curr line.
+    pstring genreExc = genreExcMsg;  // Exc thrown when exitSuccess is false.
+    pstring statusExc = statusExcMsg;
 
     getline(movFile, readingLine);          // Ignore the first line in the inFile.
     for(int i = 1; getline(movFile, readingLine); i++){
@@ -150,7 +158,7 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     // more than 7 genres in the readingLine.
                     // =====================
                     if(exitSuccess){ exitSuccess = false; break; }
-                    else{ genreExc.append(std::to_wstring(i)); throw genreExc; }
+                    else{ genreExc.append(to_pstring(i)); throw genreExc; }
                 // Duration. //
                 case 3:
                     baseList[i].duration = stoi(readingLine); 
@@ -175,7 +183,12 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     break;
                 // Rent to. //
                 case 7:
-                    if(readingLine == L";;;"){ getNextLine = true; break; }
+                    #ifdef _WIN32
+                        if(readingLine == L";;;"){ getNextLine = true; break; }
+                    #else
+                        if(readingLine == ";;;"){ getNextLine = true; break; }
+                    #endif
+                    
                     baseList[i].rentedTo = readingLine.substr(0, nextDelim);
                     break;
                 // Rent date. //
@@ -189,6 +202,7 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     break;
                 // Status. //
                 case 9:
+                    #ifdef _WIN32
                     tempReadingLine = readingLine.substr(0, nextDelim);
                     if(tempReadingLine == L"returned"){
                         baseList[i].status = MOV_STATUS_RETURNED;
@@ -197,9 +211,22 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     } else if(tempReadingLine == L"expired"){
                         baseList[i].status = MOV_STATUS_EXPIRED;
                     } else{
-                        statusExc.append(std::to_wstring(i));
+                        statusExc.append(to_pstring(i));
                         throw statusExc;
                     }
+                    #else
+                    tempReadingLine = readingLine.substr(0, nextDelim);
+                    if(tempReadingLine == "returned"){
+                        baseList[i].status = MOV_STATUS_RETURNED;
+                    } else if(tempReadingLine == "rented"){
+                        baseList[i].status = MOV_STATUS_RENTED;
+                    } else if(tempReadingLine == "expired"){
+                        baseList[i].status = MOV_STATUS_EXPIRED;
+                    } else{
+                        statusExc.append(to_pstring(i));
+                        throw statusExc;
+                    }
+                    #endif
                     break;
                 // Expiry. //
                 case 10:
@@ -218,12 +245,12 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
 }
 
 void PopulateUserList(User userList[], const char* userDataFilePath){
-    wstring openExc = L"[ ERR ] user_data.csv FILE DOES NOT EXIST IN THE PROVIDED PATH";
-    wifstream userDataFile(userDataFilePath);
+    pstring openExc = openExcMsg;
+    pifstream userDataFile(userDataFilePath);
     if(!userDataFile){ throw openExc; }
 
     int nextDelim;
-    wstring readingLine;
+    pstring readingLine;
     getline(userDataFile, readingLine);
 
     for(int i = 1; getline(userDataFile, readingLine); i++){

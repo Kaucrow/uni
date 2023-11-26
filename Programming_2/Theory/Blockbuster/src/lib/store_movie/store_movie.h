@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>     // debug.
+#include "../basic_defs.h"
 #include "../structs.h"
 
 /**
