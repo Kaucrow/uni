@@ -68,5 +68,7 @@ void MergeSort(ListT &arr, int l, int r){
 
 template void Merge<List<IntFrag>>(List<IntFrag> &arr, int l, int m, int r);
 template void Merge<List<PStrFrag>>(List<PStrFrag> &arr, int l, int m, int r);
+template void Merge<List<LLIntFrag>>(List<LLIntFrag> &arr, int l, int m, int r);
 template void MergeSort<List<IntFrag>>(List<IntFrag> &arr, int l, int r);
 template void MergeSort<List<PStrFrag>>(List<PStrFrag> &arr, int l, int r);
+template void MergeSort<List<LLIntFrag>>(List<LLIntFrag> &arr, int l, int r);

@@ -1,5 +1,5 @@
 #include "../search_ops/search_ops.h"
-#include "./store_movie.h"
+#include "./store_frag.h"
 #include <string>
 
 /**
@@ -38,3 +38,4 @@ void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
 
 template void StoreNewFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toStore);
 template void StoreNewFrag<List<PStrFrag>, pstring>(List<PStrFrag> &arr, int l, int r, const pstring toStore);
+template void StoreNewFrag<List<LLIntFrag>, long long int>(List<LLIntFrag> &arr, int l, int r, const long long int toStore);

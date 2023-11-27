@@ -17,7 +17,7 @@
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
-#include <store_movie.h>
+#include <store_frag.h>
 #include <rent_movie.h>
 #include <search_ops.h>
 #include <file_ops.h>
@@ -113,16 +113,23 @@ int main(){
         pfstream openTest(USRDATA_PATH);
         if(!openTest){
             pstring appendLine;
+            int ci;
+            long long int phoneNum;
             ClrScr();
-            pcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
-                    << "         of the first user, so the file may be created: ";
+            pcout   << "[ INFO ] No users_data.csv file was found. Please input the data\n"
+                    << "         of the first user, so the file may be created.\n";
+            pcout << "Name: ";
             getline(pcin, username);
+            pcout << "C.I.: ";
+            pcin >> ci;
+            pcout << "Phone number: ";
+            pcin >> phoneNum;
             #ifdef _WIN32
                 appendLine = L"1;" + username + L";\n";
                 AppendLine(USRDATA_PATH, L"id;name;movies\n" + appendLine);
             #else
-                appendLine = "1;" + username + ";\n";
-                AppendLine(USRDATA_PATH, "id;name;movies\n" + appendLine);
+                appendLine = "1;" + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n";
+                AppendLine(USRDATA_PATH, "id;ci;phone;name;movies\n" + appendLine);
             #endif
         }
     }
@@ -131,7 +138,9 @@ int main(){
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
     
     List<User> userList(userNum + 1);       // List which holds the users in the users_data.csv file and their data.
-    List<PStrFrag> usernameList(userNum + 1); 
+    List<PStrFrag> usernameList(userNum + 1);
+    List<IntFrag> ciList(userNum + 1);
+    List<LLIntFrag> phoneNumList(userNum + 1);
     
     // Populate the user list. //
     try{ PopulateUserList(userList, USRDATA_PATH); }
@@ -164,10 +173,16 @@ int main(){
     for(int i = 1; i <= userNum; i++){
         usernameList.data[i].ID = userList.data[i].ID;
         usernameList.data[i].data = userList.data[i].name;
+        ciList.data[i].ID = userList.data[i].ID;
+        ciList.data[i].data = userList.data[i].ci;
+        phoneNumList.data[i].ID = userList.data[i].ID;
+        phoneNumList.data[i].data = userList.data[i].phoneNum;
     }
 
     // Sort the username frag list. //
     MergeSort(usernameList, 1, userNum);
+    MergeSort(ciList, 1, userNum);
+    MergeSort(phoneNumList, 1, userNum);
 
     // =========================
     //  Main loop.
@@ -206,15 +221,31 @@ int main(){
         }
         if(currUser == 0){
             userNum++;              // Increment the user count. //
+            int ci;
+            long long int phoneNum;
+
+            pcout << "The user wasn't found. Please input the user data to add it to the register.\n";
+            pcout << "C.I.: ";
+            pcin >> ci;
+            pcout << "Phone number: ";
+            pcin >> phoneNum;
 
             // Update the users_data.csv and the live users data with the new user's data. //
             #ifdef _WIN32
             AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
             #else
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ";\n");
+            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ';' + username + ";\n");
             #endif
+
+            userList.CheckData();
             userList.data[userNum].ID = userNum;
+            userList.data[userNum].ci = ci;
+            userList.data[userNum].phoneNum = phoneNum;
             userList.data[userNum].name = username;
+
+            StoreNewFrag(usernameList, 1, userNum, username);
+            StoreNewFrag(ciList, 1, userNum, ci);
+            StoreNewFrag(phoneNumList, 1, userNum, phoneNum);
 
             currUser = userNum;     // Set the currUser. //
         }

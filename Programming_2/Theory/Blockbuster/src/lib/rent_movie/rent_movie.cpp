@@ -77,8 +77,8 @@ void UpdateUsersData(const char* usersDataFilePath, List<User> &userList, int cu
 
     usersDataFile.close();
 
-    // Get the line, up to the movies substr. E.g: readingLine will be something like "1;User1;". //
-    readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 2) + 1);
+    // Get the line, up to the movies substr. E.g: readingLine will be something like "1;User1;ci;phone;". //
+    readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 4) + 1);
 
     // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){

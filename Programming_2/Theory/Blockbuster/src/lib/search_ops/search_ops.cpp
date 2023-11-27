@@ -89,5 +89,6 @@ void GenreSearchStoreMatches(const List<Movie> baseList, int storeArr[], int l, 
 
 template int BinSearch<List<IntFrag>, int>(const List<IntFrag> &searchArr, int l, int r, const int search, bool retClosest);
 template int BinSearch<List<PStrFrag>, pstring>(const List<PStrFrag> &searchArr, int l, int r, const pstring search, bool retClosest);
+template int BinSearch<List<LLIntFrag>, long long int>(const List<LLIntFrag> &searchArr, int l, int r, const long long int search, bool retClosest);
 template void BinSearchStoreMatches<List<IntFrag>, int>(const List<IntFrag> &searchArr, int storeArr[], int l, int r, const int search, bool lesserMatch);
 template void BinSearchStoreMatches<List<PStrFrag>, pstring>(const List<PStrFrag> &searchArr, int storeArr[], int l, int r, const pstring search, bool lesserMatch);

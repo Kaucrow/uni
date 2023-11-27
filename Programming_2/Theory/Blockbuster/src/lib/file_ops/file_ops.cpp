@@ -254,7 +254,7 @@ void PopulateUserList(List<User> &userList, const char* userDataFilePath){
     getline(userDataFile, readingLine);
 
     for(int i = 1; getline(userDataFile, readingLine); i++){
-        for(int j = 0; j < 3; j++){
+        for(int j = 0; j < 5; j++){
             nextDelim = readingLine.find(';');
             switch(j){
                 // ID. //
@@ -265,8 +265,16 @@ void PopulateUserList(List<User> &userList, const char* userDataFilePath){
                 case 1:
                     userList.data[i].name = readingLine.substr(0, nextDelim);
                     break;
-                // Rented movies. //
+                // C.I. //
                 case 2:
+                    userList.data[i].ci = stoi(readingLine);
+                    break;
+                // Phone number. //
+                case 3:
+                    userList.data[i].phoneNum = stoll(readingLine);
+                    break;
+                // Rented movies. //
+                case 4:
                     userList.data[i].movies = readingLine;
                     break;
             }
