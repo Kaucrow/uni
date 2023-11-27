@@ -77,19 +77,19 @@ int main(){
     try{ totalMovies = GetLastLineFirstNum(MOVFILE_PATH); }     // Get the number of movies in the movies.csv file.
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
 
-    List<Movie> baseList(totalMovies);     // Create a base list of movies (sorted by ID), where the first element is unused.
+    List<Movie> baseList(totalMovies + 1);     // Create a base list of movies (sorted by ID), where the first element is unused.
     // ==================
     // Create lists of movie fragments, where the first element of the array is unused.
     // Each frag list is sorted according to the movie data it contains 
     // (duration, title, director, release year, release month, release day).
     // ==================
-    List<IntFrag> durList(totalMovies);
-    List<IntFrag> prcList(totalMovies);
-    List<IntFrag> yeaList(totalMovies);
-    List<IntFrag> monList(totalMovies);
-    List<IntFrag> dayList(totalMovies);
-    List<PStrFrag> ttlList(totalMovies);
-    List<PStrFrag> dirList(totalMovies);
+    List<IntFrag> durList(totalMovies + 1);
+    List<IntFrag> prcList(totalMovies + 1);
+    List<IntFrag> yeaList(totalMovies + 1);
+    List<IntFrag> monList(totalMovies + 1);
+    List<IntFrag> dayList(totalMovies + 1);
+    List<PStrFrag> ttlList(totalMovies + 1);
+    List<PStrFrag> dirList(totalMovies + 1);
     List<IntFrag> intFrags[5] = { durList, prcList, yeaList, monList, dayList };
     List<PStrFrag> pstrFrags[2] = { ttlList, dirList };
 
@@ -130,8 +130,8 @@ int main(){
     try{ userNum = GetLastLineFirstNum(USRDATA_PATH); }
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
     
-    List<User> userList(userNum);       // List which holds the users in the users_data.csv file and their data.
-    List<PStrFrag> usernameList(userNum); 
+    List<User> userList(userNum + 1);       // List which holds the users in the users_data.csv file and their data.
+    List<PStrFrag> usernameList(userNum + 1); 
     
     // Populate the user list. //
     try{ PopulateUserList(userList, USRDATA_PATH); }
@@ -140,11 +140,7 @@ int main(){
     // Populate the base movie list. //
     try{ PopulateMovieList(baseList, MOVFILE_PATH); }
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
-
-    pcout << "HERE\n";
-    pcout << baseList.data[5].title << '\n';
-    pcin.get();
-     
+ 
     // Copy the base movie list elements data to each frag list. //
     for(int i = 1; i <= totalMovies; i++){
         for(int j = DUR; j <= DAY; j++){ intFrags[j].data[i].ID = baseList.data[i].ID; }
@@ -459,7 +455,7 @@ int main(){
                 for(int i = 0; !empty(toStore.genres[i]) && i < 7; i++){
                     appendLine << toStore.genres[i] << '|';
                 }
-                appendLine.seekp(-1, std::ios_base::end);
+                
                 appendLine  << ';' << toStore.duration << ';'
                             << toStore.director << ';'
                             << std::setprecision(4) << toStore.price << ';';

@@ -15,6 +15,8 @@
  */
 template<typename ListT, typename DataT>
 void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
+    arr.CheckData();
+
     // Get the pivot. //
     int pivot = BinSearch(arr, l, r - 1, toStore, true);
     // Go back a number of elements. //
