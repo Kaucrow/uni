@@ -1,4 +1,5 @@
 #pragma once
+#include "../list/list.h"
 #include "../basic_defs.h"
 #include "../structs.h"
 
@@ -14,8 +15,8 @@
  *          - If no match is found, and retClosest is true, will return the index
  *          of the closest match on the searchArr.
  */
-template<typename FragT, typename DataT>
-int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool retClosest = false);
+template<typename ListT, typename DataT>
+int BinSearch(const ListT &searchArr, int l, int r, const DataT search, bool retClosest = false);
 
 /**
  * @brief Performs a binary search and stores the ID of all matches in the storeArr.
@@ -25,8 +26,8 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
  *                      - If true, the search will store the ID of every element that has a data equal or less than the search.
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
-template<typename FragT, typename DataT>
-void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search, bool lesserMatch = false);
+template<typename ListT, typename DataT>
+void BinSearchStoreMatches(const ListT &searchArr, int storeArr[], int l, int r, const DataT search, bool lesserMatch = false);
 
 /**
  * @brief Performs a linear search in the base movie list looking for movies with 
@@ -34,4 +35,4 @@ void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r
  * All params included have the same function as the ones in BinSearch().
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
-void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const pstring search);
+void GenreSearchStoreMatches(const List<Movie> baseList, int storeArr[], int l, int r, const pstring search);

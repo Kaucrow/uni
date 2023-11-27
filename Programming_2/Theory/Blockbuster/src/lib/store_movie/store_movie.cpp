@@ -13,8 +13,8 @@
  * starting from the last one, until it reaches the index of the arr where the new
  * frag should be stored at, and stores it there.
  */
-template<typename FragT, typename DataT>
-void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore){
+template<typename ListT, typename DataT>
+void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
     // Get the pivot. //
     int pivot = BinSearch(arr, l, r - 1, toStore, true);
     // Go back a number of elements. //
@@ -24,15 +24,15 @@ void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore){
     int storeAt = pivot;
 
     // Get the index where the frag should be stored at. //
-    for(int i = 0; arr[pivot + i].data < toStore && (pivot + i) < r; i++){ storeAt++; }
+    for(int i = 0; arr.data[pivot + i].data < toStore && (pivot + i) < r; i++){ storeAt++; }
     
     // Shift every frag up, until the storeAt index is reached. //
-    for(int i = r; i > storeAt; i--){ arr[i] = arr[i - 1]; }
+    for(int i = r; i > storeAt; i--){ arr.data[i] = arr.data[i - 1]; }
 
     // Store the frag at the storeAt index. //
-    arr[storeAt].ID = r;
-    arr[storeAt].data = toStore;
+    arr.data[storeAt].ID = r;
+    arr.data[storeAt].data = toStore;
 }
 
-template void StoreNewFrag<IntFrag, int>(IntFrag arr[], int l, int r, const int toStore);
-template void StoreNewFrag<PStrFrag, pstring>(PStrFrag arr[], int l, int r, const pstring toStore);
+template void StoreNewFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toStore);
+template void StoreNewFrag<List<PStrFrag>, pstring>(List<PStrFrag> &arr, int l, int r, const pstring toStore);

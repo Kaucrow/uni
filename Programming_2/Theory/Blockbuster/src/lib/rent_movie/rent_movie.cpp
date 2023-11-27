@@ -62,7 +62,7 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, pstring username, pst
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, pstring movieTtl, bool rentOrReturn){
+void UpdateUsersData(const char* usersDataFilePath, List<User> userList, int currUser, pstring movieTtl, bool rentOrReturn){
     pifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
 
     pstring readingLine;
@@ -83,20 +83,20 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
     // Executes if the action is a RENT. //
     if(rentOrReturn == UPDATE_RENT){
         #ifdef _WIN32
-            userList[currUser].movies.append(L'|' + movieTtl);
+            userList.data[currUser].movies.append(L'|' + movieTtl);
         #else
-            userList[currUser].movies.append('|' + movieTtl);
+            userList.data[currUser].movies.append('|' + movieTtl);
         #endif
 
-        readingLine.append(userList[currUser].movies);
+        readingLine.append(userList.data[currUser].movies);
     }
     // Executes if the action is a RETURN. //
     else if(rentOrReturn == UPDATE_RETURN){
-        pstring temp = userList[currUser].movies;
+        pstring temp = userList.data[currUser].movies;
         temp = temp.substr(0, temp.find(movieTtl) - 1);     // Get the user's movies, up to the one to return.
-        temp.append(userList[currUser].movies.substr(userList[currUser].movies.find(movieTtl) + movieTtl.length()));    // Append the substr that comes after the movie to return.
+        temp.append(userList.data[currUser].movies.substr(userList.data[currUser].movies.find(movieTtl) + movieTtl.length()));    // Append the substr that comes after the movie to return.
 
-        userList[currUser].movies = temp;   // Update the live movie data.
+        userList.data[currUser].movies = temp;   // Update the live movie data.
 
         readingLine.append(temp);           // Append the updated movies to the readingLine.
     }
@@ -105,26 +105,26 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
-void UpdateMovieLiveData(Movie baseList[], int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
+void UpdateMovieLiveData(List<Movie> baseList, int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
     // Executes if the action is a RETURN. //
-    if(rentOrReturn == UPDATE_RETURN){ baseList[movieID].status = MOV_STATUS_RETURNED; return; }
+    if(rentOrReturn == UPDATE_RETURN){ baseList.data[movieID].status = MOV_STATUS_RETURNED; return; }
 
     // Executes if the action is a RENT. //
-    baseList[movieID].status = MOV_STATUS_RENTED;
-    baseList[movieID].rentedTo = username;
+    baseList.data[movieID].status = MOV_STATUS_RENTED;
+    baseList.data[movieID].rentedTo = username;
     for(int i = 0; i < 3; i++){
         switch(i){
             case 0:
-                baseList[movieID].rentedOn.year = stoi(rentDate);
-                baseList[movieID].expiry.year = stoi(expiryDate);
+                baseList.data[movieID].rentedOn.year = stoi(rentDate);
+                baseList.data[movieID].expiry.year = stoi(expiryDate);
                 break;
             case 1:
-                baseList[movieID].rentedOn.month = stoi(rentDate);
-                baseList[movieID].expiry.month = stoi(expiryDate);
+                baseList.data[movieID].rentedOn.month = stoi(rentDate);
+                baseList.data[movieID].expiry.month = stoi(expiryDate);
                 break;
             case 2:
-                baseList[movieID].rentedOn.day = stoi(rentDate);
-                baseList[movieID].expiry.day = stoi(expiryDate);
+                baseList.data[movieID].rentedOn.day = stoi(rentDate);
+                baseList.data[movieID].expiry.day = stoi(expiryDate);
                 break;
         }
         rentDate = rentDate.substr(rentDate.find('-') + 1);
@@ -132,7 +132,7 @@ void UpdateMovieLiveData(Movie baseList[], int movieID, pstring username, pstrin
     }
 }
 
-int QueryMovieRent(Movie baseList[], PStrFrag ttlFrag[], int totalMovies, pstring title, int& queryMovieID){
+int QueryMovieRent(List<Movie> baseList, List<PStrFrag> ttlFrag, int totalMovies, pstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
 
@@ -140,9 +140,9 @@ int QueryMovieRent(Movie baseList[], PStrFrag ttlFrag[], int totalMovies, pstrin
     if(ttlPos == -1) return QUERY_RENT_NOTFOUND;
     
     // If found, get its ID, then return a rent or returned status. //
-    int movPos = ttlFrag[ttlPos].ID;
+    int movPos = ttlFrag.data[ttlPos].ID;
     queryMovieID = movPos;
 
-    if(baseList[movPos].status != MOV_STATUS_RETURNED) return QUERY_RENT_RENTED;
+    if(baseList.data[movPos].status != MOV_STATUS_RETURNED) return QUERY_RENT_RENTED;
     else return QUERY_RENT_NOTRENTED;
 }
