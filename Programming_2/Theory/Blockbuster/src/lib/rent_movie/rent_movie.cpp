@@ -62,7 +62,7 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, pstring username, pst
     ReplaceLine(csvFilePath, readingLine, movieID + 1);
 }
 
-void UpdateUsersData(const char* usersDataFilePath, List<User> userList, int currUser, pstring movieTtl, bool rentOrReturn){
+void UpdateUsersData(const char* usersDataFilePath, List<User> &userList, int currUser, pstring movieTtl, bool rentOrReturn){
     pifstream usersDataFile(usersDataFilePath);        // Open the users_data.csv file.
 
     pstring readingLine;
@@ -105,7 +105,7 @@ void UpdateUsersData(const char* usersDataFilePath, List<User> userList, int cur
     ReplaceLine(usersDataFilePath, readingLine, currUser + 1);
 }
 
-void UpdateMovieLiveData(List<Movie> baseList, int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
+void UpdateMovieLiveData(List<Movie> &baseList, int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn){
     // Executes if the action is a RETURN. //
     if(rentOrReturn == UPDATE_RETURN){ baseList.data[movieID].status = MOV_STATUS_RETURNED; return; }
 
@@ -132,7 +132,7 @@ void UpdateMovieLiveData(List<Movie> baseList, int movieID, pstring username, ps
     }
 }
 
-int QueryMovieRent(List<Movie> baseList, List<PStrFrag> ttlFrag, int totalMovies, pstring title, int& queryMovieID){
+int QueryMovieRent(List<Movie> &baseList, List<PStrFrag> &ttlFrag, int totalMovies, pstring title, int& queryMovieID){
     // Perform a search by title for the entered movie. //
     int ttlPos = BinSearch(ttlFrag, 1, totalMovies, title);
 
