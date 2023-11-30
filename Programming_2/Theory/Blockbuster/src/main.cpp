@@ -129,7 +129,7 @@ int main(){
                 AppendLine(USRDATA_PATH, L"id;name;movies\n" + appendLine);
             #else
                 appendLine = "1;" + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n";
-                AppendLine(USRDATA_PATH, "id;ci;phone;name;movies\n" + appendLine);
+                AppendLine(USRDATA_PATH, "id;name;ci;phone;movies\n" + appendLine);
             #endif
         }
     }
@@ -234,7 +234,7 @@ int main(){
             #ifdef _WIN32
             AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
             #else
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ';' + username + ";\n");
+            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n");
             #endif
 
             userList.CheckData();
@@ -603,22 +603,76 @@ int main(){
             // ========================
             else if(action == GETCLTDATA){
                 ClrScr();
-                pstring search;
+                pstring searchStr;
+                int searchInt;
+                long long int searchLLInt;
 
-                pcout << "Client name: ";
-                getline(pcin, search);
+                int userPos;
 
-                int userPos = BinSearch(usernameList, 1, userNum, search);
+                pcout   << "*** SEARCH BY ***\n"
+                        << "(1) Name\n"
+                        << "(2) C.I.\n"
+                        << "(3) Phone\n"
+                        << "(4) ID\n"
+                        << "Select option: ";
+
+                pcin >> action;
+                while(action < 1 || action > 4){
+                    pcout << "INVALID OPTION.\nSelect option: ";
+                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    pcin >> action;
+                }
+                pcin.ignore(1);
+
+                ClrScr();
+                switch(action){
+                    case 1:
+                        pcout << "Input client name: ";
+                        getline(pcin, searchStr);
+                        userPos = BinSearch(usernameList, 1, userNum, searchStr);
+                        if(userPos != -1) userPos = usernameList.data[userPos].ID;
+                        break;
+                    case 2:
+                        pcout << "Input client C.I.: ";
+                        pcin >> searchInt;
+                        userPos = BinSearch(ciList, 1, userNum, searchInt);
+                        if(userPos != -1) userPos = ciList.data[userPos].ID;
+                        pcin.ignore(1);
+                        break;
+                    case 3:
+                        pcout << "Input client phone number: ";
+                        pcin >> searchLLInt;
+                        userPos = BinSearch(phoneNumList, 1, userNum, searchLLInt);
+                        if(userPos != -1) userPos = phoneNumList.data[userPos].ID;
+                        pcin.ignore(1);
+                        break;
+                    case 4:
+                        pcout << "Input client ID: ";
+                        pcin >> searchInt;
+                        if(searchInt > userList.max) userPos = -1;
+                        else if(empty(userList.data[searchInt].name)) userPos = -1;
+                        else userPos = searchInt;
+                        pcin.ignore(1);
+                        break; 
+                }
 
                 if(userPos == -1)
                     pcerr << "[ ERR ] The client was not found.\n";
                 else{
                     ClrScr();
-                    userPos = usernameList.data[userPos].ID;
                     pcout   << "*** FOUND CLIENT ***\n"
                             << "-> ID: " << userList.data[userPos].ID << '\n'
                             << "-> Name: " << userList.data[userPos].name << '\n'
-                            << "-> Rented movies: " << userList.data[userPos].movies << '\n';
+                            << "-> C.I.: " << userList.data[userPos].ci << '\n'
+                            << "-> Phone number: " << userList.data[userPos].phoneNum << '\n'
+                            << "-> Rented movies:\n";
+                    pstring rentedMovies = userList.data[userPos].movies;
+                    while(!empty(rentedMovies)){
+                        size_t nextDelim = rentedMovies.find(1, '|');
+                        pcout << "  * " << rentedMovies.substr(1, nextDelim) << '\n';
+                        if(nextDelim != string::npos) rentedMovies = rentedMovies.substr(nextDelim);
+                        else break;
+                    };
                 }
                 pcin.get();
             }
