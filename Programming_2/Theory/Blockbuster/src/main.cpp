@@ -272,18 +272,19 @@ int main(){
                     << "(4) Rent a movie\n"
                     << "(5) Return a movie\n"
                     << "(6) Get client info\n"
-                    << "(7) Display rented/not rented movies\n"
+                    << "(7) Display rented/non-rented movies\n"
                     << "(8) Exit\n"
                     << "\nActive user: " << username << "\n\n"
                     << "Select option: ";
 
             GetAction(action, FILTER, EXIT);
 
+            ClrScr();
+
             //=========================
             //  Search with filters.
             // ========================
             if(action == FILTER){
-                ClrScr();
                 int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
 
                 pcout   << "*** FILTERS ***\n"
@@ -380,7 +381,6 @@ int main(){
             //  Get movie info.
             // ========================
             else if(action == GETMOVDATA){
-                ClrScr();
                 pstring search;
                 pcout << "-> Movie title: ";
                 getline(pcin, search);
@@ -419,7 +419,6 @@ int main(){
             //  Add a movie.
             // ========================
             else if(action == ADD){
-                ClrScr();
                 Movie toStore;
                 pstring storeDat;
                 totalMovies++;              // Increase the count of movies.
@@ -512,7 +511,6 @@ int main(){
             //  Rent a movie.
             // ========================
             else if(action == RENT){
-                ClrScr();
                 pstring rentName;
                 pcout << "*** MOVIE RENT ***\n";
                 pcout << "Input the title of the movie: ";
@@ -547,7 +545,6 @@ int main(){
             //  Return a movie.
             // ========================
             else if(action == RETURNMOV){
-                ClrScr();
                 int queryMovieID = 0;
                 pstring returnName;
                 pcout << "*** MOVIE RETURN ***\n";
@@ -604,7 +601,6 @@ int main(){
             //  Get client info.
             // ========================
             else if(action == GETCLTDATA){
-                ClrScr();
                 pstring searchStr;
                 int searchInt;
                 long long int searchLLInt;
@@ -673,14 +669,30 @@ int main(){
                 pcin.get();
             }
             else if(action == DISPMOVIESBYRENT){
-                pcout   << "*** DISPLAY RENTED/NOT RENTED MOVIES ***\n"
+                pcout   << "*** DISPLAY RENTED/NON-RENTED MOVIES ***\n"
                         << "(1) Rented movies\n"
                         << "(2) Not rented movies\n"
                         << "Display: ";
                 
                 GetAction(action, 1, 2);
 
+                ClrScr();
 
+                if(action == 1){
+                    pcout << "*** RENTED MOVIES ***\n\n";
+                    for(int i = 1; i <= baseList.total; i++){
+                        if(baseList.data[i].status != MOV_STATUS_RETURNED)
+                            pcout << baseList.data[i].title << '\n';
+                    }
+                }
+                else{
+                    pcout << "*** NON-RENTED MOVIES ***\n\n";
+                    for(int i = 1; i <= baseList.total; i++){
+                        if(baseList.data[i].status == MOV_STATUS_RETURNED)
+                            pcout << baseList.data[i].title << '\n';
+                    }
+                }
+                pcin.get();
             }
             // Executes if the user selects the "Exit" action. //
             else break;
