@@ -25,7 +25,8 @@
 #include <list.h>
 
 enum {  FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4,      // Actions.
-        RETURNMOV = 5, GETCLTDATA = 6, EXIT = 7 };
+        RETURNMOV = 5, GETCLTDATA = 6, DISPMOVIESBYRENT = 7,
+        EXIT = 8 };
 enum { DUR, PRC, YEA, MON, DAY };           // int frag types.
 enum { TTL, DIR };                          // pstring frag types.
 
@@ -41,6 +42,16 @@ void ClrScr();
  * @return The path to the data dir, if found. Otherwise, returns an empty pstring.
 */
 string GetDataDir();
+
+void GetAction(int& action, int lowBound, int highBound){
+    pcin >> action;
+    while(action < lowBound || action > highBound){
+        pcout << "INVALID OPTION.\nSelect option: ";
+        pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        pcin >> action;
+    }
+    pcin.ignore(1);
+}
 
  /**
  * @brief Gets the current date, or the current date plus 14 days.
@@ -196,14 +207,15 @@ int main(){
                 << "(1) Login\n"
                 << "(2) Exit\n"
                 << "Select option: ";
-        pcin >> action;
+
+        GetAction(action, 1, 2);
+
         switch(action){
             case 1: break;
             case 2:
                 pcout << "\nTerminating execution...\n";
                 return 0;
         }
-        pcin.ignore(1);
 
         // Login screen. //
         ClrScr(); 
@@ -260,16 +272,12 @@ int main(){
                     << "(4) Rent a movie\n"
                     << "(5) Return a movie\n"
                     << "(6) Get client info\n"
-                    << "(7) Exit\n"
+                    << "(7) Display rented/not rented movies\n"
+                    << "(8) Exit\n"
                     << "\nActive user: " << username << "\n\n"
                     << "Select option: ";
-            pcin >> action;
-            while(action < FILTER || action > EXIT){
-                pcout << "INVALID OPTION.\nSelect option: ";
-                pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                pcin >> action;
-            }
-            pcin.ignore(1);
+
+            GetAction(action, FILTER, EXIT);
 
             //=========================
             //  Search with filters.
@@ -289,13 +297,7 @@ int main(){
                         << "(8) Release day\n"
                         << "Select option: ";
 
-                pcin >> action;
-                while(action < 1 || action > 8){
-                    pcout << "INVALID OPTION.\nSelect option: ";
-                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    pcin >> action;
-                }
-                pcin.ignore(1);
+                GetAction(action, 1, 8);
 
                 pstring wstrSearch;
                 int intSearch;
@@ -616,13 +618,7 @@ int main(){
                         << "(4) ID\n"
                         << "Select option: ";
 
-                pcin >> action;
-                while(action < 1 || action > 4){
-                    pcout << "INVALID OPTION.\nSelect option: ";
-                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    pcin >> action;
-                }
-                pcin.ignore(1);
+                GetAction(action, 1, 2);
 
                 ClrScr();
                 switch(action){
@@ -675,6 +671,16 @@ int main(){
                     };
                 }
                 pcin.get();
+            }
+            else if(action == DISPMOVIESBYRENT){
+                pcout   << "*** DISPLAY RENTED/NOT RENTED MOVIES ***\n"
+                        << "(1) Rented movies\n"
+                        << "(2) Not rented movies\n"
+                        << "Display: ";
+                
+                GetAction(action, 1, 2);
+
+
             }
             // Executes if the user selects the "Exit" action. //
             else break;
