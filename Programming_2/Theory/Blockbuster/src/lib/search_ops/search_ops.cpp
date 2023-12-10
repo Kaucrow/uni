@@ -5,7 +5,7 @@
 using std::abs;
 
 template<typename FragT, typename DataT>
-void StoreMatches(const List<FragT> searchArr, int storeArr[], int someMatchPos, const DataT search, bool lesserMatch){
+void StoreMatches(const List<FragT> &searchArr, int storeArr[], int someMatchPos, const DataT search, bool lesserMatch){
     int storeIndex = 0;     // Next index to store a match at.
 
     if(!lesserMatch){
@@ -71,7 +71,7 @@ void BinSearchStoreMatches(const ListT &searchArr, int storeArr[], int l, int r,
     else storeArr[0] = 0;
 }
 
-void GenreSearchStoreMatches(const List<Movie> baseList, int storeArr[], int l, int r, const pstring search){
+void GenreSearchStoreMatches(const List<Movie> &baseList, int storeArr[], int l, int r, const pstring search){
     int storeIndex = 0;
     for(l; l <= r; l++){
         for(int j = 0; !empty(baseList.data[l].genres[j]); j++){

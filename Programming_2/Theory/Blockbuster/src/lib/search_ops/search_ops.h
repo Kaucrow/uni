@@ -35,4 +35,4 @@ void BinSearchStoreMatches(const ListT &searchArr, int storeArr[], int l, int r,
  * All params included have the same function as the ones in BinSearch().
  * If no match is found, a 0 will be stored in the first index of the storeArr.
 */
-void GenreSearchStoreMatches(const List<Movie> baseList, int storeArr[], int l, int r, const pstring search);
+void GenreSearchStoreMatches(const List<Movie> &baseList, int storeArr[], int l, int r, const pstring search);
