@@ -30,7 +30,8 @@ add_subdirectory(./src/lib/store_frag)
 add_subdirectory(./src/lib/rent_movie)
 add_subdirectory(./src/lib/search_ops)
 add_subdirectory(./src/lib/file_ops)
-add_subdirectory(./src/lib/list)
+add_subdirectory(./src/lib/misc)
+add_subdirectory(./src/test)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
@@ -40,6 +41,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib/search_ops
     PUBLIC ./src/lib/file_ops
     PUBLIC ./src/lib/list
+    PUBLIC ./src/lib/misc
+    PUBLIC ./src/test
 )
 
 if(Boost_FOUND)
@@ -60,7 +63,8 @@ target_link_directories(${PROJECT_NAME}
     PRIVATE rent_movie
     PRIVATE file_ops
     PRIVATE search_ops
-    #PRIVATE list
+    PRIVATE misc
+    PRIVATE test
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -69,5 +73,6 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE rent_movie
     PRIVATE search_ops
     PRIVATE file_ops
-    #PRIVATE list
+    PRIVATE misc
+    PRIVATE test
 )
