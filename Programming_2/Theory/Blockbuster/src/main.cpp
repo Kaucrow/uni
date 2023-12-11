@@ -15,6 +15,10 @@
 #include <list.h>
 #include <misc.h>
 
+#ifndef NDEBUG
+#   include <test.h>
+#endif
+
 enum {  FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4,      // Actions.
         RETURNMOV = 5, GETCLTDATA = 6, DISPMOVIESBYRENT = 7,
         EXIT = 8 };
@@ -24,6 +28,10 @@ enum { TTL, DIR };                          // pstring frag types.
 using std::string;
 
 int main(){
+    #ifndef NDEBUG
+        ExecAllTests();
+    #endif
+
     boost::locale::generator gen;               // Create the locale generator.
     std::locale loc = gen("en_US");             // Create an "en_US" locale
     std::locale::global(loc);                   // and set it as the global locale.
@@ -33,7 +41,7 @@ int main(){
 
     // Set the file paths. //
     string dataDir = GetDataDir();
-    if(empty(dataDir)){ pcerr << L"[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
+    if(empty(dataDir)){ pcerr << "[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
 
     char USRDATA_PATH[dataDir.length() + 16];
     strcpy(USRDATA_PATH, (dataDir + "/users_data.csv").c_str());

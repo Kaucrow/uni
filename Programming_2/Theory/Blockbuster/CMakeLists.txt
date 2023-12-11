@@ -74,5 +74,6 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE search_ops
     PRIVATE file_ops
     PRIVATE misc
+    PRIVATE rand_gen
     PRIVATE test
 )
