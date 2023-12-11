@@ -482,35 +482,49 @@ int main(){
             //  Rent a movie.
             // ========================
             else if(action == RENT){
-                pstring rentName;
-                pcout << "*** MOVIE RENT ***\n";
-                pcout << "Input the title of the movie: ";
-                getline(pcin, rentName);
-
-                int queryMovieID = 0; 
-                // Search for the title of the movie to rent, throw an error if it doesn't exist,
-                // and print some information if the movie exists but is already rented.
-                int rentStatus = QueryMovieRent(baseList, *pstrFrags[TTL], totalMovies, rentName, queryMovieID);
-                if(rentStatus == QUERY_RENT_NOTFOUND){
-                    pcerr << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                char charAction;
+                if(!empty(userList.data[currUser].movies)){
+                    pcout << "[ ERR ] You can't rent any more movies until\n\tyou return the ones you currently have.\n";
                     pcin.get();
-                    continue;
-                } 
-                else if(rentStatus == QUERY_RENT_RENTED){
-                    pcout << "[ INFO ] The movie is already rented by someone.\n";
-                    pcin.get();
-                    continue;
                 }
-                // If the movie exists and is not rented, rent it. //
-                pstring currDate = GetDate();           // Get the current date.
-                pstring expiryDate = GetDate(true);     // Get the expiry date.
+                else do{
+                    ClrScr();
+                    pstring rentName;
+                    pcout << "*** MOVIE RENT ***\n";
+                    pcout << "Input the title of the movie (Input 0 to exit): ";
+                    getline(pcin, rentName);
 
-                // Update the movies.csv file with the rent information. //
-                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the base list movie data with the rent information. //
-                UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the users_data.csv file and user list data with the rent information. //
-                UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
+                    if(rentName == "0") break;
+
+                    int queryMovieID = 0; 
+                    // Search for the title of the movie to rent, throw an error if it doesn't exist,
+                    // and print some information if the movie exists but is already rented.
+                    int rentStatus = QueryMovieRent(baseList, *pstrFrags[TTL], totalMovies, rentName, queryMovieID);
+                    if(rentStatus == QUERY_RENT_NOTFOUND){
+                        pcerr << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                        pcin.get();
+                        continue;
+                    } 
+                    else if(rentStatus == QUERY_RENT_RENTED){
+                        pcout << "[ INFO ] The movie is already rented by someone.\n";
+                        pcin.get();
+                        continue;
+                    }
+                    // If the movie exists and is not rented, rent it. //
+                    pstring currDate = GetDate();           // Get the current date.
+                    pstring expiryDate = GetDate(true);     // Get the expiry date.
+
+                    // Update the movies.csv file with the rent information. //
+                    UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
+                    // Update the base list movie data with the rent information. //
+                    UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
+                    // Update the users_data.csv file and user list data with the rent information. //
+                    UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
+
+                    pcout << "\nWould you like to rent another movie? (y/n): ";
+                    pcin.get(charAction);
+                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }while(tolower(charAction) == 'y');
             }
             // ========================
             //  Return a movie.
@@ -631,8 +645,8 @@ int main(){
                             << "-> Rented movies:\n";
                     pstring rentedMovies = userList.data[userPos].movies;
                     while(!empty(rentedMovies)){
-                        size_t nextDelim = rentedMovies.find(1, '|');
-                        pcout << "  * " << rentedMovies.substr(1, nextDelim) << '\n';
+                        size_t nextDelim = rentedMovies.find('|', 1);
+                        pcout << "  * " << rentedMovies.substr(1, nextDelim - 1) << '\n';
                         if(nextDelim != string::npos) rentedMovies = rentedMovies.substr(nextDelim);
                         else break;
                     };
