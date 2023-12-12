@@ -1,12 +1,3 @@
-#ifdef _WIN32
-    #include <libloaderapi.h>
-    #include <sys/stat.h> 
-#else
-    #include <libgen.h>
-    #include <unistd.h>
-    #include <linux/limits.h>
-#endif
-
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -21,25 +12,16 @@
 #include <search_ops.h>
 #include <transaction.h>
 #include <list.h>
+#include <misc.h>
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
 
 enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4 };       // Actions.
 
-/**
- * @brief OS agnostic clear screen function.
- */
-void ClrScr();
-
-/**
- * @brief Gets the path to the "data" dir.
- * @return The path to the data dir, if found. Otherwise, returns an empty string.
-*/
-string GetDataDir();
-
 int main(){
     assert(sizeof(long long int) >= 8);
+
     // Set the file paths. //
     string dataDir = GetDataDir();
 
@@ -359,63 +341,3 @@ int main(){
         }
     }
 }
-
-void ClrScr(){
-    #ifdef _WIN32
-        // If on Windows OS
-        std::system("cls");
-    #else
-        // Assuming POSIX OS
-        std::system("clear");
-    #endif
-}
-
-#ifdef _WIN32
-string GetDataDir(){
-    auto ValidDataDir = [](string path) -> bool{
-        struct stat s;
-        if((stat(path.c_str(), &s) == 0)){
-            if(s.st_mode & S_IFDIR)
-                return true;
-        }
-        return false;
-    };
-
-    char pBuf[256];
-    size_t len = sizeof(pBuf);
-    GetModuleFileName(NULL, pBuf, len);
-
-    string path(pBuf);
-    path.append("\\data");
-    if(ValidDataDir(path)) return path;
-    path.erase(path.find_last_of('\\'));
-
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('\\'));
-        path.append("\\data");
-        if(ValidDataDir(path)) return path;
-        path.erase(path.find_last_of('\\'));
-    }
-    return "";
-}
-#else
-string GetDataDir(){
-    using std::filesystem::is_directory;
-
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    string path;
-    if(count != -1) path = dirname(result);
-    path.append("/data");
-    if(is_directory(path)) return path;
-    path.erase(path.find_last_of('/'));
-    
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('/'));
-        path.append("/data");
-        if(is_directory(path)) return path;
-        path.erase(path.find_last_of('/'));
-    }
-    return "";
-}
-#endif
