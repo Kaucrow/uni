@@ -5,16 +5,16 @@
 using std::string;
 
 template<typename FragT, typename DataT>
-int BinSearch(const FragT searchArr[], int l, int r, const DataT search){
+int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
         // Check if x is present at mid.
-        if(searchArr[m].data == search)
+        if(searchList.data[m].data == search)
             return m;
  
         // If x is greater, ignore left half.
-        if(searchArr[m].data < search)
+        if(searchList.data[m].data < search)
             l = m + 1;
  
         // If x is smaller, ignore right half.
@@ -26,6 +26,6 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search){
     return -1;
 }
 
-template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search);
-template int BinSearch<LLIntFrag, long long int>(const LLIntFrag searchArr[], int l, int r, const long long int search);
-template int BinSearch<StrFrag, string>(const StrFrag searchArr[], int l, int r, const string search);
+template int BinSearch<IntFrag, int>(const List<IntFrag> &searchList, int l, int r, const int search);
+template int BinSearch<LLIntFrag, long long int>(const List<LLIntFrag> &searchList, int l, int r, const long long int search);
+template int BinSearch<StrFrag, string>(const List<StrFrag> &searchList, int l, int r, const string search);

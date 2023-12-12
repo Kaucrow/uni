@@ -23,6 +23,7 @@ add_subdirectory(./src/lib/merge_sort)
 add_subdirectory(./src/lib/search_ops)
 add_subdirectory(./src/lib/file_ops)
 add_subdirectory(./src/lib/transaction)
+#add_subdirectory(./src/lib/list)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
@@ -30,6 +31,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib/search_ops
     PUBLIC ./src/lib/file_ops
     PUBLIC ./src/lib/transaction
+    PUBLIC ./src/lib/list
 )
 
 target_link_directories(${PROJECT_NAME}

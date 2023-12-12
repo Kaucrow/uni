@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include "../structs.h"
+#include "../list/list.h"
 
 using std::string, std::ofstream, std::ifstream, std::getline;
 
@@ -40,11 +41,11 @@ int GetFileNumOfLines(const char* filePath, bool ignoreBlankLines = false);
  * @param baseList - Base list array to store the movies in.
  * @param movFilePath - Path to the movies.csv file.
  */
-void PopulateClientList(Client baseList[], const char* clientFilePath);
+void PopulateClientList(List<Client> &baseList, const char* clientFilePath);
 
 /**
  * @brief Stores the balance data from the client_ops.csv file into the base list array.
  * @param baseList - Base client list array to store the balance data in.
  * @param clientOpsPath - Path to the client_ops.csv file.
 */
-void PopulateClientListBalance(Client baseList[], const char* clientOpsPath);
+void PopulateClientListBalance(List<Client> &baseList, const char* clientOpsPath);

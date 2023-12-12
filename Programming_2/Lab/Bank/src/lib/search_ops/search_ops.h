@@ -1,5 +1,6 @@
 #pragma once
 #include "../structs.h"
+#include "../list/list.h"
 
 /**
  * @brief Binary search function implementation.
@@ -11,4 +12,4 @@
  *          - If no match is found, will return -1.
  */
 template<typename FragT, typename DataT>
-int BinSearch(const FragT searchArr[], int l, int r, const DataT search);
+int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search);

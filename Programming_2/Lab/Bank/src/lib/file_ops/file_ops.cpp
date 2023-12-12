@@ -78,7 +78,7 @@ int GetNthDelimPos(string line, int delimNum){
     return totalPos;
 }
 
-void PopulateClientList(Client baseList[], const char* clientFilePath){
+void PopulateClientList(List<Client> &baseList, const char* clientFilePath){
     string openExc = "[ ERR ] \"clients.csv\" FILE DOES NOT EXIST IN THE PROVIDED PATH.\n";
     ifstream clientFile(clientFilePath);
     if(!clientFile){ throw openExc; }
@@ -90,7 +90,7 @@ void PopulateClientList(Client baseList[], const char* clientFilePath){
 
     for(int i = 1; getline(clientFile, readingLine); i++){
         // Store the client's ID. //
-        baseList[i].ID = i;
+        baseList.data[i].ID = i;
 
         // Store each of the 5 basic data fields in each Client struct element. //
         for(int j = 0; j < 5; j++){
@@ -98,24 +98,24 @@ void PopulateClientList(Client baseList[], const char* clientFilePath){
             switch(j){
                 // CI. //
                 case 0: 
-                    baseList[i].CI = stoi(readingLine);       // Store the first number of the curr line.
+                    baseList.data[i].CI = stoi(readingLine);       // Store the first number of the curr line.
                     break;
                 // Client name. //
                 case 1:
-                    baseList[i].name = readingLine.substr(0, nextDelim);
+                    baseList.data[i].name = readingLine.substr(0, nextDelim);
                     break;
                 // Account number. //
                 case 2:
-                    baseList[i].accNum = stoll(readingLine);
+                    baseList.data[i].accNum = stoll(readingLine);
                     break;
                 // Account type. //
                 case 3:
                     (readingLine.substr(0, nextDelim) == "current") ?
-                        baseList[i].accType = ACC_CURRENT : baseList[i].accType = ACC_DEBIT;
+                        baseList.data[i].accType = ACC_CURRENT : baseList.data[i].accType = ACC_DEBIT;
                     break;
                 // Suspend status. //
                 case 4:
-                    readingLine == "true" ? baseList[i].suspended = true : baseList[i].suspended = false;
+                    readingLine == "true" ? baseList.data[i].suspended = true : baseList.data[i].suspended = false;
                     break;
             }
             readingLine = readingLine.substr(nextDelim + 1);    // Remove the stored data field from the curr line.
@@ -123,7 +123,7 @@ void PopulateClientList(Client baseList[], const char* clientFilePath){
     }
 }
 
-void PopulateClientListBalance(Client baseList[], const char* clientOpsPath){
+void PopulateClientListBalance(List<Client> &baseList, const char* clientOpsPath){
     string openExc = "[ ERR ] \"client_ops.csv\" FILE DOES NOT EXIST IN THE PROVIDED PATH.";
     ifstream clientOps(clientOpsPath);
     if(!clientOps){ throw openExc; }
@@ -135,7 +135,7 @@ void PopulateClientListBalance(Client baseList[], const char* clientOpsPath){
     // Store the balance for every client. //
     for(int i = 1; getline(clientOps, readingLine); i++){
         readingLine = readingLine.substr(GetNthDelimPos(readingLine, 2) + 1);
-        baseList[i].balance.dollars = stoi(readingLine);
-        baseList[i].balance.cents = stoi(readingLine.substr(readingLine.find_first_of('.') + 1));
+        baseList.data[i].balance.dollars = stoi(readingLine);
+        baseList.data[i].balance.cents = stoi(readingLine.substr(readingLine.find_first_of('.') + 1));
     }
 }

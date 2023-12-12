@@ -8,6 +8,7 @@
 #endif
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <limits>
 #include <iomanip>
@@ -19,6 +20,7 @@
 #include <merge_sort.h>
 #include <search_ops.h>
 #include <transaction.h>
+#include <list.h>
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
@@ -38,26 +40,25 @@ string GetDataDir();
 
 int main(){
     assert(sizeof(long long int) >= 8);
-
     // Set the file paths. //
     string dataDir = GetDataDir();
 
     if(dataDir == ""){ cerr << "[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
 
     char CLTFILE_PATH[dataDir.length() + 13];
-    strcpy(CLTFILE_PATH, (dataDir + "\\clients.csv").c_str());
+    strcpy(CLTFILE_PATH, (dataDir + "/clients.csv").c_str());
 
     char OPSFILE_PATH[dataDir.length() + 16];
-    strcpy(OPSFILE_PATH, (dataDir + "\\client_ops.csv").c_str());
+    strcpy(OPSFILE_PATH, (dataDir + "/client_ops.csv").c_str());
 
     char TTLFILE_PATH[dataDir.length() + 11];
-    strcpy(TTLFILE_PATH, (dataDir + "\\title.txt").c_str());
+    strcpy(TTLFILE_PATH, (dataDir + "/title.txt").c_str());
 
     // Get the number of clients in the clients.csv file. //
     int totalClients = GetFileNumOfLines(CLTFILE_PATH) - 1;
-
+    
     // Create a base list of clients (sorted by ID), where the first element is unused. //
-    Client baseList[totalClients + 1];
+    List<Client> baseList(totalClients + 1);
 
     // Populate the base client list. //
     try{ PopulateClientList(baseList, CLTFILE_PATH); }
@@ -68,20 +69,20 @@ int main(){
     // Each frag list is sorted according to the client data it contains
     // (C.I., account number, client name).
     // ==================
-    IntFrag ciList[totalClients + 1];
-    LLIntFrag accNumList[totalClients + 1];
-    StrFrag nameList[totalClients + 1];
+    List<IntFrag> ciList(totalClients + 1);
+    List<LLIntFrag> accNumList(totalClients + 1);
+    List<StrFrag> nameList(totalClients + 1);
 
     // Copy the base client list elements data to each frag list. //
     for(int i = 1; i <= totalClients; i++){
-        ciList[i].ID        = baseList[i].ID;
-        ciList[i].data      = baseList[i].CI;
+        ciList.data[i].ID        = baseList.data[i].ID;
+        ciList.data[i].data      = baseList.data[i].CI;
 
-        accNumList[i].ID    = baseList[i].ID;
-        accNumList[i].data  = baseList[i].accNum;
+        accNumList.data[i].ID    = baseList.data[i].ID;
+        accNumList.data[i].data  = baseList.data[i].accNum;
 
-        nameList[i].ID      = baseList[i].ID;
-        nameList[i].data    = baseList[i].name;
+        nameList.data[i].ID      = baseList.data[i].ID;
+        nameList.data[i].data    = baseList.data[i].name;
     }
 
     // Sort each frag list. //
@@ -97,8 +98,8 @@ int main(){
             ofstream clientOpsFile(OPSFILE_PATH, std::ios::app);
             clientOpsFile << "ci,client,balance,last_op\n";
             for(int i = 1; i <= totalClients; i++){
-                clientOpsFile << setfill('0') << setw(8) << baseList[i].CI << ','
-                            << baseList[i].name << ",0.0,\n";
+                clientOpsFile << setfill('0') << setw(8) << baseList.data[i].CI << ','
+                            << baseList.data[i].name << ",0.0,\n";
             }
         }
         // If it has already been created, set the clients'
@@ -161,10 +162,10 @@ int main(){
         }
 
         // Set the actual client ID. //
-        currClient = nameList[currClient].ID;
+        currClient = nameList.data[currClient].ID;
 
         // If the client's account is suspended, output an error message. //
-        if(baseList[currClient].suspended){
+        if(baseList.data[currClient].suspended){
             cerr << "[ INFO ] This account is currently suspended.\n";
             cin.get();
             continue;
@@ -220,20 +221,20 @@ int main(){
                         cin >> intSearch;
                         cin.ignore(1);
                         matchID = BinSearch(ciList, 1, totalClients, intSearch);  // Get the client's index in the ciList array.
-                        if(matchID != -1) matchID = ciList[matchID].ID;     // If the client was found, set its actual ID.
+                        if(matchID != -1) matchID = ciList.data[matchID].ID;     // If the client was found, set its actual ID.
                         break;
                     case 2:
                         cout << "Account number to search for: ";
                         cin >> llintSearch;
                         cin.ignore(1);
                         matchID = BinSearch(accNumList, 1, totalClients, llintSearch);
-                        if(matchID != -1) matchID = accNumList[matchID].ID;
+                        if(matchID != -1) matchID = accNumList.data[matchID].ID;
                         break;
                     case 3:
                         cout << "Client name to search for: ";
                         getline(cin, strSearch);
                         matchID = BinSearch(nameList, 1, totalClients, strSearch);
-                        if(matchID != -1) matchID = nameList[matchID].ID;
+                        if(matchID != -1) matchID = nameList.data[matchID].ID;
                         break;
                 }
 
@@ -241,13 +242,13 @@ int main(){
                 // If the client was found, display its information. //
                 if(matchID != -1){
                     cout    << "*** FOUND CLIENT ***\n"
-                            << "-> Name: " << baseList[matchID].name << '\n'
-                            << "-> C.I.: " << setfill('0') << setw(8) << baseList[matchID].CI << '\n'
-                            << "-> Account number: " << setfill('0') << setw(10) << baseList[matchID].accNum << '\n'
+                            << "-> Name: " << baseList.data[matchID].name << '\n'
+                            << "-> C.I.: " << setfill('0') << setw(8) << baseList.data[matchID].CI << '\n'
+                            << "-> Account number: " << setfill('0') << setw(10) << baseList.data[matchID].accNum << '\n'
                             << "-> Account type: ";
-                    (baseList[matchID].accType == ACC_CURRENT) ? cout << "Current\n" : cout << "Debit\n";
+                    (baseList.data[matchID].accType == ACC_CURRENT) ? cout << "Current\n" : cout << "Debit\n";
                     cout    << "-> Account status: ";
-                    (baseList[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
+                    (baseList.data[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
                 }
                 // If the client was not found, display a message indicating so. //
                 else{
@@ -284,14 +285,14 @@ int main(){
                         cout << "Deposit amount: ";
                         cin >> amount;
                         cin.ignore(1);
-                        Deposit(OPSFILE_PATH, baseList, currClient, amount);
+                        Deposit(OPSFILE_PATH, baseList.data, currClient, amount);
                         break;
                     // Withdraw. //
                     case 2:
                         cout << "Withdraw amount: ";
                         cin >> amount;
                         cin.ignore(1);
-                        try{ Withdraw(OPSFILE_PATH, baseList, currClient, amount); }
+                        try{ Withdraw(OPSFILE_PATH, baseList.data, currClient, amount); }
                         catch(string exc){ cerr << exc; cin.get(); }
                         break;
                     // Transfer. //
@@ -309,9 +310,9 @@ int main(){
                             break;
                         }
                         else{
-                            transferToID = nameList[transferToID].ID;
+                            transferToID = nameList.data[transferToID].ID;
                             // If the transfer beneficiary is a suspended account, output an error message. //
-                            if((baseList[transferToID].suspended)){ 
+                            if((baseList.data[transferToID].suspended)){ 
                                 cerr << "[ ERR ] The beneficiary account is suspended.\n";
                                 cin.get();
                                 break;
@@ -321,7 +322,7 @@ int main(){
                                 cout << "Transfer amount: ";
                                 cin >> amount;
                                 cin.ignore(1);
-                                try{ Transfer(OPSFILE_PATH, baseList, currClient, transferToID, amount); }
+                                try{ Transfer(OPSFILE_PATH, baseList.data, currClient, transferToID, amount); }
                                 catch(string exc){ cerr << exc; cin.get(); }
                                 break;
                             }
@@ -336,14 +337,14 @@ int main(){
                 ClrScr();
 
                 // Update the live base client list data. //
-                baseList[currClient].suspended = true;
+                baseList.data[currClient].suspended = true;
 
                 // Update the clients.csv file data. //
                 std::stringstream lineUpdate;
-                lineUpdate  << setfill('0') << setw(8) << baseList[currClient].CI << ','
-                            << baseList[currClient].name << ','
-                            << setfill('0') << setw(10) << baseList[currClient].accNum << ',';
-                (baseList[currClient].accType == ACC_CURRENT) ? 
+                lineUpdate  << setfill('0') << setw(8) << baseList.data[currClient].CI << ','
+                            << baseList.data[currClient].name << ','
+                            << setfill('0') << setw(10) << baseList.data[currClient].accNum << ',';
+                (baseList.data[currClient].accType == ACC_CURRENT) ? 
                     lineUpdate  << "current," : lineUpdate << "debit,";
                 lineUpdate  << "true";
 
