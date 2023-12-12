@@ -22,7 +22,7 @@ void ReplaceLine(const char* filePath, string line, int replaceNum){
     };
 
     getline(file, readingLine);
-    write << line << '\n';
+    write << line;
 
     while(getline(file, readingLine)){
         write << readingLine << '\n';

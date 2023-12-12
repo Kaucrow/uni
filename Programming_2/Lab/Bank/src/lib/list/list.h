@@ -1,8 +1,6 @@
 #pragma once
 #include <iostream>         // debug.
 
-#include <iostream>
-
 template <typename T>
 struct List{
     T* data;

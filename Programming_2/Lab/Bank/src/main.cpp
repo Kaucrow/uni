@@ -13,7 +13,7 @@
 #include <search_ops.h>
 #include <transaction.h>
 #include <list.h>
-#include <store_frag.h>
+#include <frag_ops.h>
 #include <misc.h>
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
@@ -350,7 +350,7 @@ int main(){
                             << setfill('0') << setw(10) << baseList.data[currClient].accNum << ',';
                 (baseList.data[currClient].accType == ACC_CURRENT) ? 
                     lineUpdate  << "current," : lineUpdate << "debit,";
-                lineUpdate  << "true";
+                lineUpdate  << "true" << '\n';
 
                 ReplaceLine(CLTFILE_PATH, lineUpdate.str(), currClient + 1);
 
@@ -425,13 +425,35 @@ int main(){
                 StoreNewFrag(nameList, 1, totalClients, newName);
                 StoreNewFrag(ciList, 1, totalClients, newCI);
                 StoreNewFrag(accNumList, 1, totalClients, newAccNum);
-                
-                cin.get();
             }
             else if(action == DELCLT){
                 ClrScr();
+                string delName;
+
                 cout << "*** DELETE A CLIENT ***\n";
-                cin.get();
+                cout << "Input the client's name: ";
+                getline(cin, delName);
+                int nameListPos = BinSearch(nameList, 1, totalClients, delName);
+                if(nameListPos == -1){
+                    cout << "[ ERR ] The client couldn't be found.\n";
+                    cin.get();
+                    continue;
+                }
+
+                totalClients--;
+
+                int delID = nameList.data[nameListPos].ID;
+
+                DelFrag(nameList, 1, totalClients, baseList.data[delID].name, delID);
+                DelFrag(ciList, 1, totalClients, baseList.data[delID].CI, delID);
+                DelFrag(accNumList, 1, totalClients, baseList.data[delID].accNum, delID);
+                
+                for(int i = delID; i <= totalClients; i++){
+                    baseList.data[i] = baseList.data[i + 1];
+                    baseList.data[i].ID--;
+                }
+                ReplaceLine(CLTFILE_PATH, "", delID + 1);
+                ReplaceLine(OPSFILE_PATH, "", delID + 1);
             }
             else break;
         }

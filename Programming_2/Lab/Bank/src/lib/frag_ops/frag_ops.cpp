@@ -1,5 +1,5 @@
 #include "../search_ops/search_ops.h"
-#include "store_frag.h"
+#include "frag_ops.h"
 
 /**
  * @name StoreNewFragImplem
@@ -14,6 +14,7 @@
  */
 template<typename ListT, typename DataT>
 void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
+    arr.total++;
     arr.CheckData();
 
     // Get the pivot. //
@@ -35,6 +36,29 @@ void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
     arr.data[storeAt].data = toStore;
 }
 
+template<typename ListT, typename DataT>
+void DelFrag(ListT &arr, int l, int r, const DataT toDel, int delID){
+    arr.total--;
+
+    // Get the pos of the element to delete. //
+    int delPos = BinSearch(arr, l, r + 1, toDel);
+
+    // Shift every frag down, until the end of the list is reached. //
+    for(int i = delPos; i < r + 1; i++){
+        arr.data[i] = arr.data[i + 1];
+        //std::cout << arr.data[i].data << '\n';
+        //std::cin.get();
+    }
+
+    // Change the IDs that need to be changed. //
+    for(int i = l; i < r + 1; i++)
+        if(arr.data[i].ID >= delID)
+            arr.data[i].ID--;
+}
+
 template void StoreNewFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toStore);
 template void StoreNewFrag<List<StrFrag>, string>(List<StrFrag> &arr, int l, int r, const string toStore);
 template void StoreNewFrag<List<LLIntFrag>, long long int>(List<LLIntFrag> &arr, int l, int r, const long long int toStore);
+template void DelFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toDel, int delID);
+template void DelFrag<List<StrFrag>, string>(List<StrFrag> &arr, int l, int r, const string toDel, int delID);
+template void DelFrag<List<LLIntFrag>, long long int>(List<LLIntFrag> &arr, int l, int r, const long long int toDel, int delID);
