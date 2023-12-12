@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <string>
 #include <filesystem>
 
@@ -11,7 +12,7 @@
     #include <linux/limits.h>
 #endif
 
-using std::string;
+using std::string, std::cout, std::cin;
 
 /**
  * @brief OS agnostic clear screen function.
@@ -23,3 +24,5 @@ void ClrScr();
  * @return The path to the data dir, if found. Otherwise, returns an empty string.
 */
 string GetDataDir();
+
+void GetAction(int &action, int lowBound, int highBound);

@@ -12,4 +12,4 @@
  *          - If no match is found, will return -1.
  */
 template<typename FragT, typename DataT>
-int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search);
+int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search, bool retClosest = false);

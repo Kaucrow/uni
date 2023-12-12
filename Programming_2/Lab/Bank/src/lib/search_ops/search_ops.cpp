@@ -5,7 +5,7 @@
 using std::string;
 
 template<typename FragT, typename DataT>
-int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search){
+int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search, bool retClosest){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
@@ -23,9 +23,10 @@ int BinSearch(const List<FragT> &searchList, int l, int r, const DataT search){
     }
  
     // If we reach here, the element was not present.
+    if(retClosest) return m;
     return -1;
 }
 
-template int BinSearch<IntFrag, int>(const List<IntFrag> &searchList, int l, int r, const int search);
-template int BinSearch<LLIntFrag, long long int>(const List<LLIntFrag> &searchList, int l, int r, const long long int search);
-template int BinSearch<StrFrag, string>(const List<StrFrag> &searchList, int l, int r, const string search);
+template int BinSearch<IntFrag, int>(const List<IntFrag> &searchList, int l, int r, const int search, bool retClosest);
+template int BinSearch<LLIntFrag, long long int>(const List<LLIntFrag> &searchList, int l, int r, const long long int search, bool retClosest);
+template int BinSearch<StrFrag, string>(const List<StrFrag> &searchList, int l, int r, const string search, bool retClosest);

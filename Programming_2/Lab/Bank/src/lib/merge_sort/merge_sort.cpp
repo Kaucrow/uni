@@ -13,9 +13,9 @@ void Merge(List<FragT> &list, int l, int m, int r){
 
     // Copy data to temp listays L[] and R[].
     for(int i = 0; i < n1; i++)
-        L[i].data = list.data[l + i].data;
+        L[i] = list.data[l + i];
     for(int j = 0; j < n2; j++)
-        R[j].data = list.data[m + 1 + j].data;
+        R[j] = list.data[m + 1 + j];
 
     // Merge the temp listays back into movies[l..r].
     int i = 0;  // Initial index of first sublistay.
@@ -24,11 +24,11 @@ void Merge(List<FragT> &list, int l, int m, int r){
 
     while(i < n1 && j < n2){
         if(L[i].data <= R[j].data){
-            list.data[k].data = L[i].data;
+            list.data[k] = L[i];
             i++;
         }
         else{
-            list.data[k].data = R[j].data;
+            list.data[k] = R[j];
             j++;
         }
         k++;
@@ -36,14 +36,14 @@ void Merge(List<FragT> &list, int l, int m, int r){
 
     // Copy the remaining elements of L[], if any.
     while(i < n1){
-        list.data[k].data = L[i].data;
+        list.data[k] = L[i];
         i++;
         k++;
     }
 
     // Copy the remaining elements of R[], if any.
     while(j < n2){
-        list.data[k].data = R[j].data;
+        list.data[k] = R[j];
         j++;
         k++;
     }

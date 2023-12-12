@@ -2,7 +2,7 @@
 #include <string>
 using std::string;
 
-enum AccType{ ACC_DEBIT, ACC_CURRENT };
+enum AccType{ ACC_DEBIT = 1, ACC_CURRENT = 2};
 
 struct Client{
     int ID = 0, CI = 0;

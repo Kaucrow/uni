@@ -59,3 +59,13 @@ string GetDataDir(){
     return "";
 }
 #endif
+
+void GetAction(int &action, int lowBound, int highBound){
+    cin >> action;
+    while(action < lowBound || action > highBound){
+        cout << "INVALID OPTION.\nSelect option: ";
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> action;
+    }
+    cin.ignore(1);
+}

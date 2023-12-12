@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <filesystem>
 #include <fstream>
 #include <limits>
@@ -12,12 +13,15 @@
 #include <search_ops.h>
 #include <transaction.h>
 #include <list.h>
+#include <store_frag.h>
 #include <misc.h>
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
 
-enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4 };       // Actions.
+enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4, NEWCLT = 5, DELCLT = 6 };       // Actions.
+
+bool isAdm;
 
 int main(){
     assert(sizeof(long long int) >= 8);
@@ -112,6 +116,8 @@ int main(){
     int currClient;       // ID of the active client.
     string clientName;    // Full name of the active client.
     while(true){
+        isAdm = false;
+
         // Main menu screen. //
         ClrScr();
         cout    << "*** MENU ***\n"
@@ -133,44 +139,60 @@ int main(){
                 << "-> Client full name: ";
         getline(cin, clientName);
 
-        // Get the client's index in the nameList array. //
-        currClient = BinSearch(nameList, 1, totalClients, clientName);
+        string checkName = clientName;
+        for(auto &x:checkName)
+            x = tolower(x);
 
-        // If the client doesn't exist, output an error message. //
-        if(currClient == -1){
-            cerr << "[ ERR ] The client could not be found.\n";
-            cin.get();
-            continue;
+        if(checkName == "admin"){
+            isAdm = true;
+            currClient = 0;
+            clientName = checkName;
         }
+        else{
+            // Get the client's index in the nameList array. //
+            currClient = BinSearch(nameList, 1, totalClients, clientName);
 
-        // Set the actual client ID. //
-        currClient = nameList.data[currClient].ID;
+            // If the client doesn't exist, output an error message. //
+            if(currClient == -1){
+                cerr << "[ ERR ] The client could not be found.\n";
+                cin.get();
+                continue;
+            }
 
-        // If the client's account is suspended, output an error message. //
-        if(baseList.data[currClient].suspended){
-            cerr << "[ INFO ] This account is currently suspended.\n";
-            cin.get();
-            continue;
+            // Set the actual client ID. //
+            currClient = nameList.data[currClient].ID;
+
+            // If the client's account is suspended, output an error message. //
+            if(baseList.data[currClient].suspended){
+                cerr << "[ INFO ] This account is currently suspended.\n";
+                cin.get();
+                continue;
+            }
         }
-
         // If the client's name and ID were set properly, display the main actions screen. //
         while(true){
             // Main actions screen. //
             ClrScr();
             cout    << "*** CHOOSE AN ACTION ***\n"
-                    << "(1) Search for a client\n"
-                    << "(2) Peform transactions\n"
-                    << "(3) Suspend current user\n"
-                    << "(4) Exit\n"
-                    << "Select option: ";
-
-            cin >> action;
-            while(action < SEARCH || action > EXIT){
-                cout << "INVALID OPTION.\nSelect option: ";
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                cin >> action;
+                    << "(1) Search for a client\n";
+            if(isAdm){
+                cout    << "(2) Add a new client\n"
+                        << "(3) Delete a client\n"
+                        << "(4) Exit\n"
+                        << "\nLogged in as: " << clientName << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 4);
+                if(action >= TRANSACTIONS && action < EXIT)
+                    action += ((EXIT - TRANSACTIONS) + 1);
             }
-            cin.ignore(1);
+            else{
+                cout    << "(2) Perform transactions\n"
+                        << "(3) Suspend current user\n"
+                        << "(4) Exit\n"
+                        << "\nLogged in as: " << clientName << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 4);
+            }
 
             //=========================
             //  Search for a client.
@@ -203,7 +225,7 @@ int main(){
                         cin >> intSearch;
                         cin.ignore(1);
                         matchID = BinSearch(ciList, 1, totalClients, intSearch);  // Get the client's index in the ciList array.
-                        if(matchID != -1) matchID = ciList.data[matchID].ID;     // If the client was found, set its actual ID.
+                        if(matchID != -1) matchID = ciList.data[matchID].ID;      // If the client was found, set its actual ID.
                         break;
                     case 2:
                         cout << "Account number to search for: ";
@@ -336,6 +358,80 @@ int main(){
                 cout << "[ INFO ] The account has been suspended successfully.\n";
                 cin.get();
                 break;
+            }
+            else if(action == NEWCLT){
+                ClrScr();
+                string newName;
+                int newCI, newAccType;
+                long long int newAccNum;
+
+                cout << "*** ADD A NEW CLIENT ***\n";
+
+                cout << "Input the client's name: ";
+                getline(cin, newName);
+
+                cout << "Input the client's C.I.: ";
+                cin >> newCI;
+                cin.ignore(1);
+                if(BinSearch(ciList, 1, totalClients, newCI) != -1){
+                    cout << "[ ERR ] There's already a client with this C.I.\n";
+                    cin.get();
+                    continue;
+                }
+
+                cout << "Input the client's account number: ";
+                cin >> newAccNum;
+                cin.ignore(1);
+                if(BinSearch(accNumList, 1, totalClients, newAccNum) != -1){
+                    cout << "[ ERR ] There's already a client with this account number.\n";
+                    cin.get();
+                    continue;
+                }
+
+                cout    << "Account type\n"
+                        << "(1) Debit\n"
+                        << "(2) Current\n";
+                GetAction(newAccType, ACC_DEBIT, ACC_CURRENT);
+
+                totalClients++;
+                ofstream clientsFile(CLTFILE_PATH, std::ios::app);
+                clientsFile << setw(8) << setfill('0') << newCI << ','
+                            << newName << ','
+                            << setw(10) << setfill('0') << newAccNum << ',';
+                if(newAccType == ACC_DEBIT)
+                    clientsFile << "debit" << ',';
+                else
+                    clientsFile << "current" << ',';
+                clientsFile << "false" << '\n';
+                clientsFile.close();
+
+                ofstream opsFile(OPSFILE_PATH, std::ios::app);
+                opsFile     << setw(8) << setfill('0') << newCI << ','
+                            << newName << ','
+                            << "0.0" << ','
+                            << '\n';
+
+                baseList.CheckData();
+                baseList.data[totalClients].name = newName;
+                baseList.data[totalClients].ID = totalClients;
+                baseList.data[totalClients].CI = newCI;
+                baseList.data[totalClients].accNum = newAccNum;
+                baseList.data[totalClients].suspended = false;
+                if(newAccType == ACC_DEBIT)
+                    baseList.data[totalClients].accType = ACC_DEBIT;
+                else
+                    baseList.data[totalClients].accType = ACC_CURRENT;
+ 
+                StoreNewFrag(nameList, 1, totalClients, newName);
+                StoreNewFrag(ciList, 1, totalClients, newCI);
+                StoreNewFrag(accNumList, 1, totalClients, newAccNum);
+                
+                cin.get();
+            }
+            else if(action == DELCLT){
+                ClrScr();
+                cout << "*** DELETE A CLIENT ***\n";
+                cin.get();
             }
             else break;
         }
