@@ -16,6 +16,10 @@
 #include <frag_ops.h>
 #include <misc.h>
 
+#ifndef NDEBUG
+#   include <test.h>
+#endif
+
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
 
@@ -25,6 +29,10 @@ bool isAdm;
 
 int main(){
     assert(sizeof(long long int) >= 8);
+
+    #ifndef NDEBUG
+        ExecAllTests();
+    #endif        
 
     // Set the file paths. //
     string dataDir = GetDataDir();
