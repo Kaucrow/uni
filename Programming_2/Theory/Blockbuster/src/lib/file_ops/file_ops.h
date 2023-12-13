@@ -24,6 +24,8 @@ void AppendLine(const char* filePath, pstring line);
  */
 void ReplaceLine(const char* filePath, pstring line, int replaceNum);
 
+void RemoveLine(const char* filePath, int removeNum);
+
 /**
  * @brief Gets the first number in the last line of the specified file.
  * @param filePath - Path to the file.

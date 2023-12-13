@@ -16,3 +16,6 @@
  */
 template<typename ListT, typename DataT>
 void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore);
+
+template<typename ListT, typename DataT>
+void DelFrag(ListT &arr, int l, int r, const DataT toDel, int delID);

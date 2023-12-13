@@ -53,9 +53,9 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, pstring username, pst
     readingLine = readingLine.substr(0, GetNthDelimPos(readingLine, 7));
 
     #ifdef _WIN32
-        readingLine.append(L';' + username + L';' + rentDate + L';' + statusType + L';' + expiryDate);
+        readingLine.append(L';' + username + L';' + rentDate + L';' + statusType + L';' + expiryDate + L'\n');
     #else
-        readingLine.append(';' + username + ';' + rentDate + ';' + statusType + ';' + expiryDate);
+        readingLine.append(';' + username + ';' + rentDate + ';' + statusType + ';' + expiryDate + '\n');
     #endif
 
     csvFile.close();
@@ -98,7 +98,7 @@ void UpdateUsersData(const char* usersDataFilePath, List<User> &userList, int cu
 
         userList.data[currUser].movies = temp;   // Update the live movie data.
 
-        readingLine.append(temp);           // Append the updated movies to the readingLine.
+        readingLine.append(temp + '\n');           // Append the updated movies to the readingLine.
     }
 
     // Update the users_data.csv line. //

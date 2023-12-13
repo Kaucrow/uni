@@ -26,7 +26,7 @@ find_package(Boost REQUIRED COMPONENTS locale)
 add_executable(blockbuster ./src/main.cpp)
 
 add_subdirectory(./src/lib/merge_sort)
-add_subdirectory(./src/lib/store_frag)
+add_subdirectory(./src/lib/frag_ops)
 add_subdirectory(./src/lib/rent_movie)
 add_subdirectory(./src/lib/search_ops)
 add_subdirectory(./src/lib/file_ops)
@@ -36,7 +36,7 @@ add_subdirectory(./src/test)
 target_include_directories(${PROJECT_NAME}
     PUBLIC ./src/lib
     PUBLIC ./src/lib/merge_sort
-    PUBLIC ./src/lib/store_frag
+    PUBLIC ./src/lib/frag_ops
     PUBLIC ./src/lib/rent_movie
     PUBLIC ./src/lib/search_ops
     PUBLIC ./src/lib/file_ops
@@ -59,7 +59,7 @@ endif()
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE merge_sort
-    PRIVATE store_frag
+    PRIVATE frag_ops
     PRIVATE rent_movie
     PRIVATE file_ops
     PRIVATE search_ops
@@ -69,7 +69,7 @@ target_link_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE merge_sort
-    PRIVATE store_frag
+    PRIVATE frag_ops
     PRIVATE rent_movie
     PRIVATE search_ops
     PRIVATE file_ops

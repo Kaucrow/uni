@@ -11,7 +11,7 @@ void AppendLine(const char* filePath, pstring line){
 void ReplaceLine(const char* filePath, pstring line, int replaceNum){
     pofstream write("./write.txt");
     pifstream file(filePath);
-    if(!file){ std::wcerr << "[ ERR ] ReplaceLine() FAILED. FILE COULD NOT BE OPENED\n"; }
+    if(!file){ pcerr << "[ ERR ] ReplaceLine() FAILED. FILE COULD NOT BE OPENED\n"; }
     pstring readingLine;
 
     int counter = 0;
@@ -22,10 +22,40 @@ void ReplaceLine(const char* filePath, pstring line, int replaceNum){
     };
 
     getline(file, readingLine);
-    write << line << '\n';
+    write << line;
 
     while(getline(file, readingLine)){
         write << readingLine << '\n';
+    }
+
+    // Close the file and the writeFile. Then delete the file and       //
+    // rename the writeFile to the file.                                //
+    file.close();
+    write.close();
+
+    remove(filePath);
+    rename("./write.txt", filePath);
+}
+
+void RemoveLine(const char* filePath, int removeNum){
+    pofstream write("./write.txt");
+    pifstream file(filePath);
+    if(!file){ pcerr << "[ ERR ] RemoveLine() FAILED. FILE COULD NOT BE OPENED\n"; }
+    pstring readingLine;
+
+    int counter = 0;
+    while(counter != removeNum - 1){
+        getline(file, readingLine);
+        write << readingLine << '\n';
+        counter++;
+    }
+
+    getline(file, readingLine);
+
+    while(getline(file, readingLine)){
+        readingLine = readingLine.substr(readingLine.find_first_of(';'));
+        write << counter << readingLine << '\n';
+        counter++;
     }
 
     // Close the file and the writeFile. Then delete the file and       //

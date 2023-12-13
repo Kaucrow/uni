@@ -46,8 +46,6 @@ void DelFrag(ListT &arr, int l, int r, const DataT toDel, int delID){
     // Shift every frag down, until the end of the list is reached. //
     for(int i = delPos; i < r + 1; i++){
         arr.data[i] = arr.data[i + 1];
-        //std::cout << arr.data[i].data << '\n';
-        //std::cin.get();
     }
 
     // Change the IDs that need to be changed. //

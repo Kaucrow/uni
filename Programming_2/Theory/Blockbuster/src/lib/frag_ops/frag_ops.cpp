@@ -1,5 +1,5 @@
 #include "../search_ops/search_ops.h"
-#include "./store_frag.h"
+#include "./frag_ops.h"
 #include <string>
 
 /**
@@ -36,6 +36,37 @@ void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
     arr.data[storeAt].data = toStore;
 }
 
+template<typename ListT, typename DataT>
+void DelFrag(ListT &arr, int l, int r, const DataT toDel, int delID){
+    arr.total--;
+
+    // Get the pos of the element to delete. //
+    int pivot = BinSearch(arr, l, r + 1, toDel);
+    int delPos = 0;
+
+    for(int i = pivot; i <= r; i++){
+        if(arr.data[i].data == toDel)
+            if(arr.data[i].ID == delID){ delPos = i; break; }
+    }
+
+    for(int i = pivot; i >= l; i--){
+        if(arr.data[i].data == toDel)
+            if(arr.data[i].ID == delID){ delPos = i; break; }
+    }
+    
+    // Shift every frag down, until the end of the list is reached. //
+    for(int i = delPos; i < r + 1; i++)
+        arr.data[i] = arr.data[i + 1];
+
+    // Change the IDs that need to be changed. //
+    for(int i = l; i < r + 1; i++)
+        if(arr.data[i].ID > delID)
+            arr.data[i].ID--;
+}
+
 template void StoreNewFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toStore);
 template void StoreNewFrag<List<PStrFrag>, pstring>(List<PStrFrag> &arr, int l, int r, const pstring toStore);
 template void StoreNewFrag<List<LLIntFrag>, long long int>(List<LLIntFrag> &arr, int l, int r, const long long int toStore);
+template void DelFrag<List<IntFrag>, int>(List<IntFrag> &arr, int l, int r, const int toDel, int delID);
+template void DelFrag<List<PStrFrag>, pstring>(List<PStrFrag> &arr, int l, int r, const pstring toDel, int delID);
+template void DelFrag<List<LLIntFrag>, long long int>(List<LLIntFrag> &arr, int l, int r, const long long int toDel, int delID);

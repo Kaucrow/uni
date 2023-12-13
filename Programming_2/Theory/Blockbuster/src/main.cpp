@@ -7,7 +7,7 @@
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
-#include <store_frag.h>
+#include <frag_ops.h>
 #include <rent_movie.h>
 #include <search_ops.h>
 #include <file_ops.h>
@@ -19,13 +19,15 @@
 #   include <test.h>
 #endif
 
-enum {  FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4,      // Actions.
-        RETURNMOV = 5, GETCLTDATA = 6, DISPMOVIESBYRENT = 7,
-        EXIT = 8 };
+enum {  FILTER = 1, GETMOVINFO = 2, GETCLTINFO = 3, DISPMOVBYRENT = 4,
+        RENT = 5, RETURNMOV = 6, ADDMOV = 7, DELMOV = 8,
+        DELCLT = 9, EXIT = 99 };
 enum { DUR, PRC, YEA, MON, DAY };           // int frag types.
 enum { TTL, DIR };                          // pstring frag types.
 
 using std::string;
+
+bool isAdm;
 
 int main(){
     #ifndef NDEBUG
@@ -172,6 +174,8 @@ int main(){
     int action;
     int currUser;       // ID of the active user.
     while(true){
+        isAdm = false;
+
         // Main menu screen. //
         ClrScr();
         pcout   << "*** MENU ***\n"
@@ -195,60 +199,82 @@ int main(){
                 << "-> User: ";
         getline(pcin, username);
 
-        // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
-        // If it's not, add it, and set the currUser ID.
-        for(int i = 1; i <= userNum; i++){
-            if(userList.data[i].name == username){
-                currUser = userList.data[i].ID;
+        pstring checkUsername = username;
+        for(auto &x:checkUsername)
+            x = tolower(x);
+
+        if(checkUsername == "admin"){
+            isAdm = true;
+            username = checkUsername;
+        }
+        else{
+            // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
+            // If it's not, add it, and set the currUser ID.
+            for(int i = 1; i <= userNum; i++){
+                if(userList.data[i].name == username){
+                    currUser = userList.data[i].ID;
+                }
+            }
+            if(currUser == 0){
+                userNum++;              // Increment the user count. //
+                int ci;
+                long long int phoneNum;
+
+                pcout << "The user wasn't found. Please input the user data to add it to the register.\n";
+                pcout << "C.I.: ";
+                pcin >> ci;
+                pcout << "Phone number: ";
+                pcin >> phoneNum;
+
+                // Update the users_data.csv and the live users data with the new user's data. //
+                #ifdef _WIN32
+                AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
+                #else
+                AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n");
+                #endif
+
+                userList.CheckData();
+                userList.data[userNum].ID = userNum;
+                userList.data[userNum].ci = ci;
+                userList.data[userNum].phoneNum = phoneNum;
+                userList.data[userNum].name = username;
+
+                StoreNewFrag(usernameList, 1, userNum, username);
+                StoreNewFrag(ciList, 1, userNum, ci);
+                StoreNewFrag(phoneNumList, 1, userNum, phoneNum);
+
+                currUser = userNum;     // Set the currUser. //
             }
         }
-        if(currUser == 0){
-            userNum++;              // Increment the user count. //
-            int ci;
-            long long int phoneNum;
-
-            pcout << "The user wasn't found. Please input the user data to add it to the register.\n";
-            pcout << "C.I.: ";
-            pcin >> ci;
-            pcout << "Phone number: ";
-            pcin >> phoneNum;
-
-            // Update the users_data.csv and the live users data with the new user's data. //
-            #ifdef _WIN32
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
-            #else
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n");
-            #endif
-
-            userList.CheckData();
-            userList.data[userNum].ID = userNum;
-            userList.data[userNum].ci = ci;
-            userList.data[userNum].phoneNum = phoneNum;
-            userList.data[userNum].name = username;
-
-            StoreNewFrag(usernameList, 1, userNum, username);
-            StoreNewFrag(ciList, 1, userNum, ci);
-            StoreNewFrag(phoneNumList, 1, userNum, phoneNum);
-
-            currUser = userNum;     // Set the currUser. //
-        }
-
         while(true){
             // Main actions screen. //
             ClrScr();
             pcout   << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search with filters\n"
                     << "(2) Get movie info\n"
-                    << "(3) Add a movie\n"
-                    << "(4) Rent a movie\n"
-                    << "(5) Return a movie\n"
-                    << "(6) Get client info\n"
-                    << "(7) Display rented/non-rented movies\n"
-                    << "(8) Exit\n"
-                    << "\nActive user: " << username << "\n\n"
-                    << "Select option: ";
-
-            GetAction(action, FILTER, EXIT);
+                    << "(3) Get client info\n"
+                    << "(4) Display rented/non-rented movies\n";
+            if(isAdm){
+                pcout   << "(5) Add a movie\n"
+                        << "(6) Delete a movie\n"
+                        << "(7) Delete client info\n"
+                        << "(8) Exit\n"
+                        << "\nLogged in as: " << username << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 8);
+                if(action > DISPMOVBYRENT && action < EXIT)
+                    action += (ADDMOV - RENT);
+                else if(action == 8) action = EXIT;
+            }
+            else{
+                pcout   << "(5) Rent a movie\n"
+                        << "(6) Return a movie\n"
+                        << "(7) Exit\n"
+                        << "\nLogged in as: " << username << "\n\n"
+                        << "Select option: ";
+                GetAction(action, FILTER, EXIT);
+                if(action == 7) action = EXIT;
+            }
 
             ClrScr();
 
@@ -351,7 +377,7 @@ int main(){
             // ========================
             //  Get movie info.
             // ========================
-            else if(action == GETMOVDATA){
+            else if(action == GETMOVINFO){
                 pstring search;
                 pcout << "-> Movie title: ";
                 getline(pcin, search);
@@ -389,7 +415,7 @@ int main(){
             // ========================
             //  Add a movie.
             // ========================
-            else if(action == ADD){
+            else if(action == ADDMOV){
                 Movie toStore;
                 pstring storeDat;
                 totalMovies++;              // Increase the count of movies.
@@ -585,7 +611,7 @@ int main(){
             // ========================
             //  Get client info.
             // ========================
-            else if(action == GETCLTDATA){
+            else if(action == GETCLTINFO){
                 pstring searchStr;
                 int searchInt;
                 long long int searchLLInt;
@@ -653,7 +679,7 @@ int main(){
                 }
                 pcin.get();
             }
-            else if(action == DISPMOVIESBYRENT){
+            else if(action == DISPMOVBYRENT){
                 pcout   << "*** DISPLAY RENTED/NON-RENTED MOVIES ***\n"
                         << "(1) Rented movies\n"
                         << "(2) Not rented movies\n"
@@ -678,6 +704,68 @@ int main(){
                     }
                 }
                 pcin.get();
+            }
+            else if(action == DELMOV){
+                pstring delTtl;
+                pcout << "*** DELETE A MOVIE ***\n";
+                pcout << "Name of the movie to delete: ";
+                getline(pcin, delTtl);
+                int ttlListPos = BinSearch(*pstrFrags[TTL], 1, totalMovies, delTtl);
+                if(ttlListPos == -1){
+                    pcout << "[ ERR ] The movie couldn't be found.\n";
+                    pcin.get();
+                    continue;
+                }
+
+                totalMovies--;
+
+                int delID = pstrFrags[TTL]->data[ttlListPos].ID;
+                
+                DelFrag(*pstrFrags[TTL], 1, totalMovies, baseList.data[delID].title, delID);
+                DelFrag(*pstrFrags[DIR], 1, totalMovies, baseList.data[delID].director, delID);
+                DelFrag(*intFrags[DUR], 1, totalMovies, baseList.data[delID].duration, delID);
+                DelFrag(*intFrags[PRC], 1, totalMovies, int(baseList.data[delID].price), delID);
+                DelFrag(*intFrags[YEA], 1, totalMovies, baseList.data[delID].release.year, delID);
+                DelFrag(*intFrags[MON], 1, totalMovies, baseList.data[delID].release.month, delID);
+                DelFrag(*intFrags[DAY], 1, totalMovies, baseList.data[delID].release.day, delID); 
+
+                for(int i = delID; i <= totalMovies; i++){
+                    baseList.data[i] = baseList.data[i + 1];
+                    baseList.data[i].ID--;
+                }
+
+                RemoveLine(MOVFILE_PATH, delID + 1);
+            }
+            else if(action == DELCLT){
+                pstring toDel;
+                pcout << "*** DELETE A CLIENT ***\n";
+                pcout << "Name of the client to delete: ";
+                getline(pcin, toDel);
+                int usernameListPos = BinSearch(usernameList, 1, userNum, toDel);
+                if(usernameListPos == -1){
+                    pcout << "[ ERR ] The client couldn't be found.\n";
+                    pcin.get();
+                    continue;
+                }
+
+                pcin.get();
+                userNum--;
+
+                int delID = userList.data[usernameListPos].ID;
+
+                pcout << delID << '\n';
+                pcin.get();
+
+                DelFrag(usernameList, 1, userNum, userList.data[delID].name, delID);
+                DelFrag(ciList, 1, userNum, userList.data[delID].ci, delID);
+                DelFrag(phoneNumList, 1, userNum, userList.data[delID].phoneNum, delID);
+
+                for(int i = delID; i <= userNum; i++){
+                    userList.data[i] = userList.data[i + 1];
+                    userList.data[i].ID--;
+                }
+
+                RemoveLine(USRDATA_PATH, delID + 1); 
             }
             // Executes if the user selects the "Exit" action. //
             else break;
