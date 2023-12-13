@@ -15,6 +15,7 @@
  */
 template<typename ListT, typename DataT>
 void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore){
+    arr.total++;
     arr.CheckData();
 
     // Get the pivot. //
