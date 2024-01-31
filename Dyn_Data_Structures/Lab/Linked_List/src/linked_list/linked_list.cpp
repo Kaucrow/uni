@@ -27,6 +27,23 @@ LinkedList<T>::~LinkedList() {
 }
 
 template <typename T>
+T& LinkedList<T>::operator[](const size_t idx) {
+    NodePtr<T> current = this->head;
+    size_t count = 0;
+
+    while(current && count < idx) {
+        current = current->next;
+        count++;
+    }
+
+    if(!current) {
+        throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
+    }
+
+    return current->data;
+}
+
+template <typename T>
 void LinkedList<T>::copy_list(const LinkedList<T>& other) {
     NodePtr<T> other_current = other.head;
     while(other_current) {
@@ -81,5 +98,8 @@ namespace LinkedListFn {
 
 template LinkedList<Student>::LinkedList();
 template LinkedList<Student>::~LinkedList();
-template LinkedList<string>::~LinkedList();
+template Student& LinkedList<Student>::operator[](size_t idx);
 template void LinkedList<Student>::append(Student data);
+
+template string& LinkedList<string>::operator[](size_t idx);
+template LinkedList<string>::~LinkedList();

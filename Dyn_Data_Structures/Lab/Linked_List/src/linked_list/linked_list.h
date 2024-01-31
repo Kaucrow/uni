@@ -21,6 +21,7 @@ class LinkedList {
         LinkedList(const LinkedList& other);
         LinkedList& operator=(const LinkedList& other);
         ~LinkedList();
+        T& operator[](const size_t idx);
         void append(T data);
         void clear();
         class Iterator {

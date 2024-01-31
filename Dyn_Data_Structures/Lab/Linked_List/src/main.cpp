@@ -8,7 +8,7 @@ using   std::string, std::cout, std::cin, std::getline,
         std::ifstream, std::ofstream;
 
 int main() {
-    cout << ":) Hello world start\n";
+    cout << "Execution start :)\n";
     string hello = "hello,j,o,e";
     LinkedList<string> linked_list = LinkedListFn::from_row(hello);
     for(auto value : linked_list) {
@@ -20,6 +20,5 @@ int main() {
     for(auto value : student_list) {
         cout << value.first_name << '\n';
     }
-
-    cout << ":) Hello world end\n";
+    cout << "Terminating execution... :)\n";
 }

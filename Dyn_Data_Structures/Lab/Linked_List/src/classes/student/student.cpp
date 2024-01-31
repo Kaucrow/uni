@@ -24,40 +24,23 @@ namespace StudentFn {
 
         LinkedList<string> fields = LinkedListFn::from_row(row);
         int field_num = 0;
-        for(auto const &field : fields) {
-            try {
-                switch(field_num) {
-                    case 0:
-                        student.ci = stoi(field); break;
-                    case 1:
-                        student.first_name = field; break;
-                    case 2:
-                        student.last_name = field; break;
-                    case 3:
-                        student.email = field; break;
-                    case 4:
-                        if(field == "M")
-                            student.gender = Gender::Male;
-                        else if(field == "F")
-                            student.gender = Gender::Female;
-                        else
-                            throw(nullptr);
-                        break;
-                    case 5:
-                        student.av_grade = stof(field); break;
-                    case 6:
-                        student.curr_year = stoi(field); break;
-                    case 7:
-                        student.section = field[0]; break;
-                    default:
-                        throw(nullptr); break;
-                }
-            } catch(...) {
-                panic("Found invalid field " + field + " in position number " + std::to_string(field_num));
+        try {
+            student.ci = stoi(fields[0]);
+            student.first_name = fields[1];
+            student.last_name = fields[2];
+            student.email = fields[3];
+            switch(fields[4][0]) {
+                case 'M': student.gender = Gender::Male; break;
+                case 'F': student.gender = Gender::Female; break;
+                default: throw(nullptr);
             }
-            field_num++;
+            student.av_grade = stof(fields[5]);
+            student.curr_year = stoi(fields[6]);
+            student.section = fields[7][0];
+        } catch(...) {
+            panic("[ ERR ] Found invalid field in row \"" + row + "\".");
         }
-
+        
         return student;
     }
 
