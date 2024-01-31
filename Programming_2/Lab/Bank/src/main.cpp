@@ -1,13 +1,6 @@
-#ifdef _WIN32
-    #include <libloaderapi.h>
-    #include <sys/stat.h> 
-#else
-    #include <libgen.h>
-    #include <unistd.h>
-    #include <linux/limits.h>
-#endif
-
 #include <iostream>
+#include <iomanip>
+#include <filesystem>
 #include <fstream>
 #include <limits>
 #include <iomanip>
@@ -19,25 +12,27 @@
 #include <merge_sort.h>
 #include <search_ops.h>
 #include <transaction.h>
+#include <list.h>
+#include <frag_ops.h>
+#include <misc.h>
+
+#ifndef NDEBUG
+#   include <test.h>
+#endif
 
 using   std::cout, std::cerr, std::cin, std::string, std::getline,
         std::ofstream, std::ifstream, std::setw, std::setfill;
 
-enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4 };       // Actions.
+enum { SEARCH = 1, TRANSACTIONS = 2, SUSPEND = 3, EXIT = 4, NEWCLT = 5, DELCLT = 6 };       // Actions.
 
-/**
- * @brief OS agnostic clear screen function.
- */
-void ClrScr();
-
-/**
- * @brief Gets the path to the "data" dir.
- * @return The path to the data dir, if found. Otherwise, returns an empty string.
-*/
-string GetDataDir();
+bool isAdm;
 
 int main(){
     assert(sizeof(long long int) >= 8);
+
+    #ifndef NDEBUG
+        ExecAllTests();
+    #endif        
 
     // Set the file paths. //
     string dataDir = GetDataDir();
@@ -45,19 +40,19 @@ int main(){
     if(dataDir == ""){ cerr << "[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
 
     char CLTFILE_PATH[dataDir.length() + 13];
-    strcpy(CLTFILE_PATH, (dataDir + "\\clients.csv").c_str());
+    strcpy(CLTFILE_PATH, (dataDir + "/clients.csv").c_str());
 
     char OPSFILE_PATH[dataDir.length() + 16];
-    strcpy(OPSFILE_PATH, (dataDir + "\\client_ops.csv").c_str());
+    strcpy(OPSFILE_PATH, (dataDir + "/client_ops.csv").c_str());
 
     char TTLFILE_PATH[dataDir.length() + 11];
-    strcpy(TTLFILE_PATH, (dataDir + "\\title.txt").c_str());
+    strcpy(TTLFILE_PATH, (dataDir + "/title.txt").c_str());
 
     // Get the number of clients in the clients.csv file. //
     int totalClients = GetFileNumOfLines(CLTFILE_PATH) - 1;
-
+    
     // Create a base list of clients (sorted by ID), where the first element is unused. //
-    Client baseList[totalClients + 1];
+    List<Client> baseList(totalClients + 1);
 
     // Populate the base client list. //
     try{ PopulateClientList(baseList, CLTFILE_PATH); }
@@ -68,20 +63,20 @@ int main(){
     // Each frag list is sorted according to the client data it contains
     // (C.I., account number, client name).
     // ==================
-    IntFrag ciList[totalClients + 1];
-    LLIntFrag accNumList[totalClients + 1];
-    StrFrag nameList[totalClients + 1];
+    List<IntFrag> ciList(totalClients + 1);
+    List<LLIntFrag> accNumList(totalClients + 1);
+    List<StrFrag> nameList(totalClients + 1);
 
     // Copy the base client list elements data to each frag list. //
     for(int i = 1; i <= totalClients; i++){
-        ciList[i].ID        = baseList[i].ID;
-        ciList[i].data      = baseList[i].CI;
+        ciList.data[i].ID        = baseList.data[i].ID;
+        ciList.data[i].data      = baseList.data[i].CI;
 
-        accNumList[i].ID    = baseList[i].ID;
-        accNumList[i].data  = baseList[i].accNum;
+        accNumList.data[i].ID    = baseList.data[i].ID;
+        accNumList.data[i].data  = baseList.data[i].accNum;
 
-        nameList[i].ID      = baseList[i].ID;
-        nameList[i].data    = baseList[i].name;
+        nameList.data[i].ID      = baseList.data[i].ID;
+        nameList.data[i].data    = baseList.data[i].name;
     }
 
     // Sort each frag list. //
@@ -97,8 +92,8 @@ int main(){
             ofstream clientOpsFile(OPSFILE_PATH, std::ios::app);
             clientOpsFile << "ci,client,balance,last_op\n";
             for(int i = 1; i <= totalClients; i++){
-                clientOpsFile << setfill('0') << setw(8) << baseList[i].CI << ','
-                            << baseList[i].name << ",0.0,\n";
+                clientOpsFile << setfill('0') << setw(8) << baseList.data[i].CI << ','
+                            << baseList.data[i].name << ",0.0,\n";
             }
         }
         // If it has already been created, set the clients'
@@ -129,6 +124,8 @@ int main(){
     int currClient;       // ID of the active client.
     string clientName;    // Full name of the active client.
     while(true){
+        isAdm = false;
+
         // Main menu screen. //
         ClrScr();
         cout    << "*** MENU ***\n"
@@ -150,44 +147,60 @@ int main(){
                 << "-> Client full name: ";
         getline(cin, clientName);
 
-        // Get the client's index in the nameList array. //
-        currClient = BinSearch(nameList, 1, totalClients, clientName);
+        string checkName = clientName;
+        for(auto &x:checkName)
+            x = tolower(x);
 
-        // If the client doesn't exist, output an error message. //
-        if(currClient == -1){
-            cerr << "[ ERR ] The client could not be found.\n";
-            cin.get();
-            continue;
+        if(checkName == "admin"){
+            isAdm = true;
+            currClient = 0;
+            clientName = checkName;
         }
+        else{
+            // Get the client's index in the nameList array. //
+            currClient = BinSearch(nameList, 1, totalClients, clientName);
 
-        // Set the actual client ID. //
-        currClient = nameList[currClient].ID;
+            // If the client doesn't exist, output an error message. //
+            if(currClient == -1){
+                cerr << "[ ERR ] The client could not be found.\n";
+                cin.get();
+                continue;
+            }
 
-        // If the client's account is suspended, output an error message. //
-        if(baseList[currClient].suspended){
-            cerr << "[ INFO ] This account is currently suspended.\n";
-            cin.get();
-            continue;
+            // Set the actual client ID. //
+            currClient = nameList.data[currClient].ID;
+
+            // If the client's account is suspended, output an error message. //
+            if(baseList.data[currClient].suspended){
+                cerr << "[ INFO ] This account is currently suspended.\n";
+                cin.get();
+                continue;
+            }
         }
-
         // If the client's name and ID were set properly, display the main actions screen. //
         while(true){
             // Main actions screen. //
             ClrScr();
             cout    << "*** CHOOSE AN ACTION ***\n"
-                    << "(1) Search for a client\n"
-                    << "(2) Peform transactions\n"
-                    << "(3) Suspend current user\n"
-                    << "(4) Exit\n"
-                    << "Select option: ";
-
-            cin >> action;
-            while(action < SEARCH || action > EXIT){
-                cout << "INVALID OPTION.\nSelect option: ";
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                cin >> action;
+                    << "(1) Search for a client\n";
+            if(isAdm){
+                cout    << "(2) Add a new client\n"
+                        << "(3) Delete a client\n"
+                        << "(4) Exit\n"
+                        << "\nLogged in as: " << clientName << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 4);
+                if(action >= TRANSACTIONS && action < EXIT)
+                    action += ((EXIT - TRANSACTIONS) + 1);
             }
-            cin.ignore(1);
+            else{
+                cout    << "(2) Perform transactions\n"
+                        << "(3) Suspend current user\n"
+                        << "(4) Exit\n"
+                        << "\nLogged in as: " << clientName << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 4);
+            }
 
             //=========================
             //  Search for a client.
@@ -220,20 +233,20 @@ int main(){
                         cin >> intSearch;
                         cin.ignore(1);
                         matchID = BinSearch(ciList, 1, totalClients, intSearch);  // Get the client's index in the ciList array.
-                        if(matchID != -1) matchID = ciList[matchID].ID;     // If the client was found, set its actual ID.
+                        if(matchID != -1) matchID = ciList.data[matchID].ID;      // If the client was found, set its actual ID.
                         break;
                     case 2:
                         cout << "Account number to search for: ";
                         cin >> llintSearch;
                         cin.ignore(1);
                         matchID = BinSearch(accNumList, 1, totalClients, llintSearch);
-                        if(matchID != -1) matchID = accNumList[matchID].ID;
+                        if(matchID != -1) matchID = accNumList.data[matchID].ID;
                         break;
                     case 3:
                         cout << "Client name to search for: ";
                         getline(cin, strSearch);
                         matchID = BinSearch(nameList, 1, totalClients, strSearch);
-                        if(matchID != -1) matchID = nameList[matchID].ID;
+                        if(matchID != -1) matchID = nameList.data[matchID].ID;
                         break;
                 }
 
@@ -241,13 +254,13 @@ int main(){
                 // If the client was found, display its information. //
                 if(matchID != -1){
                     cout    << "*** FOUND CLIENT ***\n"
-                            << "-> Name: " << baseList[matchID].name << '\n'
-                            << "-> C.I.: " << setfill('0') << setw(8) << baseList[matchID].CI << '\n'
-                            << "-> Account number: " << setfill('0') << setw(10) << baseList[matchID].accNum << '\n'
+                            << "-> Name: " << baseList.data[matchID].name << '\n'
+                            << "-> C.I.: " << setfill('0') << setw(8) << baseList.data[matchID].CI << '\n'
+                            << "-> Account number: " << setfill('0') << setw(10) << baseList.data[matchID].accNum << '\n'
                             << "-> Account type: ";
-                    (baseList[matchID].accType == ACC_CURRENT) ? cout << "Current\n" : cout << "Debit\n";
+                    (baseList.data[matchID].accType == ACC_CURRENT) ? cout << "Current\n" : cout << "Debit\n";
                     cout    << "-> Account status: ";
-                    (baseList[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
+                    (baseList.data[matchID].suspended == true) ? cout << "Suspended\n" : cout << "Active\n";
                 }
                 // If the client was not found, display a message indicating so. //
                 else{
@@ -284,14 +297,14 @@ int main(){
                         cout << "Deposit amount: ";
                         cin >> amount;
                         cin.ignore(1);
-                        Deposit(OPSFILE_PATH, baseList, currClient, amount);
+                        Deposit(OPSFILE_PATH, baseList.data, currClient, amount);
                         break;
                     // Withdraw. //
                     case 2:
                         cout << "Withdraw amount: ";
                         cin >> amount;
                         cin.ignore(1);
-                        try{ Withdraw(OPSFILE_PATH, baseList, currClient, amount); }
+                        try{ Withdraw(OPSFILE_PATH, baseList.data, currClient, amount); }
                         catch(string exc){ cerr << exc; cin.get(); }
                         break;
                     // Transfer. //
@@ -309,9 +322,9 @@ int main(){
                             break;
                         }
                         else{
-                            transferToID = nameList[transferToID].ID;
+                            transferToID = nameList.data[transferToID].ID;
                             // If the transfer beneficiary is a suspended account, output an error message. //
-                            if((baseList[transferToID].suspended)){ 
+                            if((baseList.data[transferToID].suspended)){ 
                                 cerr << "[ ERR ] The beneficiary account is suspended.\n";
                                 cin.get();
                                 break;
@@ -321,7 +334,7 @@ int main(){
                                 cout << "Transfer amount: ";
                                 cin >> amount;
                                 cin.ignore(1);
-                                try{ Transfer(OPSFILE_PATH, baseList, currClient, transferToID, amount); }
+                                try{ Transfer(OPSFILE_PATH, baseList.data, currClient, transferToID, amount); }
                                 catch(string exc){ cerr << exc; cin.get(); }
                                 break;
                             }
@@ -336,16 +349,16 @@ int main(){
                 ClrScr();
 
                 // Update the live base client list data. //
-                baseList[currClient].suspended = true;
+                baseList.data[currClient].suspended = true;
 
                 // Update the clients.csv file data. //
                 std::stringstream lineUpdate;
-                lineUpdate  << setfill('0') << setw(8) << baseList[currClient].CI << ','
-                            << baseList[currClient].name << ','
-                            << setfill('0') << setw(10) << baseList[currClient].accNum << ',';
-                (baseList[currClient].accType == ACC_CURRENT) ? 
+                lineUpdate  << setfill('0') << setw(8) << baseList.data[currClient].CI << ','
+                            << baseList.data[currClient].name << ','
+                            << setfill('0') << setw(10) << baseList.data[currClient].accNum << ',';
+                (baseList.data[currClient].accType == ACC_CURRENT) ? 
                     lineUpdate  << "current," : lineUpdate << "debit,";
-                lineUpdate  << "true";
+                lineUpdate  << "true" << '\n';
 
                 ReplaceLine(CLTFILE_PATH, lineUpdate.str(), currClient + 1);
 
@@ -354,67 +367,103 @@ int main(){
                 cin.get();
                 break;
             }
+            else if(action == NEWCLT){
+                ClrScr();
+                string newName;
+                int newCI, newAccType;
+                long long int newAccNum;
+
+                cout << "*** ADD A NEW CLIENT ***\n";
+
+                cout << "Input the client's name: ";
+                getline(cin, newName);
+
+                cout << "Input the client's C.I.: ";
+                cin >> newCI;
+                cin.ignore(1);
+                if(BinSearch(ciList, 1, totalClients, newCI) != -1){
+                    cout << "[ ERR ] There's already a client with this C.I.\n";
+                    cin.get();
+                    continue;
+                }
+
+                cout << "Input the client's account number: ";
+                cin >> newAccNum;
+                cin.ignore(1);
+                if(BinSearch(accNumList, 1, totalClients, newAccNum) != -1){
+                    cout << "[ ERR ] There's already a client with this account number.\n";
+                    cin.get();
+                    continue;
+                }
+
+                cout    << "Account type\n"
+                        << "(1) Debit\n"
+                        << "(2) Current\n";
+                GetAction(newAccType, ACC_DEBIT, ACC_CURRENT);
+
+                totalClients++;
+                ofstream clientsFile(CLTFILE_PATH, std::ios::app);
+                clientsFile << setw(8) << setfill('0') << newCI << ','
+                            << newName << ','
+                            << setw(10) << setfill('0') << newAccNum << ',';
+                if(newAccType == ACC_DEBIT)
+                    clientsFile << "debit" << ',';
+                else
+                    clientsFile << "current" << ',';
+                clientsFile << "false" << '\n';
+                clientsFile.close();
+
+                ofstream opsFile(OPSFILE_PATH, std::ios::app);
+                opsFile     << setw(8) << setfill('0') << newCI << ','
+                            << newName << ','
+                            << "0.0" << ','
+                            << '\n';
+
+                baseList.CheckData();
+                baseList.data[totalClients].name = newName;
+                baseList.data[totalClients].ID = totalClients;
+                baseList.data[totalClients].CI = newCI;
+                baseList.data[totalClients].accNum = newAccNum;
+                baseList.data[totalClients].suspended = false;
+                if(newAccType == ACC_DEBIT)
+                    baseList.data[totalClients].accType = ACC_DEBIT;
+                else
+                    baseList.data[totalClients].accType = ACC_CURRENT;
+ 
+                StoreNewFrag(nameList, 1, totalClients, newName);
+                StoreNewFrag(ciList, 1, totalClients, newCI);
+                StoreNewFrag(accNumList, 1, totalClients, newAccNum);
+            }
+            else if(action == DELCLT){
+                ClrScr();
+                string delName;
+
+                cout << "*** DELETE A CLIENT ***\n";
+                cout << "Input the client's name: ";
+                getline(cin, delName);
+                int nameListPos = BinSearch(nameList, 1, totalClients, delName);
+                if(nameListPos == -1){
+                    cout << "[ ERR ] The client couldn't be found.\n";
+                    cin.get();
+                    continue;
+                }
+
+                totalClients--;
+
+                int delID = nameList.data[nameListPos].ID;
+
+                DelFrag(nameList, 1, totalClients, baseList.data[delID].name, delID);
+                DelFrag(ciList, 1, totalClients, baseList.data[delID].CI, delID);
+                DelFrag(accNumList, 1, totalClients, baseList.data[delID].accNum, delID);
+                
+                for(int i = delID; i <= totalClients; i++){
+                    baseList.data[i] = baseList.data[i + 1];
+                    baseList.data[i].ID--;
+                }
+                ReplaceLine(CLTFILE_PATH, "", delID + 1);
+                ReplaceLine(OPSFILE_PATH, "", delID + 1);
+            }
             else break;
         }
     }
 }
-
-void ClrScr(){
-    #ifdef _WIN32
-        // If on Windows OS
-        std::system("cls");
-    #else
-        // Assuming POSIX OS
-        std::system("clear");
-    #endif
-}
-
-#ifdef _WIN32
-string GetDataDir(){
-    auto ValidDataDir = [](string path) -> bool{
-        struct stat s;
-        if((stat(path.c_str(), &s) == 0)){
-            if(s.st_mode & S_IFDIR)
-                return true;
-        }
-        return false;
-    };
-
-    char pBuf[256];
-    size_t len = sizeof(pBuf);
-    GetModuleFileName(NULL, pBuf, len);
-
-    string path(pBuf);
-    path.append("\\data");
-    if(ValidDataDir(path)) return path;
-    path.erase(path.find_last_of('\\'));
-
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('\\'));
-        path.append("\\data");
-        if(ValidDataDir(path)) return path;
-        path.erase(path.find_last_of('\\'));
-    }
-    return "";
-}
-#else
-string GetDataDir(){
-    using std::filesystem::is_directory;
-
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    string path;
-    if(count != -1) path = dirname(result);
-    path.append("/data");
-    if(is_directory(path)) return path;
-    path.erase(path.find_last_of('/'));
-    
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('/'));
-        path.append("/data");
-        if(is_directory(path)) return path;
-        path.erase(path.find_last_of('/'));
-    }
-    return "";
-}
-#endif

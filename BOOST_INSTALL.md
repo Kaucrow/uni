@@ -20,3 +20,15 @@ Execute the following two commands to build and install Boost:
 The first command prepares the Boost.Build system for use. The second command invokes Boost.Build to build the separately-compiled Boost libraries, and installs them in the `C:\Boost` directory.
 
 After completing these steps, the Boost C++ Libraries should be ready to use. If you haven't already done so, remember to add them to your include path for your development environment.
+
+## Linux
+### Debian-based distro
+To install the Boost C++ libraries on any debian-based distro (Ubuntu, Mint, PopOS, etc.), simply execute the following command:
+
+    sudo apt install libboost-all-dev
+
+### Arch-based distro
+To install the Boost C++ libraries on any arch-based distro (Manjaro, Garuda, Endeavour, etc.), simply execute the following commands:
+
+    sudo pacman -Syy
+    sudo pacman -S boost

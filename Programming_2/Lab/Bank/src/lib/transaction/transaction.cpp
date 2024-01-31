@@ -44,7 +44,7 @@ void DepositCall(const char* clientOpsPath, Client baseList[], int clientID, int
     // Update the client_ops.csv data. //
     string lineUpdate = to_string(baseList[clientID].CI) + ',' + baseList[clientID].name + ',' + 
                         to_string(baseList[clientID].balance.dollars) + '.' + to_string(baseList[clientID].balance.cents) + ",+" + 
-                        to_string(addDollars) + '.' + to_string(addCents);
+                        to_string(addDollars) + '.' + to_string(addCents) + '\n';
     ReplaceLine(clientOpsPath, lineUpdate, clientID + 1);
 }
 
@@ -77,7 +77,7 @@ void WithdrawCall(const char* clientOpsPath, Client baseList[], int clientID, in
     // Update the client_ops.csv data. //
     string lineUpdate = to_string(baseList[clientID].CI) + ',' + baseList[clientID].name + ',' + 
                         to_string(baseList[clientID].balance.dollars) + '.' + to_string(baseList[clientID].balance.cents) + ",-" + 
-                        to_string(withdrawDollars) + '.' + to_string(withdrawCents);
+                        to_string(withdrawDollars) + '.' + to_string(withdrawCents) + '\n';
     ReplaceLine(clientOpsPath, lineUpdate, clientID + 1);
 }
 
@@ -102,6 +102,6 @@ void Transfer(const char* clientOpsPath, Client baseList[], int clientFromID, in
     // Update the client_ops.csv data. //
     string lineUpdate = to_string(baseList[clientFromID].CI) + ',' + baseList[clientFromID].name + ',' + 
                         to_string(baseList[clientFromID].balance.dollars) + '.' + to_string(baseList[clientFromID].balance.cents) + ',' + 
-                        to_string(transferDollars) + '.' + to_string(transferCents) + "->" + baseList[clientToID].name;
+                        to_string(transferDollars) + '.' + to_string(transferCents) + "->" + baseList[clientToID].name + '\n';
     ReplaceLine(clientOpsPath, lineUpdate, clientFromID + 1);
 }

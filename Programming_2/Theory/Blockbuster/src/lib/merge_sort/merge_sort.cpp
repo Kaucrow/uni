@@ -2,20 +2,20 @@
 #include <iostream>
 
 /* For use only by MergeSort() */
-template<typename FragT>
-void Merge(FragT arr[], int l, int m, int r){
+template<typename ListT>
+void Merge(ListT &arr, int l, int m, int r){
     int n1 = m - l + 1;     // Amount of elements of the L subarray.
     int n2 = r - m;         // Amount of elements of the R subarray.
 
     // Create temp L and R arrays.
-    FragT* L{ new FragT [n1] };
-    FragT* R{ new FragT [n2] };
+    ListT* L{ new ListT(n1) };
+    ListT* R{ new ListT(n2) };
 
     // Copy data to temp arrays L[] and R[].
     for(int i = 0; i < n1; i++)
-        L[i] = arr[l + i];
+        L->data[i] = arr.data[l + i];
     for(int j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
+        R->data[j] = arr.data[m + 1 + j];
 
     // Merge the temp arrays back into movies[l..r].
     int i = 0;  // Initial index of first subarray.
@@ -23,12 +23,12 @@ void Merge(FragT arr[], int l, int m, int r){
     int k = l;  // Initial index of merged subarray.
 
     while(i < n1 && j < n2){
-        if(L[i].data <= R[j].data){
-            arr[k] = L[i];
+        if(L->data[i].data <= R->data[j].data){
+            arr.data[k] = L->data[i];
             i++;
         }
         else{
-            arr[k] = R[j];
+            arr.data[k] = R->data[j];
             j++;
         }
         k++;
@@ -36,23 +36,23 @@ void Merge(FragT arr[], int l, int m, int r){
 
     // Copy the remaining elements of L[], if any.
     while(i < n1){
-        arr[k] = L[i];
+        arr.data[k] = L->data[i];
         i++;
         k++;
     }
 
     // Copy the remaining elements of R[], if any.
     while(j < n2){
-        arr[k] = R[j];
+        arr.data[k] = R->data[j];
         j++;
         k++;
     }
 
-    delete [] L; delete [] R;
+    delete L; delete R;
 }
 
-template<typename FragT>
-void MergeSort(FragT arr[], int l, int r){
+template<typename ListT>
+void MergeSort(ListT &arr, int l, int r){
     if(l < r){
         // Same as (l + r) / 2, but avoids overflow for large l and r.
         int m = l + (r - l) / 2;
@@ -66,7 +66,9 @@ void MergeSort(FragT arr[], int l, int r){
     }
 }
 
-template void Merge<IntFrag>(IntFrag arr[], int l, int m, int r);
-template void Merge<PStrFrag>(PStrFrag arr[], int l, int m, int r);
-template void MergeSort<IntFrag>(IntFrag arr[], int l, int r);
-template void MergeSort<PStrFrag>(PStrFrag arr[], int l, int r);
+template void Merge<List<IntFrag>>(List<IntFrag> &arr, int l, int m, int r);
+template void Merge<List<PStrFrag>>(List<PStrFrag> &arr, int l, int m, int r);
+template void Merge<List<LLIntFrag>>(List<LLIntFrag> &arr, int l, int m, int r);
+template void MergeSort<List<IntFrag>>(List<IntFrag> &arr, int l, int r);
+template void MergeSort<List<PStrFrag>>(List<PStrFrag> &arr, int l, int r);
+template void MergeSort<List<LLIntFrag>>(List<LLIntFrag> &arr, int l, int r);

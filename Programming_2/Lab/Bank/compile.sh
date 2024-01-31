@@ -8,7 +8,7 @@ function ErrExit () {
 }
 
 workingDir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-binFileName=blockbuster
+binFileName=bank
 mainFileName=main.cpp
 mainFilePath=$workingDir/src/$mainFileName
 

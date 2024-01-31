@@ -33,7 +33,13 @@ struct PStrFrag : public Frag{
     pstring data; 
 };
 
+struct LLIntFrag : public Frag{
+    long long int data; 
+};
+
 struct User{
     int ID = 0;
+    int ci;
+    long long int phoneNum;
     pstring name, movies;
 };

@@ -1,7 +1,8 @@
 #pragma once
 #include <iostream>     // debug.
-#include "../basic_defs.h"
+#include "../list/list.h"
 #include "../structs.h"
+#include <string>
 
 /**
  * @brief Stores a movie frag in the frag list provided, while preserving its sorting order.
@@ -13,5 +14,8 @@
  * This function uses the value of param 'r' both as the last arr index to check
  * for the position to store the frag at and the ID of the frag stored.
  */
-template<typename FragT, typename DataT>
-void StoreNewFrag(FragT arr[], int l, int r, const DataT toStore);
+template<typename ListT, typename DataT>
+void StoreNewFrag(ListT &arr, int l, int r, const DataT toStore);
+
+template<typename ListT, typename DataT>
+void DelFrag(ListT &arr, int l, int r, const DataT toDel, int delID);

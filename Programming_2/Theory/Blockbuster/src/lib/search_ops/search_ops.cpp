@@ -5,33 +5,33 @@
 using std::abs;
 
 template<typename FragT, typename DataT>
-void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, const DataT search, bool lesserMatch){
+void StoreMatches(const List<FragT> &searchArr, int storeArr[], int someMatchPos, const DataT search, bool lesserMatch){
     int storeIndex = 0;     // Next index to store a match at.
 
     if(!lesserMatch){
         // Search down the searchArr for matches. //
-        for(int offset = 0; (searchArr[someMatchPos + offset].data == search); offset--){
-            storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
+        for(int offset = 0; (searchArr.data[someMatchPos + offset].data == search); offset--){
+            storeArr[storeIndex] = searchArr.data[someMatchPos + offset].ID;
             storeIndex++;
         }
         
         // Search up the searchArr for matches. //
-        for(int offset = 1; (searchArr[someMatchPos + offset].data == search); offset++){
-            storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
+        for(int offset = 1; (searchArr.data[someMatchPos + offset].data == search); offset++){
+            storeArr[storeIndex] = searchArr.data[someMatchPos + offset].ID;
             storeIndex++;
         }
     }
     else{
         // Get the topPos, which is the highest data in the searchArr that is equal or less than the search. //
         int offset = 0, topPos = 0;
-        while(searchArr[someMatchPos + offset].data <= search && searchArr[someMatchPos + offset].ID != 0) offset += 10;
-        while(searchArr[someMatchPos + offset].data > search && searchArr[someMatchPos + offset].ID != 0) offset--;
+        while(searchArr.data[someMatchPos + offset].data <= search && searchArr.data[someMatchPos + offset].ID != 0) offset += 10;
+        while(searchArr.data[someMatchPos + offset].data > search && searchArr.data[someMatchPos + offset].ID != 0) offset--;
         topPos = someMatchPos + offset;
 
         // Get the ID of every element that comes before the searchArr topPos index. //
-        if(searchArr[topPos].ID != 0){
-            for(offset = 0; searchArr[topPos + offset].ID != 0; offset--){
-                storeArr[storeIndex] = searchArr[someMatchPos + offset].ID;
+        if(searchArr.data[topPos].ID != 0){
+            for(offset = 0; searchArr.data[topPos + offset].ID != 0; offset--){
+                storeArr[storeIndex] = searchArr.data[someMatchPos + offset].ID;
                 storeIndex++;
             }
         }
@@ -41,17 +41,17 @@ void StoreMatches(const FragT searchArr[], int storeArr[], int someMatchPos, con
     storeArr[storeIndex] = 0;
 }
 
-template<typename FragT, typename DataT>
-int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool retClosest){
+template<typename ListT, typename DataT>
+int BinSearch(const ListT &searchArr, int l, int r, const DataT search, bool retClosest){
     int m;
     while (l <= r) {
         m = l + (r - l) / 2;
         // Check if x is present at mid.
-        if(searchArr[m].data == search)
+        if(searchArr.data[m].data == search)
             return m;
  
         // If x is greater, ignore left half.
-        if(searchArr[m].data < search)
+        if(searchArr.data[m].data < search)
             l = m + 1;
  
         // If x is smaller, ignore right half.
@@ -64,18 +64,18 @@ int BinSearch(const FragT searchArr[], int l, int r, const DataT search, bool re
     else return -1;
 }
 
-template<typename FragT, typename DataT>
-void BinSearchStoreMatches(const FragT searchArr[], int storeArr[], int l, int r, const DataT search, bool lesserMatch){
+template<typename ListT, typename DataT>
+void BinSearchStoreMatches(const ListT &searchArr, int storeArr[], int l, int r, const DataT search, bool lesserMatch){
     int m = BinSearch(searchArr, l, r, search, lesserMatch);
     if(m != -1){ StoreMatches(searchArr, storeArr, m, search, lesserMatch); }
     else storeArr[0] = 0;
 }
 
-void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int r, const pstring search){
+void GenreSearchStoreMatches(const List<Movie> &baseList, int storeArr[], int l, int r, const pstring search){
     int storeIndex = 0;
     for(l; l <= r; l++){
-        for(int j = 0; !empty(baseList[l].genres[j]); j++){
-            if(baseList[l].genres[j] == search){
+        for(int j = 0; !empty(baseList.data[l].genres[j]); j++){
+            if(baseList.data[l].genres[j] == search){
                 storeArr[storeIndex] = l;
                 storeIndex++;
                 break;
@@ -87,7 +87,8 @@ void GenreSearchStoreMatches(const Movie baseList[], int storeArr[], int l, int 
     storeArr[storeIndex] = 0;
 }
 
-template int BinSearch<IntFrag, int>(const IntFrag searchArr[], int l, int r, const int search, bool retClosest);
-template int BinSearch<PStrFrag, pstring>(const PStrFrag searchArr[], int l, int r, const pstring search, bool retClosest);
-template void BinSearchStoreMatches<IntFrag, int>(const IntFrag searchArr[], int storeArr[], int l, int r, const int search, bool lesserMatch);
-template void BinSearchStoreMatches<PStrFrag, pstring>(const PStrFrag searchArr[], int storeArr[], int l, int r, const pstring search, bool lesserMatch);
+template int BinSearch<List<IntFrag>, int>(const List<IntFrag> &searchArr, int l, int r, const int search, bool retClosest);
+template int BinSearch<List<PStrFrag>, pstring>(const List<PStrFrag> &searchArr, int l, int r, const pstring search, bool retClosest);
+template int BinSearch<List<LLIntFrag>, long long int>(const List<LLIntFrag> &searchArr, int l, int r, const long long int search, bool retClosest);
+template void BinSearchStoreMatches<List<IntFrag>, int>(const List<IntFrag> &searchArr, int storeArr[], int l, int r, const int search, bool lesserMatch);
+template void BinSearchStoreMatches<List<PStrFrag>, pstring>(const List<PStrFrag> &searchArr, int storeArr[], int l, int r, const pstring search, bool lesserMatch);

@@ -11,7 +11,7 @@ void AppendLine(const char* filePath, pstring line){
 void ReplaceLine(const char* filePath, pstring line, int replaceNum){
     pofstream write("./write.txt");
     pifstream file(filePath);
-    if(!file){ std::wcerr << "[ ERR ] ReplaceLine() FAILED. FILE COULD NOT BE OPENED\n"; }
+    if(!file){ pcerr << "[ ERR ] ReplaceLine() FAILED. FILE COULD NOT BE OPENED\n"; }
     pstring readingLine;
 
     int counter = 0;
@@ -22,10 +22,40 @@ void ReplaceLine(const char* filePath, pstring line, int replaceNum){
     };
 
     getline(file, readingLine);
-    write << line << '\n';
+    write << line;
 
     while(getline(file, readingLine)){
         write << readingLine << '\n';
+    }
+
+    // Close the file and the writeFile. Then delete the file and       //
+    // rename the writeFile to the file.                                //
+    file.close();
+    write.close();
+
+    remove(filePath);
+    rename("./write.txt", filePath);
+}
+
+void RemoveLine(const char* filePath, int removeNum){
+    pofstream write("./write.txt");
+    pifstream file(filePath);
+    if(!file){ pcerr << "[ ERR ] RemoveLine() FAILED. FILE COULD NOT BE OPENED\n"; }
+    pstring readingLine;
+
+    int counter = 0;
+    while(counter != removeNum - 1){
+        getline(file, readingLine);
+        write << readingLine << '\n';
+        counter++;
+    }
+
+    getline(file, readingLine);
+
+    while(getline(file, readingLine)){
+        readingLine = readingLine.substr(readingLine.find_first_of(';'));
+        write << counter << readingLine << '\n';
+        counter++;
     }
 
     // Close the file and the writeFile. Then delete the file and       //
@@ -108,7 +138,7 @@ void CheckMoviesCsv(const char* movFilePath){
     }
 }
 
-void PopulateMovieList(Movie baseList[], const char* movFilePath){
+void PopulateMovieList(List<Movie> &baseList, const char* movFilePath){
     pstring openExc = openExcMsg;
     pifstream movFile(movFilePath);
     if(!movFile){ throw openExc; }
@@ -132,11 +162,11 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
             switch(j){
                 // ID. //
                 case 0: 
-                    baseList[i].ID = stoi(readingLine);       // Store the first number of the curr line.
+                    baseList.data[i].ID = stoi(readingLine);       // Store the first number of the curr line.
                     break;
                 // Title. //
                 case 1:
-                    baseList[i].title = readingLine.substr(0, nextDelim);
+                    baseList.data[i].title = readingLine.substr(0, nextDelim);
                     break;
                 // Genres. //
                 case 2:
@@ -146,10 +176,10 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     for(int k = 0; k < 7; k++){         
                         nextPipe = tempReadingLine.find('|');
                         // If no pipe character was found on the temp line, assign the last genre and stop storing any more. //
-                        if(nextPipe == -1){ baseList[i].genres[k] = tempReadingLine; exitSuccess = true; break; }
+                        if(nextPipe == -1){ baseList.data[i].genres[k] = tempReadingLine; exitSuccess = true; break; }
                         // Otherwise, store the curr genre and remove it from the temp line. //
                         else{
-                            baseList[i].genres[k] = tempReadingLine.substr(0, nextPipe);
+                            baseList.data[i].genres[k] = tempReadingLine.substr(0, nextPipe);
                             tempReadingLine = tempReadingLine.substr(nextPipe + 1);
                         }
                     }
@@ -161,15 +191,15 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     else{ genreExc.append(to_pstring(i)); throw genreExc; }
                 // Duration. //
                 case 3:
-                    baseList[i].duration = stoi(readingLine); 
+                    baseList.data[i].duration = stoi(readingLine); 
                     break;
                 // Director. //
                 case 4:
-                    baseList[i].director = readingLine.substr(0, nextDelim);
+                    baseList.data[i].director = readingLine.substr(0, nextDelim);
                     break;
                 // Price. //
                 case 5:
-                    baseList[i].price = stof(readingLine.substr(0, nextDelim));
+                    baseList.data[i].price = stof(readingLine.substr(0, nextDelim));
                     break;
                 // Release. //
                 case 6:
@@ -177,9 +207,9 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                      * WARNING: Assumes that the release date is in Y-M-d format, the year
                      * is 4 characters long, and the month and day are two characters long each.
                      */
-                    baseList[i].release.year  = stoi(readingLine.substr(0, 4));
-                    baseList[i].release.month = stoi(readingLine.substr(5, 2));
-                    baseList[i].release.day   = stoi(readingLine.substr(8, 2));
+                    baseList.data[i].release.year  = stoi(readingLine.substr(0, 4));
+                    baseList.data[i].release.month = stoi(readingLine.substr(5, 2));
+                    baseList.data[i].release.day   = stoi(readingLine.substr(8, 2));
                     break;
                 // Rent to. //
                 case 7:
@@ -189,16 +219,16 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                         if(readingLine == ";;;"){ getNextLine = true; break; }
                     #endif
                     
-                    baseList[i].rentedTo = readingLine.substr(0, nextDelim);
+                    baseList.data[i].rentedTo = readingLine.substr(0, nextDelim);
                     break;
                 // Rent date. //
                 case 8:
                     /**
                      * WARNING: Same considerations as case 6.
                      */
-                    baseList[i].rentedOn.year  = stoi(readingLine.substr(0, 4));
-                    baseList[i].rentedOn.month = stoi(readingLine.substr(5, 2));
-                    baseList[i].rentedOn.day   = stoi(readingLine.substr(8, 2));
+                    baseList.data[i].rentedOn.year  = stoi(readingLine.substr(0, 4));
+                    baseList.data[i].rentedOn.month = stoi(readingLine.substr(5, 2));
+                    baseList.data[i].rentedOn.day   = stoi(readingLine.substr(8, 2));
                     break;
                 // Status. //
                 case 9:
@@ -217,11 +247,11 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     #else
                     tempReadingLine = readingLine.substr(0, nextDelim);
                     if(tempReadingLine == "returned"){
-                        baseList[i].status = MOV_STATUS_RETURNED;
+                        baseList.data[i].status = MOV_STATUS_RETURNED;
                     } else if(tempReadingLine == "rented"){
-                        baseList[i].status = MOV_STATUS_RENTED;
+                        baseList.data[i].status = MOV_STATUS_RENTED;
                     } else if(tempReadingLine == "expired"){
-                        baseList[i].status = MOV_STATUS_EXPIRED;
+                        baseList.data[i].status = MOV_STATUS_EXPIRED;
                     } else{
                         statusExc.append(to_pstring(i));
                         throw statusExc;
@@ -233,9 +263,9 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
                     /**
                      * WARNING: Same considerations as case 6.
                      */ 
-                    baseList[i].expiry.year  = stoi(readingLine.substr(0, 4));
-                    baseList[i].expiry.month = stoi(readingLine.substr(5, 2));
-                    baseList[i].expiry.day   = stoi(readingLine.substr(8, 2));
+                    baseList.data[i].expiry.year  = stoi(readingLine.substr(0, 4));
+                    baseList.data[i].expiry.month = stoi(readingLine.substr(5, 2));
+                    baseList.data[i].expiry.day   = stoi(readingLine.substr(8, 2));
                     break;
             }
             if(getNextLine){ getNextLine = false; break; }
@@ -244,7 +274,7 @@ void PopulateMovieList(Movie baseList[], const char* movFilePath){
     }
 }
 
-void PopulateUserList(User userList[], const char* userDataFilePath){
+void PopulateUserList(List<User> &userList, const char* userDataFilePath){
     pstring openExc = openExcMsg;
     pifstream userDataFile(userDataFilePath);
     if(!userDataFile){ throw openExc; }
@@ -254,20 +284,28 @@ void PopulateUserList(User userList[], const char* userDataFilePath){
     getline(userDataFile, readingLine);
 
     for(int i = 1; getline(userDataFile, readingLine); i++){
-        for(int j = 0; j < 3; j++){
+        for(int j = 0; j < 5; j++){
             nextDelim = readingLine.find(';');
             switch(j){
                 // ID. //
                 case 0:
-                    userList[i].ID = stoi(readingLine);
+                    userList.data[i].ID = stoi(readingLine);
                     break;
                 // Name. //
                 case 1:
-                    userList[i].name = readingLine.substr(0, nextDelim);
+                    userList.data[i].name = readingLine.substr(0, nextDelim);
+                    break;
+                // C.I. //
+                case 2:
+                    userList.data[i].ci = stoi(readingLine);
+                    break;
+                // Phone number. //
+                case 3:
+                    userList.data[i].phoneNum = stoll(readingLine);
                     break;
                 // Rented movies. //
-                case 2:
-                    userList[i].movies = readingLine;
+                case 4:
+                    userList.data[i].movies = readingLine;
                     break;
             }
             readingLine = readingLine.substr(nextDelim + 1);

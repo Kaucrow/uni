@@ -1,5 +1,6 @@
 #pragma once
 #include "../basic_defs.h"
+#include "../list/list.h"
 #include "../structs.h"
 
 /**
@@ -8,5 +9,5 @@
  * @param l - First index of the array.
  * @param r - Last index of the array.
  */
-template <typename FragT>
-void MergeSort(FragT arr[], int l, int r);
+template <typename ListT>
+void MergeSort(ListT &arr, int l, int r);

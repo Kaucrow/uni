@@ -1,4 +1,5 @@
 #pragma once
+#include "../list/list.h"
 #include "../structs.h"
 #include "../basic_defs.h"
 #include <fstream>
@@ -28,7 +29,7 @@ void UpdateMoviesCsv(const char* csvFilePath, int movieID, pstring username, pst
  * @param rentDate - pstring object containing the date of the rent, in Y-M-d format.
  * @param expiryDate - pstring object containing the date of the rent expiry, in Y-M-d format.
 */
-void UpdateMovieLiveData(Movie baseList[], int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn);
+void UpdateMovieLiveData(List<Movie> &baseList, int movieID, pstring username, pstring rentDate, pstring expiryDate, bool rentOrReturn);
 
 /**
  * @brief Updates the users_data.csv file and the live user list data when renting/returning a movie.
@@ -37,7 +38,7 @@ void UpdateMovieLiveData(Movie baseList[], int movieID, pstring username, pstrin
  * @param currUser - ID of the user renting/returning the movie.
  * @param movieTtl - pstring object containing the title of the movie to rent/return.
 */
-void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUser, pstring movieTtl, bool rentOrReturn);
+void UpdateUsersData(const char* usersDataFilePath, List<User> &userList, int currUser, pstring movieTtl, bool rentOrReturn);
 
 /**
  * @brief Queries the base list for the status of a movie.
@@ -48,4 +49,4 @@ void UpdateUsersData(const char* usersDataFilePath, User userList[], int currUse
  * @param queryMovieID - variable that should hold the ID of the queried movie after the function execution.
 */
 enum { QUERY_RENT_NOTFOUND = -1, QUERY_RENT_NOTRENTED = 0, QUERY_RENT_RENTED = 1 };
-int QueryMovieRent(Movie baseList[], PStrFrag ttlFrag[], int totalMovies, pstring title, int& queryMovieID);
+int QueryMovieRent(List<Movie> &baseList, List<PStrFrag> &ttlFrag, int totalMovies, pstring title, int& queryMovieID);

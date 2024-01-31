@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "../list/list.h"
 #include "../basic_defs.h"
 #include "../structs.h"
 
@@ -22,6 +23,8 @@ void AppendLine(const char* filePath, pstring line);
  * @param replaceNum - Number of line to replace.
  */
 void ReplaceLine(const char* filePath, pstring line, int replaceNum);
+
+void RemoveLine(const char* filePath, int removeNum);
 
 /**
  * @brief Gets the first number in the last line of the specified file.
@@ -47,11 +50,11 @@ void CheckMoviesCsv(const char* movFilePath);
  * @param baseList - Base list array to store the movies in.
  * @param movFilePath - Path to the movies.csv file.
  */
-void PopulateMovieList(Movie baseList[], const char* movFilePath);
+void PopulateMovieList(List<Movie> &baseList, const char* movFilePath);
 
 /**
  * @brief Stores the users data from the users_data.csv file into each element of the user list array.
  * @param userList - User list to store the users data in.
  * @param userDataFilePath - Path to the users_data.csv file.
  */
-void PopulateUserList(User userList[], const char* userDataFilePath);
+void PopulateUserList(List<User> &userList, const char* userDataFilePath);

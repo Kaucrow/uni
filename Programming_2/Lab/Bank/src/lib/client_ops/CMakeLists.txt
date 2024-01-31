@@ -1,0 +1,1 @@
+add_library(client_ops client_ops.cpp)

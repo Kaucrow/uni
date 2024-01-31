@@ -35,3 +35,14 @@ After installing CMake, you may also need to add it to your system PATH. Here's 
     * Add the following path: **C:\Program Files\CMake\bin**
 
 After completing these steps, Make & CMake should be ready to use.
+
+## Linux
+### Debian-based
+To install the Make and CMake on any debian-based distro (Ubuntu, Mint, PopOS, etc.), simply execute the following command:
+
+    sudo apt install make cmake
+
+### Arch-based
+To install Make and CMake on any arch-based distro (Manjaro, Garuda, Endeavour, etc.), simply execute the following commands:
+
+    sudo pacman -S make cmake

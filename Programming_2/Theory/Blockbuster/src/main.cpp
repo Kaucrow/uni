@@ -1,13 +1,3 @@
-#ifdef _WIN32
-    #include <libloaderapi.h>
-    #include <sys/stat.h> 
-#else
-    #include <libgen.h>
-    #include <unistd.h>
-    #include <linux/limits.h>
-#endif
-
-#include <filesystem>
 #include <boost/locale.hpp>
 #include <iostream>
 #include <fstream>
@@ -17,38 +7,33 @@
 #include <boost/locale.hpp>
 #include <structs.h>
 #include <merge_sort.h>
-#include <store_movie.h>
+#include <frag_ops.h>
 #include <rent_movie.h>
 #include <search_ops.h>
 #include <file_ops.h>
 #include <basic_defs.h>
+#include <list.h>
+#include <misc.h>
 
-enum {  FILTER = 1, GETMOVDATA = 2, ADD = 3, RENT = 4,      // Actions.
-        RETURNMOV = 5, GETCLTDATA = 6, EXIT = 7 };
+#ifndef NDEBUG
+#   include <test.h>
+#endif
+
+enum {  FILTER = 1, GETMOVINFO = 2, GETCLTINFO = 3, DISPMOVBYRENT = 4,
+        RENT = 5, RETURNMOV = 6, ADDMOV = 7, DELMOV = 8,
+        DELCLT = 9, EXIT = 99 };
 enum { DUR, PRC, YEA, MON, DAY };           // int frag types.
 enum { TTL, DIR };                          // pstring frag types.
 
 using std::string;
 
-/**
- * @brief OS agnostic clear screen function.
- */
-void ClrScr();
-
-/**
- * @brief Gets the path to the "data" dir.
- * @return The path to the data dir, if found. Otherwise, returns an empty pstring.
-*/
-string GetDataDir();
-
- /**
- * @brief Gets the current date, or the current date plus 14 days.
- * @param add14Days - Depending on its value, 14 days are added to the current date or not.
- * @return Returns a pstring object with the date in "Y-M-d" format.
- */
-pstring GetDate(bool add14Days = false);
+bool isAdm;
 
 int main(){
+    #ifndef NDEBUG
+        ExecAllTests();
+    #endif
+
     boost::locale::generator gen;               // Create the locale generator.
     std::locale loc = gen("en_US");             // Create an "en_US" locale
     std::locale::global(loc);                   // and set it as the global locale.
@@ -58,8 +43,7 @@ int main(){
 
     // Set the file paths. //
     string dataDir = GetDataDir();
-
-    if(empty(dataDir)){ pcerr << L"[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
+    if(empty(dataDir)){ pcerr << "[ ERR ] THE PROGRAM COULD NOT FIND THE \"data\" DIR.\n"; return 1; }
 
     char USRDATA_PATH[dataDir.length() + 16];
     strcpy(USRDATA_PATH, (dataDir + "/users_data.csv").c_str());
@@ -76,21 +60,22 @@ int main(){
     int totalMovies = 0;
     try{ totalMovies = GetLastLineFirstNum(MOVFILE_PATH); }     // Get the number of movies in the movies.csv file.
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
-    Movie baseList[totalMovies + 3001];     // Create a base list of movies (sorted by ID), where the first element is unused.
+
+    List<Movie> baseList(totalMovies + 1);     // Create a base list of movies (sorted by ID), where the first element is unused.
     // ==================
     // Create lists of movie fragments, where the first element of the array is unused.
     // Each frag list is sorted according to the movie data it contains 
     // (duration, title, director, release year, release month, release day).
     // ==================
-    IntFrag durList[totalMovies + 3001];
-    IntFrag prcList[totalMovies + 3001];
-    IntFrag yeaList[totalMovies + 3001];
-    IntFrag monList[totalMovies + 3001];
-    IntFrag dayList[totalMovies + 3001];
-    PStrFrag ttlList[totalMovies + 3001];
-    PStrFrag dirList[totalMovies + 3001];
-    IntFrag* intFrags[5] = { durList, prcList, yeaList, monList, dayList };
-    PStrFrag* pstrFrags[2] = { ttlList, dirList };
+    List<IntFrag> durList(totalMovies + 1);
+    List<IntFrag> prcList(totalMovies + 1);
+    List<IntFrag> yeaList(totalMovies + 1);
+    List<IntFrag> monList(totalMovies + 1);
+    List<IntFrag> dayList(totalMovies + 1);
+    List<PStrFrag> ttlList(totalMovies + 1);
+    List<PStrFrag> dirList(totalMovies + 1);
+    List<IntFrag>* intFrags[5] = { &durList, &prcList, &yeaList, &monList, &dayList };
+    List<PStrFrag>* pstrFrags[2] = { &ttlList, &dirList };
 
     pstring username;           // Username of the active user.
     int userNum = 0;            // Number of users in the users_data.csv file.
@@ -112,16 +97,23 @@ int main(){
         pfstream openTest(USRDATA_PATH);
         if(!openTest){
             pstring appendLine;
+            int ci;
+            long long int phoneNum;
             ClrScr();
-            pcout   << "[ INFO ] No users_data.csv file was found. Please input the name\n"
-                    << "         of the first user, so the file may be created: ";
+            pcout   << "[ INFO ] No users_data.csv file was found. Please input the data\n"
+                    << "         of the first user, so the file may be created.\n";
+            pcout << "Name: ";
             getline(pcin, username);
+            pcout << "C.I.: ";
+            pcin >> ci;
+            pcout << "Phone number: ";
+            pcin >> phoneNum;
             #ifdef _WIN32
                 appendLine = L"1;" + username + L";\n";
                 AppendLine(USRDATA_PATH, L"id;name;movies\n" + appendLine);
             #else
-                appendLine = "1;" + username + ";\n";
-                AppendLine(USRDATA_PATH, "id;name;movies\n" + appendLine);
+                appendLine = "1;" + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n";
+                AppendLine(USRDATA_PATH, "id;name;ci;phone;movies\n" + appendLine);
             #endif
         }
     }
@@ -129,44 +121,52 @@ int main(){
     try{ userNum = GetLastLineFirstNum(USRDATA_PATH); }
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
     
-    User userList[userNum + 101];       // List which holds the users in the users_data.csv file and their data.
-    PStrFrag usernameList[userNum + 101];
-
+    List<User> userList(userNum + 1);       // List which holds the users in the users_data.csv file and their data.
+    List<PStrFrag> usernameList(userNum + 1);
+    List<IntFrag> ciList(userNum + 1);
+    List<LLIntFrag> phoneNumList(userNum + 1);
+    
     // Populate the user list. //
     try{ PopulateUserList(userList, USRDATA_PATH); }
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
-
+        
     // Populate the base movie list. //
     try{ PopulateMovieList(baseList, MOVFILE_PATH); }
     catch(pstring exc){ pcerr << exc << '\n'; return 1; }
-    
+ 
     // Copy the base movie list elements data to each frag list. //
     for(int i = 1; i <= totalMovies; i++){
-        for(int j = DUR; j <= DAY; j++){ intFrags[j][i].ID = baseList[i].ID; }
-        for(int j = TTL; j <= DIR ; j++){ pstrFrags[j][i].ID = baseList[i].ID; }
-        intFrags[DUR][i].data = baseList[i].duration;
-        intFrags[PRC][i].data = baseList[i].price;
-        intFrags[YEA][i].data = baseList[i].release.year;
-        intFrags[MON][i].data = baseList[i].release.month;
-        intFrags[DAY][i].data = baseList[i].release.day;
-        pstrFrags[TTL][i].data = baseList[i].title;
-        pstrFrags[DIR][i].data = baseList[i].director;
+        for(int j = DUR; j <= DAY; j++){ intFrags[j]->data[i].ID = baseList.data[i].ID; }
+        for(int j = TTL; j <= DIR ; j++){ pstrFrags[j]->data[i].ID = baseList.data[i].ID; }
+        intFrags[DUR]->data[i].data = baseList.data[i].duration;
+        intFrags[PRC]->data[i].data = baseList.data[i].price;
+        intFrags[YEA]->data[i].data = baseList.data[i].release.year;
+        intFrags[MON]->data[i].data = baseList.data[i].release.month;
+        intFrags[DAY]->data[i].data = baseList.data[i].release.day;
+        pstrFrags[TTL]->data[i].data = baseList.data[i].title;
+        pstrFrags[DIR]->data[i].data = baseList.data[i].director;
     }
      
     // Sort each frag list. //
     for(int i = 0; i < 4; i++)
-        MergeSort(intFrags[i], 1, totalMovies);
+        MergeSort(*intFrags[i], 1, totalMovies);
     for(int i = 0; i < 2; i++)
-        MergeSort(pstrFrags[i], 1, totalMovies);
+        MergeSort(*pstrFrags[i], 1, totalMovies);
 
     // Copy the userList elements to the username frag list. //
     for(int i = 1; i <= userNum; i++){
-        usernameList[i].ID = userList[i].ID;
-        usernameList[i].data = userList[i].name;
+        usernameList.data[i].ID = userList.data[i].ID;
+        usernameList.data[i].data = userList.data[i].name;
+        ciList.data[i].ID = userList.data[i].ID;
+        ciList.data[i].data = userList.data[i].ci;
+        phoneNumList.data[i].ID = userList.data[i].ID;
+        phoneNumList.data[i].data = userList.data[i].phoneNum;
     }
 
     // Sort the username frag list. //
     MergeSort(usernameList, 1, userNum);
+    MergeSort(ciList, 1, userNum);
+    MergeSort(phoneNumList, 1, userNum);
 
     // =========================
     //  Main loop.
@@ -174,20 +174,23 @@ int main(){
     int action;
     int currUser;       // ID of the active user.
     while(true){
+        isAdm = false;
+
         // Main menu screen. //
         ClrScr();
         pcout   << "*** MENU ***\n"
                 << "(1) Login\n"
                 << "(2) Exit\n"
                 << "Select option: ";
-        pcin >> action;
+
+        GetAction(action, 1, 2);
+
         switch(action){
             case 1: break;
             case 2:
                 pcout << "\nTerminating execution...\n";
                 return 0;
         }
-        pcin.ignore(1);
 
         // Login screen. //
         ClrScr(); 
@@ -196,54 +199,89 @@ int main(){
                 << "-> User: ";
         getline(pcin, username);
 
-        // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
-        // If it's not, add it, and set the currUser ID.
-        for(int i = 1; i <= userNum; i++){
-            if(userList[i].name == username){
-                currUser = userList[i].ID;
+        pstring checkUsername = username;
+        for(auto &x:checkUsername)
+            x = tolower(x);
+
+        if(checkUsername == "admin"){
+            isAdm = true;
+            username = checkUsername;
+        }
+        else{
+            // Check if the user is already in the user list. If it is, set the currUser ID accordingly.
+            // If it's not, add it, and set the currUser ID.
+            for(int i = 1; i <= userNum; i++){
+                if(userList.data[i].name == username){
+                    currUser = userList.data[i].ID;
+                }
+            }
+            if(currUser == 0){
+                userNum++;              // Increment the user count. //
+                int ci;
+                long long int phoneNum;
+
+                pcout << "The user wasn't found. Please input the user data to add it to the register.\n";
+                pcout << "C.I.: ";
+                pcin >> ci;
+                pcout << "Phone number: ";
+                pcin >> phoneNum;
+
+                // Update the users_data.csv and the live users data with the new user's data. //
+                #ifdef _WIN32
+                AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
+                #else
+                AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ';' + to_pstring(ci) + ';' + to_pstring(phoneNum) + ";\n");
+                #endif
+
+                userList.CheckData();
+                userList.data[userNum].ID = userNum;
+                userList.data[userNum].ci = ci;
+                userList.data[userNum].phoneNum = phoneNum;
+                userList.data[userNum].name = username;
+
+                StoreNewFrag(usernameList, 1, userNum, username);
+                StoreNewFrag(ciList, 1, userNum, ci);
+                StoreNewFrag(phoneNumList, 1, userNum, phoneNum);
+
+                currUser = userNum;     // Set the currUser. //
             }
         }
-        if(currUser == 0){
-            userNum++;              // Increment the user count. //
-
-            // Update the users_data.csv and the live users data with the new user's data. //
-            #ifdef _WIN32
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + L';' + username + L";\n");
-            #else
-            AppendLine(USRDATA_PATH, to_pstring(userNum) + ';' + username + ";\n");
-            #endif
-            userList[userNum].ID = userNum;
-            userList[userNum].name = username;
-
-            currUser = userNum;     // Set the currUser. //
-        }
-
         while(true){
             // Main actions screen. //
             ClrScr();
             pcout   << "*** CHOOSE AN ACTION ***\n"
                     << "(1) Search with filters\n"
                     << "(2) Get movie info\n"
-                    << "(3) Add a movie\n"
-                    << "(4) Rent a movie\n"
-                    << "(5) Return a movie\n"
-                    << "(6) Get client info\n"
-                    << "(7) Exit\n"
-                    << "\nActive user: " << username << "\n\n"
-                    << "Select option: ";
-            pcin >> action;
-            while(action < FILTER || action > EXIT){
-                pcout << "INVALID OPTION.\nSelect option: ";
-                pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                pcin >> action;
+                    << "(3) Get client info\n"
+                    << "(4) Display rented/non-rented movies\n";
+            if(isAdm){
+                pcout   << "(5) Add a movie\n"
+                        << "(6) Delete a movie\n"
+                        << "(7) Delete client info\n"
+                        << "(8) Exit\n"
+                        << "\nLogged in as: " << username << "\n\n"
+                        << "Select option: ";
+                GetAction(action, 1, 8);
+                if(action > DISPMOVBYRENT && action < EXIT)
+                    action += (ADDMOV - RENT);
+                else if(action == 8) action = EXIT;
             }
-            pcin.ignore(1);
+            else{
+                pcout   << "(5) Rent a movie\n"
+                        << "(6) Return a movie\n"
+                        << "(7) Exit\n"
+                        << "\nLogged in as: " << username << "\n\n"
+                        << "Select option: ";
+                GetAction(action, FILTER, EXIT);
+                if(action == 7) action = EXIT;
+            }
+
+            ClrScr();
 
             //=========================
             //  Search with filters.
             // ========================
             if(action == FILTER){
-                ClrScr();
                 int idMatches[totalMovies + 3001];      // Movie list array to stores the search matches.
 
                 pcout   << "*** FILTERS ***\n"
@@ -257,13 +295,7 @@ int main(){
                         << "(8) Release day\n"
                         << "Select option: ";
 
-                pcin >> action;
-                while(action < 1 || action > 8){
-                    pcout << "INVALID OPTION.\nSelect option: ";
-                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    pcin >> action;
-                }
-                pcin.ignore(1);
+                GetAction(action, 1, 8);
 
                 pstring wstrSearch;
                 int intSearch;
@@ -277,12 +309,12 @@ int main(){
                         pcout << "Duration to search for: ";
                         pcin >> intSearch;
                         pcin.ignore(1);
-                        BinSearchStoreMatches(intFrags[DUR], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(*intFrags[DUR], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 2:
                         pcout << "Title to search for: ";
                         getline(pcin, wstrSearch);
-                        BinSearchStoreMatches(pstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(*pstrFrags[TTL], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 3:
                         pcout << "Genre to search for: ";
@@ -292,19 +324,19 @@ int main(){
                     case 4:
                         pcout << "Director to search for: ";
                         getline(pcin, wstrSearch);
-                        BinSearchStoreMatches(pstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
+                        BinSearchStoreMatches(*pstrFrags[DIR], idMatches, 1, totalMovies, wstrSearch);
                         break;
                     case 5:
                         pcout << "Max price: ";
                         pcin >> intSearch;
                         pcin.ignore(1);
-                        BinSearchStoreMatches(intFrags[PRC], idMatches, 1, totalMovies, intSearch, true);
+                        BinSearchStoreMatches(*intFrags[PRC], idMatches, 1, totalMovies, intSearch, true);
                         break;
                     case 6:
                         pcout << "Year to search for: ";
                         pcin >> intSearch;
                         pcin.ignore(1);
-                        BinSearchStoreMatches(intFrags[YEA], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(*intFrags[YEA], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 7:
                         pcout << "Month to search for: ";
@@ -314,7 +346,7 @@ int main(){
                             pcin >> intSearch;
                         }
                         pcin.ignore(1);
-                        BinSearchStoreMatches(intFrags[MON], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(*intFrags[MON], idMatches, 1, totalMovies, intSearch);
                         break;
                     case 8:
                         pcout << "Day to search for: ";
@@ -324,7 +356,7 @@ int main(){
                             pcin >> intSearch;
                         }
                         pcin.ignore(1);
-                        BinSearchStoreMatches(intFrags[DAY], idMatches, 1, totalMovies, intSearch);
+                        BinSearchStoreMatches(*intFrags[DAY], idMatches, 1, totalMovies, intSearch);
                         break;
                 }
 
@@ -337,7 +369,7 @@ int main(){
                 else{
                     pcout << "*** FOUND MATCHES ***\n";
                     for(int i = 0; idMatches[i] != 0; i++){
-                        pcout << baseList[idMatches[i]].title << '\n';
+                        pcout << baseList.data[idMatches[i]].title << '\n';
                     }
                 }
                 pcin.get();
@@ -345,14 +377,13 @@ int main(){
             // ========================
             //  Get movie info.
             // ========================
-            else if(action == GETMOVDATA){
-                ClrScr();
+            else if(action == GETMOVINFO){
                 pstring search;
                 pcout << "-> Movie title: ";
                 getline(pcin, search);
 
                 // Perform a search by title for the entered movie. //
-                int ttlPos = BinSearch(pstrFrags[TTL], 1, totalMovies, search);
+                int ttlPos = BinSearch(*pstrFrags[TTL], 1, totalMovies, search);
 
                 // If it doesn't exist in the title frag list, output an error and go to the next loop iteration. //
                 if(ttlPos == -1){
@@ -362,30 +393,29 @@ int main(){
                 }
 
                 // If it exists, get its ID, and print its data from the base list. //
-                int moviePos = pstrFrags[TTL][ttlPos].ID;
+                int moviePos = pstrFrags[TTL]->data[ttlPos].ID;
                 pcout   << "\n[ INFO ] Found movie \"" << search << "\".\n"
-                        << "-> Title: " << baseList[moviePos].title << '\n'
-                        << "-> Duration: " << baseList[moviePos].duration << " min.\n"
-                        << "-> Director: " << baseList[moviePos].director << '\n'
-                        << "-> Price: " << baseList[moviePos].price << "$\n"
-                        << "-> Release date: " << baseList[moviePos].release.year << '-' << baseList[moviePos].release.month << L'-' << baseList[moviePos].release.day << '\n'
+                        << "-> Title: " << baseList.data[moviePos].title << '\n'
+                        << "-> Duration: " << baseList.data[moviePos].duration << " min.\n"
+                        << "-> Director: " << baseList.data[moviePos].director << '\n'
+                        << "-> Price: " << baseList.data[moviePos].price << "$\n"
+                        << "-> Release date: " << baseList.data[moviePos].release.year << '-' << baseList.data[moviePos].release.month << '-' << baseList.data[moviePos].release.day << '\n'
                         << "-> Genres:\n";
-                for(int i = 0; !empty(baseList[moviePos].genres[i]); i++)
-                    pcout << "  * " << baseList[moviePos].genres[i] << L'\n';
+                for(int i = 0; !empty(baseList.data[moviePos].genres[i]); i++)
+                    pcout << "  * " << baseList.data[moviePos].genres[i] << '\n';
 
                 // The rent data is only printed if the movie has actually been rented to someone. //
-                if(baseList[moviePos].status != MOV_STATUS_RETURNED){
-                    pcout   << "-> Rented to: " << baseList[moviePos].rentedTo << '\n'
-                            << "-> Rented on: " << baseList[moviePos].rentedOn.year << '-' << baseList[moviePos].rentedOn.month << '-' << baseList[moviePos].rentedOn.day << '\n'
-                            << "-> Expiry: " << baseList[moviePos].expiry.year << '-' << baseList[moviePos].expiry.month << '-' << baseList[moviePos].expiry.day << '\n';
+                if(baseList.data[moviePos].status != MOV_STATUS_RETURNED){
+                    pcout   << "-> Rented to: " << baseList.data[moviePos].rentedTo << '\n'
+                            << "-> Rented on: " << baseList.data[moviePos].rentedOn.year << '-' << baseList.data[moviePos].rentedOn.month << '-' << baseList.data[moviePos].rentedOn.day << '\n'
+                            << "-> Expiry: " << baseList.data[moviePos].expiry.year << '-' << baseList.data[moviePos].expiry.month << '-' << baseList.data[moviePos].expiry.day << '\n';
                 }
                 pcin.get();
             }
             // ========================
             //  Add a movie.
             // ========================
-            else if(action == ADD){
-                ClrScr();
+            else if(action == ADDMOV){
                 Movie toStore;
                 pstring storeDat;
                 totalMovies++;              // Increase the count of movies.
@@ -435,18 +465,18 @@ int main(){
                 toStore.release.day = stoi(storeDat);
                 
                 // Store the movie in the baseList. //
-                baseList[totalMovies] = toStore;
+                baseList.data[totalMovies] = toStore;
                 // ======================
                 // Update each of the frag lists with the added movie data,
                 // while preserving the sorting order in each of them.
                 // ======================
-                StoreNewFrag(intFrags[DUR], 1, totalMovies, toStore.duration);
-                StoreNewFrag(intFrags[PRC], 1, totalMovies, int(toStore.price));
-                StoreNewFrag(intFrags[YEA], 1, totalMovies, toStore.release.year);
-                StoreNewFrag(intFrags[MON], 1, totalMovies, toStore.release.month);
-                StoreNewFrag(intFrags[DAY], 1, totalMovies, toStore.release.day);
-                StoreNewFrag(pstrFrags[TTL], 1, totalMovies, toStore.title);
-                StoreNewFrag(pstrFrags[DIR], 1, totalMovies, toStore.director);
+                StoreNewFrag(*intFrags[DUR], 1, totalMovies, toStore.duration);
+                StoreNewFrag(*intFrags[PRC], 1, totalMovies, int(toStore.price));
+                StoreNewFrag(*intFrags[YEA], 1, totalMovies, toStore.release.year);
+                StoreNewFrag(*intFrags[MON], 1, totalMovies, toStore.release.month);
+                StoreNewFrag(*intFrags[DAY], 1, totalMovies, toStore.release.day);
+                StoreNewFrag(*pstrFrags[TTL], 1, totalMovies, toStore.title);
+                StoreNewFrag(*pstrFrags[DIR], 1, totalMovies, toStore.director);
 
                 // Build the line containing the added movie data, and append it to the movies.csv file. //
                 pstringstream appendLine;
@@ -454,7 +484,7 @@ int main(){
                 for(int i = 0; !empty(toStore.genres[i]) && i < 7; i++){
                     appendLine << toStore.genres[i] << '|';
                 }
-                appendLine.seekp(-1, std::ios_base::end);
+
                 appendLine  << ';' << toStore.duration << ';'
                             << toStore.director << ';'
                             << std::setprecision(4) << toStore.price << ';';
@@ -478,50 +508,61 @@ int main(){
             //  Rent a movie.
             // ========================
             else if(action == RENT){
-                ClrScr();
-                pstring rentName;
-                pcout << "*** MOVIE RENT ***\n";
-                pcout << "Input the title of the movie: ";
-                getline(pcin, rentName);
-
-                int queryMovieID = 0; 
-                // Search for the title of the movie to rent, throw an error if it doesn't exist,
-                // and print some information if the movie exists but is already rented.
-                int rentStatus = QueryMovieRent(baseList, pstrFrags[TTL], totalMovies, rentName, queryMovieID);
-                if(rentStatus == QUERY_RENT_NOTFOUND){
-                    pcerr << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                char charAction;
+                if(!empty(userList.data[currUser].movies)){
+                    pcout << "[ ERR ] You can't rent any more movies until\n\tyou return the ones you currently have.\n";
                     pcin.get();
-                    continue;
-                } 
-                else if(rentStatus == QUERY_RENT_RENTED){
-                    pcout << "[ INFO ] The movie is already rented by someone.\n";
-                    pcin.get();
-                    continue;
                 }
+                else do{
+                    ClrScr();
+                    pstring rentName;
+                    pcout << "*** MOVIE RENT ***\n";
+                    pcout << "Input the title of the movie (Input 0 to exit): ";
+                    getline(pcin, rentName);
 
-                // If the movie exists and is not rented, rent it. //
-                pstring currDate = GetDate();           // Get the current date.
-                pstring expiryDate = GetDate(true);     // Get the expiry date.
+                    if(rentName == "0") break;
 
-                // Update the movies.csv file with the rent information. //
-                UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the base list movie data with the rent information. //
-                UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
-                // Update the users_data.csv file and user list data with the rent information. //
-                UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
+                    int queryMovieID = 0; 
+                    // Search for the title of the movie to rent, throw an error if it doesn't exist,
+                    // and print some information if the movie exists but is already rented.
+                    int rentStatus = QueryMovieRent(baseList, *pstrFrags[TTL], totalMovies, rentName, queryMovieID);
+                    if(rentStatus == QUERY_RENT_NOTFOUND){
+                        pcerr << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
+                        pcin.get();
+                        continue;
+                    } 
+                    else if(rentStatus == QUERY_RENT_RENTED){
+                        pcout << "[ INFO ] The movie is already rented by someone.\n";
+                        pcin.get();
+                        continue;
+                    }
+                    // If the movie exists and is not rented, rent it. //
+                    pstring currDate = GetDate();           // Get the current date.
+                    pstring expiryDate = GetDate(true);     // Get the expiry date.
+
+                    // Update the movies.csv file with the rent information. //
+                    UpdateMoviesCsv(MOVFILE_PATH, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
+                    // Update the base list movie data with the rent information. //
+                    UpdateMovieLiveData(baseList, queryMovieID, username, currDate, expiryDate, UPDATE_RENT);
+                    // Update the users_data.csv file and user list data with the rent information. //
+                    UpdateUsersData(USRDATA_PATH, userList, currUser, rentName, UPDATE_RENT);
+
+                    pcout << "\nWould you like to rent another movie? (y/n): ";
+                    pcin.get(charAction);
+                    pcin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }while(tolower(charAction) == 'y');
             }
             // ========================
             //  Return a movie.
             // ========================
             else if(action == RETURNMOV){
-                ClrScr();
                 int queryMovieID = 0;
                 pstring returnName;
                 pcout << "*** MOVIE RETURN ***\n";
                 pcout << "Input the title of the movie: ";
                 getline(pcin, returnName);
 
-                int rentStatus = QueryMovieRent(baseList, pstrFrags[TTL], totalMovies, returnName, queryMovieID);
+                int rentStatus = QueryMovieRent(baseList, *pstrFrags[TTL], totalMovies, returnName, queryMovieID);
                 if(rentStatus == QUERY_RENT_NOTFOUND){
                     pcout << "[ ERR ] THE MOVIE DOES NOT EXIST.\n";
                     pcin.get();
@@ -532,7 +573,7 @@ int main(){
                     pcin.get();
                     continue;
                 }
-                else if(baseList[queryMovieID].rentedTo != username){
+                else if(baseList.data[queryMovieID].rentedTo != username){
                     pcout << "[ INFO ] You are not the owner of the rent.\n";
                     pcin.get();
                     continue;
@@ -550,14 +591,14 @@ int main(){
                     to_pstring(baseList[queryMovieID].expiry.day);
                 #else
                     pstring rentDate =
-                    to_pstring(baseList[queryMovieID].rentedOn.year) + "-" +
-                    to_pstring(baseList[queryMovieID].rentedOn.month) + "-" +
-                    to_pstring(baseList[queryMovieID].rentedOn.day);
+                    to_pstring(baseList.data[queryMovieID].rentedOn.year) + "-" +
+                    to_pstring(baseList.data[queryMovieID].rentedOn.month) + "-" +
+                    to_pstring(baseList.data[queryMovieID].rentedOn.day);
 
                     pstring expiryDate =
-                    to_pstring(baseList[queryMovieID].expiry.year) + "-" +
-                    to_pstring(baseList[queryMovieID].expiry.month) + "-" +
-                    to_pstring(baseList[queryMovieID].expiry.day);
+                    to_pstring(baseList.data[queryMovieID].expiry.year) + "-" +
+                    to_pstring(baseList.data[queryMovieID].expiry.month) + "-" +
+                    to_pstring(baseList.data[queryMovieID].expiry.day);
                 #endif
 
                 // Update the movies.csv file with the return information. //
@@ -570,26 +611,161 @@ int main(){
             // ========================
             //  Get client info.
             // ========================
-            else if(action == GETCLTDATA){
+            else if(action == GETCLTINFO){
+                pstring searchStr;
+                int searchInt;
+                long long int searchLLInt;
+
+                int userPos;
+
+                pcout   << "*** SEARCH BY ***\n"
+                        << "(1) Name\n"
+                        << "(2) C.I.\n"
+                        << "(3) Phone\n"
+                        << "(4) ID\n"
+                        << "Select option: ";
+
+                GetAction(action, 1, 2);
+
                 ClrScr();
-                pstring search;
-
-                pcout << "Client name: ";
-                getline(pcin, search);
-
-                int userPos = BinSearch(usernameList, 1, userNum, search);
+                switch(action){
+                    case 1:
+                        pcout << "Input client name: ";
+                        getline(pcin, searchStr);
+                        userPos = BinSearch(usernameList, 1, userNum, searchStr);
+                        if(userPos != -1) userPos = usernameList.data[userPos].ID;
+                        break;
+                    case 2:
+                        pcout << "Input client C.I.: ";
+                        pcin >> searchInt;
+                        userPos = BinSearch(ciList, 1, userNum, searchInt);
+                        if(userPos != -1) userPos = ciList.data[userPos].ID;
+                        pcin.ignore(1);
+                        break;
+                    case 3:
+                        pcout << "Input client phone number: ";
+                        pcin >> searchLLInt;
+                        userPos = BinSearch(phoneNumList, 1, userNum, searchLLInt);
+                        if(userPos != -1) userPos = phoneNumList.data[userPos].ID;
+                        pcin.ignore(1);
+                        break;
+                    case 4:
+                        pcout << "Input client ID: ";
+                        pcin >> searchInt;
+                        if(searchInt > userList.max) userPos = -1;
+                        else if(empty(userList.data[searchInt].name)) userPos = -1;
+                        else userPos = searchInt;
+                        pcin.ignore(1);
+                        break; 
+                }
 
                 if(userPos == -1)
                     pcerr << "[ ERR ] The client was not found.\n";
                 else{
                     ClrScr();
-                    userPos = usernameList[userPos].ID;
                     pcout   << "*** FOUND CLIENT ***\n"
-                            << "-> ID: " << userList[userPos].ID << '\n'
-                            << "-> Name: " << userList[userPos].name << '\n'
-                            << "-> Rented movies: " << userList[userPos].movies << '\n';
+                            << "-> ID: " << userList.data[userPos].ID << '\n'
+                            << "-> Name: " << userList.data[userPos].name << '\n'
+                            << "-> C.I.: " << userList.data[userPos].ci << '\n'
+                            << "-> Phone number: " << userList.data[userPos].phoneNum << '\n'
+                            << "-> Rented movies:\n";
+                    pstring rentedMovies = userList.data[userPos].movies;
+                    while(!empty(rentedMovies)){
+                        size_t nextDelim = rentedMovies.find('|', 1);
+                        pcout << "  * " << rentedMovies.substr(1, nextDelim - 1) << '\n';
+                        if(nextDelim != string::npos) rentedMovies = rentedMovies.substr(nextDelim);
+                        else break;
+                    };
                 }
                 pcin.get();
+            }
+            else if(action == DISPMOVBYRENT){
+                pcout   << "*** DISPLAY RENTED/NON-RENTED MOVIES ***\n"
+                        << "(1) Rented movies\n"
+                        << "(2) Not rented movies\n"
+                        << "Display: ";
+                
+                GetAction(action, 1, 2);
+
+                ClrScr();
+
+                if(action == 1){
+                    pcout << "*** RENTED MOVIES ***\n\n";
+                    for(int i = 1; i <= baseList.total; i++){
+                        if(baseList.data[i].status != MOV_STATUS_RETURNED)
+                            pcout << baseList.data[i].title << '\n';
+                    }
+                }
+                else{
+                    pcout << "*** NON-RENTED MOVIES ***\n\n";
+                    for(int i = 1; i <= baseList.total; i++){
+                        if(baseList.data[i].status == MOV_STATUS_RETURNED)
+                            pcout << baseList.data[i].title << '\n';
+                    }
+                }
+                pcin.get();
+            }
+            else if(action == DELMOV){
+                pstring delTtl;
+                pcout << "*** DELETE A MOVIE ***\n";
+                pcout << "Name of the movie to delete: ";
+                getline(pcin, delTtl);
+                int ttlListPos = BinSearch(*pstrFrags[TTL], 1, totalMovies, delTtl);
+                if(ttlListPos == -1){
+                    pcout << "[ ERR ] The movie couldn't be found.\n";
+                    pcin.get();
+                    continue;
+                }
+
+                totalMovies--;
+
+                int delID = pstrFrags[TTL]->data[ttlListPos].ID;
+                
+                DelFrag(*pstrFrags[TTL], 1, totalMovies, baseList.data[delID].title, delID);
+                DelFrag(*pstrFrags[DIR], 1, totalMovies, baseList.data[delID].director, delID);
+                DelFrag(*intFrags[DUR], 1, totalMovies, baseList.data[delID].duration, delID);
+                DelFrag(*intFrags[PRC], 1, totalMovies, int(baseList.data[delID].price), delID);
+                DelFrag(*intFrags[YEA], 1, totalMovies, baseList.data[delID].release.year, delID);
+                DelFrag(*intFrags[MON], 1, totalMovies, baseList.data[delID].release.month, delID);
+                DelFrag(*intFrags[DAY], 1, totalMovies, baseList.data[delID].release.day, delID); 
+
+                for(int i = delID; i <= totalMovies; i++){
+                    baseList.data[i] = baseList.data[i + 1];
+                    baseList.data[i].ID--;
+                }
+
+                RemoveLine(MOVFILE_PATH, delID + 1);
+            }
+            else if(action == DELCLT){
+                pstring toDel;
+                pcout << "*** DELETE A CLIENT ***\n";
+                pcout << "Name of the client to delete: ";
+                getline(pcin, toDel);
+                int usernameListPos = BinSearch(usernameList, 1, userNum, toDel);
+                if(usernameListPos == -1){
+                    pcout << "[ ERR ] The client couldn't be found.\n";
+                    pcin.get();
+                    continue;
+                }
+
+                pcin.get();
+                userNum--;
+
+                int delID = userList.data[usernameListPos].ID;
+
+                pcout << delID << '\n';
+                pcin.get();
+
+                DelFrag(usernameList, 1, userNum, userList.data[delID].name, delID);
+                DelFrag(ciList, 1, userNum, userList.data[delID].ci, delID);
+                DelFrag(phoneNumList, 1, userNum, userList.data[delID].phoneNum, delID);
+
+                for(int i = delID; i <= userNum; i++){
+                    userList.data[i] = userList.data[i + 1];
+                    userList.data[i].ID--;
+                }
+
+                RemoveLine(USRDATA_PATH, delID + 1); 
             }
             // Executes if the user selects the "Exit" action. //
             else break;
@@ -597,82 +773,3 @@ int main(){
     }
     return 0;
 }
-
-pstring GetDate(bool add14Days){
-    time_t rawtime;
-    struct tm timeinfo;
-    pchar buffer[20];
-
-    time(&rawtime);
-    if(add14Days) rawtime += 1209600;
-
-    #ifdef _WIN32
-        localtime_s(&timeinfo, &rawtime);
-        wcsftime(buffer, 20, L"%Y-%m-%d", &timeinfo);
-    #else
-        localtime_r(&rawtime, &timeinfo);
-        strftime(buffer, 20, "%Y-%m-%d", &timeinfo);
-    #endif
-
-    return buffer;
-}
-
-void ClrScr(){
-    #ifdef _WIN32
-        // If on Windows OS
-        std::system("cls");
-    #else
-        // Assuming POSIX OS
-        std::system("clear");
-    #endif
-}
-
-#ifdef _WIN32
-string GetDataDir(){
-    auto ValidDataDir = [](string path) -> bool{
-        struct stat s;
-        if((stat(path.c_str(), &s) == 0)){
-            if(s.st_mode & S_IFDIR)
-                return true;
-        }
-        return false;
-    };
-
-    char pBuf[256];
-    size_t len = sizeof(pBuf);
-    GetModuleFileName(NULL, pBuf, len);
-
-    string path(pBuf);
-    path.append("\\data");
-    if(ValidDataDir(path)) return path;
-    path.erase(path.find_last_of('\\'));
-
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('\\'));
-        path.append("\\data");
-        if(ValidDataDir(path)) return path;
-        path.erase(path.find_last_of('\\'));
-    }
-    return "";
-}
-#else
-string GetDataDir(){
-    using std::filesystem::is_directory;
-
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    string path;
-    if(count != -1) path = dirname(result);
-    path.append("/data");
-    if(is_directory(path)) return path;
-    path.erase(path.find_last_of('/'));
-    
-    for(int i = 0; i < 3; i++){
-        path.erase(path.find_last_of('/'));
-        path.append("/data");
-        if(is_directory(path)) return path;
-        path.erase(path.find_last_of('/'));
-    }
-    return "";
-}
-#endif
