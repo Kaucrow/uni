@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>     // debug
 #include "../classes/student/student.h"
 #include "linked_list.h"
@@ -63,13 +62,6 @@ void LinkedList<T>::append(T data) {
     curr_node->next = new_node;
 }
 
-template LinkedList<Student>::LinkedList();
-template LinkedList<Student>::~LinkedList();
-template LinkedList<string>::~LinkedList();
-template void LinkedList<Student>::append(Student data);
-
-template Node<Student>::Node(Student data);
-
 namespace LinkedListFn {
     LinkedList<string> from_row(string row) {
         LinkedList<string> linked_list;
@@ -77,14 +69,17 @@ namespace LinkedListFn {
         size_t field_end = row.find(',');
 
         while(field_end != string::npos) {
-            linked_list.append(row.substr(field_start, field_end));
+            linked_list.append(row.substr(field_start, field_end - field_start));
             field_start = field_end + 1;
             field_end = row.find(',', field_start);
         }
 
-        linked_list.append(row.substr(field_start, field_end));
-
+        linked_list.append(row.substr(field_start, field_end - field_start));
         return linked_list;
     }
 }
 
+template LinkedList<Student>::LinkedList();
+template LinkedList<Student>::~LinkedList();
+template LinkedList<string>::~LinkedList();
+template void LinkedList<Student>::append(Student data);

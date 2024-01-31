@@ -9,23 +9,22 @@ enum Gender {
     Female
 };
 
-class Student {
-    public:
-        Student(
-            int ci, string first_name, string last_name,
-            string email_addr, Gender gender, int av_grade,
-            int curr_year, char section, int csv_pos
-        );
-    private:
-        int ci;
-        string first_name;
-        string last_name;
-        string email_addr;
-        Gender gender;
-        int av_grade;
-        int curr_year;
-        char section;
-        int csv_pos;
+struct Student {
+    Student();
+    Student(
+        int ci, string first_name, string last_name,
+        string email_addr, Gender gender, int av_grade,
+        int curr_year, char section, int csv_pos
+    );
+    int ci;
+    string first_name;
+    string last_name;
+    string email;
+    Gender gender;
+    float av_grade;
+    int curr_year;
+    char section;
+    int csv_pos;
 };
 
 namespace StudentFn {

@@ -1,4 +1,5 @@
 #include "linked_list.h"
+#include "../classes/student/student.h"
 
 template <typename T>
 LinkedList<T>::Iterator::Iterator(NodePtr<T> start) : current(start) {}
@@ -36,3 +37,9 @@ template string& LinkedList<string>::Iterator::operator*() const;
 template bool LinkedList<string>::Iterator::operator!=(const LinkedList<string>::Iterator& other) const;
 template LinkedList<string>::Iterator LinkedList<string>::begin() const;
 template LinkedList<string>::Iterator LinkedList<string>::end() const;
+
+template LinkedList<Student>::Iterator& LinkedList<Student>::Iterator::operator++();
+template Student& LinkedList<Student>::Iterator::operator*() const;
+template bool LinkedList<Student>::Iterator::operator!=(const LinkedList<Student>::Iterator& other) const;
+template LinkedList<Student>::Iterator LinkedList<Student>::begin() const;
+template LinkedList<Student>::Iterator LinkedList<Student>::end() const;
