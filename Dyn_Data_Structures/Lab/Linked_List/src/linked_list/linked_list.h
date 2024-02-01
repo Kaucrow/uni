@@ -10,7 +10,7 @@ template <typename T>
 struct Node {
     Node(T data) : data(data), next(nullptr) {}
     T data;
-    Node* next; 
+    Node* next;
 };
 
 template <typename T>
@@ -28,6 +28,8 @@ class LinkedList {
         ~LinkedList();
         T& operator[](const size_t idx);
         void append(T data);
+        T remove(const size_t idx);
+        void obliterate_student(const size_t idx, const char* csv_path);
         void clear();
         void sort(CompareFn<T> compare_fn = std::less<T>());
         size_t len();
@@ -52,4 +54,4 @@ class LinkedList {
 
 namespace LinkedListFn {
     LinkedList<string> from_row(string row);
-}
+};

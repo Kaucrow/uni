@@ -1,6 +1,10 @@
 #include <iostream>     // debug
+#include <fstream>
+#include <string>
 #include "../classes/student/student.h"
 #include "linked_list.h"
+
+using std::ifstream, std::ofstream, std::getline, std::string;
 
 template <typename T>
 LinkedList<T>::LinkedList()
@@ -81,6 +85,62 @@ void LinkedList<T>::append(T data) {
 }
 
 template <typename T>
+T LinkedList<T>::remove(const size_t idx) {
+    NodePtr<T> previous = nullptr;
+    NodePtr<T> current = this->head;
+    size_t count = 0;
+
+    while(current && count < idx) {
+        previous = current;
+        current = current->next;
+        count++;
+    }
+
+    if(!current) {
+        throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
+    }
+
+    if(previous)
+        previous->next = current->next;
+    else
+        this->head = current->next;
+
+    T return_data = current->data;
+
+    delete current;
+
+    return return_data;
+}
+
+template <>
+void LinkedList<Student>::obliterate_student(const size_t idx, const char* csv_path) {
+    Student deleted = this->remove(idx);
+    int csv_remove_line = deleted.csv_pos;
+
+    string csv_path_str = string(csv_path);
+    ifstream infile(csv_path_str);
+
+    string tempfile_path = csv_path_str.substr(0, csv_path_str.rfind('/') + 1) + "temp.csv";
+    ofstream tempfile(tempfile_path);
+
+    string reading_line;
+    while(getline(infile, reading_line)) {
+        if(csv_remove_line == 1) {
+            csv_remove_line--;
+            continue;
+        }
+        tempfile << reading_line << '\n';
+        csv_remove_line--;
+    }
+
+    infile.close();
+    tempfile.close();
+    
+    std::remove(csv_path);
+    std::rename(tempfile_path.c_str(), csv_path);
+}
+
+template <typename T>
 size_t LinkedList<T>::len() {
     return this->size;
 }
@@ -152,6 +212,7 @@ template LinkedList<Student>::LinkedList();
 template LinkedList<Student>::~LinkedList();
 template Student& LinkedList<Student>::operator[](size_t idx);
 template void LinkedList<Student>::append(Student data);
+template Student LinkedList<Student>::remove(size_t idx);
 template size_t LinkedList<Student>::len();
 template void LinkedList<Student>::sort(CompareFn<Student> compare_fn);
 

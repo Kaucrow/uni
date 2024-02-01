@@ -8,13 +8,7 @@ using   std::string, std::cout, std::cin, std::getline,
         std::ifstream, std::ofstream;
 
 int main() {
-    cout << "Execution start :)\n";
-    string hello = "hello,j,o,e";
-    LinkedList<string> linked_list = LinkedListFn::from_row(hello);
-    linked_list.sort();
-    for(auto value : linked_list) {
-        cout << value << '\n';
-    }
+    cout << "Execution start :)\n\n";
 
     LinkedList<Student> students = StudentFn::list_from_csv("C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/students.csv");
 
@@ -24,6 +18,7 @@ int main() {
 
     size_t count = 0;
     LinkedList<Student> top_10_students;
+    cout << "*** TOP 10 GIGACHADS OF ALL TIME ***\n";
     for(auto student : students) {
         if(students.len() - 10 <= count)
             top_10_students.append(student);
@@ -33,9 +28,12 @@ int main() {
     }
 
     for(auto student : top_10_students) {
-        cout << student.csv_pos << '\n';
         cout << student.first_name << ' ' << student.last_name << " (" << student.av_grade << ")\n";
     }
+
+    cout << '\n' << students[1].first_name << '\n';
+
+    students.obliterate_student(1, "C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/students.csv");
 
     students[0].write_to_file("C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/");
 
