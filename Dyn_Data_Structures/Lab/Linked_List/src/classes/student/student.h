@@ -30,6 +30,6 @@ struct Student {
 };
 
 namespace StudentFn {
-    Student from_row(string row);
+    Student from_row(string row, int csv_pos);
     LinkedList<Student> list_from_csv(const char* csvfile_path);
 }

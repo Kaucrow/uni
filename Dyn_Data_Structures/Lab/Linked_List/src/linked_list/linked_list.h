@@ -1,8 +1,10 @@
 #pragma once
 #include <cstddef>
 #include <string>
+#include <functional>
+#include <iterator>
 
-using std::string;
+using std::string, std::function;
 
 template <typename T>
 struct Node {
@@ -15,6 +17,9 @@ template <typename T>
 using NodePtr = Node<T>*;
 
 template <typename T>
+using CompareFn = function<bool(const T&, const T&)>;
+
+template <typename T>
 class LinkedList {
     public:
         LinkedList();
@@ -24,7 +29,7 @@ class LinkedList {
         T& operator[](const size_t idx);
         void append(T data);
         void clear();
-        void sort();
+        void sort(CompareFn<T> compare_fn = std::less<T>());
         size_t len();
         class Iterator {
             public:
@@ -39,8 +44,8 @@ class LinkedList {
         Iterator end() const;
     private:
         void copy_list(const LinkedList& other);
-        NodePtr<T> merge_sort(NodePtr<T> head);
-        NodePtr<T> merge(NodePtr<T> left, NodePtr<T> right);
+        NodePtr<T> merge_sort(NodePtr<T> head, CompareFn<T> compare_fn);
+        NodePtr<T> merge(NodePtr<T> left, NodePtr<T> right, CompareFn<T> compare_fn);
         NodePtr<T> head;
         size_t size;
 };

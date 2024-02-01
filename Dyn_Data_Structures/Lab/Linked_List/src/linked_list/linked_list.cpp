@@ -86,12 +86,12 @@ size_t LinkedList<T>::len() {
 }
 
 template <typename T>
-void LinkedList<T>::sort() {
-    this-> head = this->merge_sort(this->head);
+void LinkedList<T>::sort(CompareFn<T> compare_fn) {
+    this->head = this->merge_sort(this->head, compare_fn);
 }
 
 template <typename T>
-NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head) {
+NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head, CompareFn<T> compare_fn) {
     if(!head || !head->next) {
         return head;
     }
@@ -107,14 +107,14 @@ NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head) {
     NodePtr<T> right = slow->next;
     slow->next = nullptr;
 
-    head = merge_sort(head);
-    right = merge_sort(right);
+    head = merge_sort(head, compare_fn);
+    right = merge_sort(right, compare_fn);
 
-    return merge(head, right);
+    return merge(head, right, compare_fn);
 }
 
 template <typename T>
-NodePtr<T> LinkedList<T>::merge(NodePtr<T> left, NodePtr<T> right) {
+NodePtr<T> LinkedList<T>::merge(NodePtr<T> left, NodePtr<T> right, CompareFn<T> compare_fn) {
     if(!left) {
         return right;
     }
@@ -122,11 +122,11 @@ NodePtr<T> LinkedList<T>::merge(NodePtr<T> left, NodePtr<T> right) {
         return left;
     }
 
-    if(left->data < right->data) {
-        left->next = merge(left->next, right);
+    if(compare_fn(left->data, right->data)) {
+        left->next = merge(left->next, right, compare_fn);
         return left;
     } else {
-        right->next = merge(left, right->next);
+        right->next = merge(left, right->next, compare_fn);
         return right;
     }
 }
@@ -153,8 +153,8 @@ template LinkedList<Student>::~LinkedList();
 template Student& LinkedList<Student>::operator[](size_t idx);
 template void LinkedList<Student>::append(Student data);
 template size_t LinkedList<Student>::len();
-//template void LinkedList<Student>::sort();
+template void LinkedList<Student>::sort(CompareFn<Student> compare_fn);
 
 template string& LinkedList<string>::operator[](size_t idx);
 template LinkedList<string>::~LinkedList();
-template void LinkedList<string>::sort();
+template void LinkedList<string>::sort(CompareFn<string> compare_fn);
