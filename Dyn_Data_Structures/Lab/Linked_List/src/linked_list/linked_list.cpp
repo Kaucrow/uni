@@ -63,6 +63,7 @@ void LinkedList<T>::clear() {
 
 template <typename T>
 void LinkedList<T>::append(T data) {
+    this->size++;
     NodePtr<T> new_node = new Node<T>(data);
 
     if(!head) {
@@ -77,6 +78,57 @@ void LinkedList<T>::append(T data) {
     }
 
     curr_node->next = new_node;
+}
+
+template <typename T>
+size_t LinkedList<T>::len() {
+    return this->size;
+}
+
+template <typename T>
+void LinkedList<T>::sort() {
+    this-> head = this->merge_sort(this->head);
+}
+
+template <typename T>
+NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head) {
+    if(!head || !head->next) {
+        return head;
+    }
+
+    NodePtr<T> slow = head;
+    NodePtr<T> fast = head->next;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    NodePtr<T> right = slow->next;
+    slow->next = nullptr;
+
+    head = merge_sort(head);
+    right = merge_sort(right);
+
+    return merge(head, right);
+}
+
+template <typename T>
+NodePtr<T> LinkedList<T>::merge(NodePtr<T> left, NodePtr<T> right) {
+    if(!left) {
+        return right;
+    }
+    if(!right) {
+        return left;
+    }
+
+    if(left->data < right->data) {
+        left->next = merge(left->next, right);
+        return left;
+    } else {
+        right->next = merge(left, right->next);
+        return right;
+    }
 }
 
 namespace LinkedListFn {
@@ -100,6 +152,9 @@ template LinkedList<Student>::LinkedList();
 template LinkedList<Student>::~LinkedList();
 template Student& LinkedList<Student>::operator[](size_t idx);
 template void LinkedList<Student>::append(Student data);
+template size_t LinkedList<Student>::len();
+//template void LinkedList<Student>::sort();
 
 template string& LinkedList<string>::operator[](size_t idx);
 template LinkedList<string>::~LinkedList();
+template void LinkedList<string>::sort();

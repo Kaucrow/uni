@@ -11,14 +11,18 @@ int main() {
     cout << "Execution start :)\n";
     string hello = "hello,j,o,e";
     LinkedList<string> linked_list = LinkedListFn::from_row(hello);
+    linked_list.sort();
     for(auto value : linked_list) {
         cout << value << '\n';
     }
-
+/*
     LinkedList<Student> student_list = StudentFn::list_from_csv("C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/students.csv");
 
     for(auto value : student_list) {
         cout << value.first_name << '\n';
     }
+
+    student_list[0].write_to_file("C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/");
+*/
     cout << "Terminating execution... :)\n";
 }

@@ -24,6 +24,8 @@ class LinkedList {
         T& operator[](const size_t idx);
         void append(T data);
         void clear();
+        void sort();
+        size_t len();
         class Iterator {
             public:
                 Iterator(NodePtr<T> start);
@@ -37,6 +39,8 @@ class LinkedList {
         Iterator end() const;
     private:
         void copy_list(const LinkedList& other);
+        NodePtr<T> merge_sort(NodePtr<T> head);
+        NodePtr<T> merge(NodePtr<T> left, NodePtr<T> right);
         NodePtr<T> head;
         size_t size;
 };

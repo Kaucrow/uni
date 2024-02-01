@@ -4,7 +4,7 @@
 #include "../../misc/panic.h"
 #include "student.h"
 
-using std::string, std::getline, std::ifstream;
+using std::string, std::getline, std::ifstream, std::ofstream;
 
 Student::Student() {}
 
@@ -15,11 +15,27 @@ Student::Student(
         ) :
             ci(ci), first_name(first_name), last_name(last_name),
             email(email_addr), gender(gender), av_grade(av_grade),
-            curr_year(curr_year), section(section), csv_pos(csv_pos)
+            school_year(school_year), section(section), csv_pos(csv_pos)
 {}
 
+void Student::write_to_file(const char* out_dir) {
+    ofstream outfile(out_dir + this->first_name + '_' + this->last_name + ".txt");
+    outfile     << "*** STUDENT DATA FORM ***\n"
+                << "C.I.: " << this->ci << '\n'
+                << "First name: " << this->first_name << '\n'
+                << "Last name: " << this->last_name << '\n'
+                << "Email address: " << this->email << '\n';
+    if(this->gender = Gender::Male)
+        outfile << "Gender: M\n";
+    else
+        outfile << "Gender: F\n";
+    outfile     << "Average grade: " << this->av_grade << '\n'
+                << "School year: " << this->school_year << '\n'
+                << "Section: " << this->section;
+}
+
 namespace StudentFn {
-    Student from_row(string row) {
+    Student from_row(string row, int csv_pos) {
         Student student;
 
         LinkedList<string> fields = LinkedListFn::from_row(row);
@@ -35,12 +51,13 @@ namespace StudentFn {
                 default: throw(nullptr);
             }
             student.av_grade = stof(fields[5]);
-            student.curr_year = stoi(fields[6]);
+            student.school_year = stoi(fields[6]);
             student.section = fields[7][0];
+            student.csv_pos = csv_pos;
         } catch(...) {
             panic("[ ERR ] Found invalid field in row \"" + row + "\".");
         }
-        
+
         return student;
     }
 
@@ -52,7 +69,7 @@ namespace StudentFn {
         getline(csvfile, reading_line);
 
         while(getline(csvfile, reading_line))
-            linked_list.append(StudentFn::from_row(reading_line));
+            linked_list.append(StudentFn::from_row(reading_line, linked_list.len() + 1));
 
         return linked_list;
     }

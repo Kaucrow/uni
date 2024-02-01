@@ -14,15 +14,17 @@ struct Student {
     Student(
         int ci, string first_name, string last_name,
         string email_addr, Gender gender, int av_grade,
-        int curr_year, char section, int csv_pos
+        int school_year, char section, int csv_pos
     );
+    void write_to_file(const char* out_dir);
+
     int ci;
     string first_name;
     string last_name;
     string email;
     Gender gender;
     float av_grade;
-    int curr_year;
+    int school_year;
     char section;
     int csv_pos;
 };
