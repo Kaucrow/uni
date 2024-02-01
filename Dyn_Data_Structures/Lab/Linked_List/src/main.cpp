@@ -33,6 +33,7 @@ int main() {
     }
 
     for(auto student : top_10_students) {
+        cout << student.csv_pos << '\n';
         cout << student.first_name << ' ' << student.last_name << " (" << student.av_grade << ")\n";
     }
 

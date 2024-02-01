@@ -69,7 +69,7 @@ namespace StudentFn {
         getline(csvfile, reading_line);
 
         while(getline(csvfile, reading_line))
-            linked_list.append(StudentFn::from_row(reading_line, linked_list.len() + 1));
+            linked_list.append(StudentFn::from_row(reading_line, linked_list.len() + 2));
 
         return linked_list;
     }
