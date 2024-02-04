@@ -105,3 +105,6 @@ Programming_2/Lab/Bank/data/client_ops.csv
 # Linked List
 Dyn_Data_Structures/Lab/Linked_List/bin/*
 Dyn_Data_Structures/Lab/Linked_List/data/*
+
+# Doubly Linked List
+Dyn_Data_Structures/Lab/Doubly_Linked_List/bin/*
