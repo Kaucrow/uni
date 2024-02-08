@@ -47,5 +47,20 @@ int main() {
         cout << (*it).av_grade << '\n';
     }
 
+    cout << "-------------------\n";
+    string numbers = "1,2,3,4,5,6,7,8,9";
+    DoublyLinkedList<string> numbers_list = DoublyLinkedListFn::from_row(numbers);
+    string to_append = "10";
+    string to_insert = "9";
+    numbers_list.append(to_append);
+    numbers_list.insert(to_insert, 0);
+    for(auto number : numbers_list) {
+        cout << number << '\n';
+    }
+
+    if(numbers_list[0] == numbers_list[8]) {
+        cout << "FOUND EQUAL NUMBERS\n";
+    }
+
     cout << "Terminating execution... :)\n";
 }

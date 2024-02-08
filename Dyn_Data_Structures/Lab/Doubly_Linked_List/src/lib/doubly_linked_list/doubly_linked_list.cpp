@@ -58,6 +58,34 @@ T& DoublyLinkedList<T>::operator[](const size_t idx) {
 }
 
 template <typename T>
+DoubleNodePtr<T> DoublyLinkedList<T>::get_node(size_t idx) {
+    DoubleNodePtr<T> current;
+    //size_t count = 0;
+
+    if(idx < size / 2) {
+        current = this->head;
+        while(current && idx) {
+            current = current->next;
+            idx--;
+            //count++;
+        }
+    } else {
+        current = this->tail;
+        while(current && idx) {
+            current = current->prev;
+            idx--;
+            //count--;
+        }
+    }
+
+    if(!current) {
+        throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
+    }
+
+    return current;
+}
+
+template <typename T>
 void DoublyLinkedList<T>::copy_list(const DoublyLinkedList<T>& other) {
     DoubleNodePtr<T> other_current = other.head;
     while(other_current) {
@@ -100,10 +128,26 @@ void DoublyLinkedList<T>::append(T data) {
 }
 
 template <typename T>
+void DoublyLinkedList<T>::insert(T data, const size_t idx) {
+    this->size++;
+    DoubleNodePtr<T> new_node = new DoubleNode<T>(data);
+    DoubleNodePtr<T> replace = get_node(idx);
+    if(replace->prev) {
+        replace->prev->next = new_node;
+        new_node->prev = replace->prev;
+    } else {
+        head = new_node;
+    }
+    new_node->next = replace;
+    replace->prev = new_node;
+    std::cout << "REPLACE: " << replace->data << '\n';
+}
+
+template <typename T>
 T DoublyLinkedList<T>::remove(const size_t idx) {
     DoubleNodePtr<T> previous = nullptr;
-    DoubleNodePtr<T> current;
-    size_t count = 0;
+    DoubleNodePtr<T> current = get_node(idx);
+    /*size_t count = 0;
 
     if(idx < size / 2) {
         current = this->head;
@@ -121,7 +165,7 @@ T DoublyLinkedList<T>::remove(const size_t idx) {
 
     if(!current) {
         throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
-    }
+    }*/
     
     if(current->prev) {
         current->prev->next = current->next;
@@ -246,3 +290,4 @@ template void DoublyLinkedList<Student>::sort(CompareFn<Student> compare_fn);
 template string& DoublyLinkedList<string>::operator[](size_t idx);
 template DoublyLinkedList<string>::~DoublyLinkedList();
 template void DoublyLinkedList<string>::sort(CompareFn<string> compare_fn);
+template void DoublyLinkedList<string>::insert(string data, const size_t idx);

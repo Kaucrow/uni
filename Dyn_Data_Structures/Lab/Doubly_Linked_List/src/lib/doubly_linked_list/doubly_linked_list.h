@@ -33,6 +33,7 @@ class DoublyLinkedList {
         ~DoublyLinkedList();
         T& operator[](const size_t idx);
         void append(T data);
+        void insert(T data, const size_t idx);
         T remove(const size_t idx);
         void obliterate_student(const size_t idx, const char* csv_path);
         void clear();
@@ -53,6 +54,7 @@ class DoublyLinkedList {
         DoubleIterator rbegin() const;
         DoubleIterator rend() const;
     private:
+        DoubleNodePtr<T> get_node(size_t idx);
         void copy_list(const DoublyLinkedList& other);
         void copy_list(const LinkedList<T>& other);
         DoubleNodePtr<T> merge_sort(DoubleNodePtr<T> head, CompareFn<T> compare_fn);
