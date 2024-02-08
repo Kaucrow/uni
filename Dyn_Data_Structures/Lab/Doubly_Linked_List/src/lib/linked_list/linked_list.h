@@ -20,7 +20,12 @@ template <typename T>
 using CompareFn = function<bool(const T&, const T&)>;
 
 template <typename T>
+class DoublyLinkedList;
+
+template <typename T>
 class LinkedList {
+    friend class DoublyLinkedList<T>;
+
     public:
         LinkedList();
         LinkedList(const LinkedList& other);
