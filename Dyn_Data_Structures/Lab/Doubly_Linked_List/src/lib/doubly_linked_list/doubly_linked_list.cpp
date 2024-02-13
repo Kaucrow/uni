@@ -145,32 +145,14 @@ void DoublyLinkedList<T>::insert(T data, const size_t idx) {
 
 template <typename T>
 T DoublyLinkedList<T>::remove(const size_t idx) {
+    this->size--;
     DoubleNodePtr<T> previous = nullptr;
     DoubleNodePtr<T> current = get_node(idx);
-    /*size_t count = 0;
 
-    if(idx < size / 2) {
-        current = this->head;
-        while(current && count < idx) {
-            current = current->next;
-            count++;
-        }
-    } else {
-        current = this->tail;
-        while(current && count > idx) {
-            current = current->prev;
-            count--;
-        }
-    }
-
-    if(!current) {
-        throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
-    }*/
-    
     if(current->prev) {
         current->prev->next = current->next;
     }
-    
+
     if(current->next) {
         current->next->prev = current->prev;
     }

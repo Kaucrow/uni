@@ -86,6 +86,7 @@ void LinkedList<T>::append(T data) {
 
 template <typename T>
 T LinkedList<T>::remove(const size_t idx) {
+    this->size--;
     NodePtr<T> previous = nullptr;
     NodePtr<T> current = this->head;
     size_t count = 0;

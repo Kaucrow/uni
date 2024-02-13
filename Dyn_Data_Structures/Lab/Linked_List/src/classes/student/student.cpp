@@ -64,7 +64,15 @@ namespace StudentFn {
     LinkedList<Student> list_from_csv(const char* csv_path) {
         LinkedList<Student> linked_list;
 
-        ifstream csvfile(csv_path);
+        ifstream csvfile;
+        try {
+            csvfile.open(csv_path);
+            if(!csvfile)
+                throw(nullptr);
+        } catch(...) {
+            panic("[ ERR ] Could not open the .csv file using path \'" + string(csv_path) + "\'.");
+        }
+
         string reading_line;
         getline(csvfile, reading_line);
 
