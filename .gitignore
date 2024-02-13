@@ -112,3 +112,6 @@ Dyn_Data_Structures/Lab/Doubly_Linked_List/data/*
 
 # Stack
 Dyn_Data_Structures/Lab/Stack/bin/*
+
+# Stack Sort
+Dyn_Data_Structures/Lab/Stack_Sort/bin/*

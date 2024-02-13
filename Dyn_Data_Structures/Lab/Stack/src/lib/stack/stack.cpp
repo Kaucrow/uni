@@ -9,6 +9,13 @@ Stack<T>::Stack()
 {}
 
 template <typename T>
+Stack<T>::~Stack() {
+    while(top) {
+        this->pop();
+    }
+}
+
+template <typename T>
 size_t Stack<T>::len() {
     return this->size;
 }
@@ -47,6 +54,7 @@ T& Stack<T>::peek() {
 }
 
 template Stack<int>::Stack();
+template Stack<int>::~Stack();
 template size_t Stack<int>::len();
 template void Stack<int>::push(const int &data);
 template int Stack<int>::pop();

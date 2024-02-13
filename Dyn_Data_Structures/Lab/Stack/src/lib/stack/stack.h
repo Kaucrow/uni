@@ -15,6 +15,7 @@ template <typename T>
 class Stack {
     public:
         Stack();
+        ~Stack();
         size_t len();
         void push(const T &data);
         T pop();
