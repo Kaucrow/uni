@@ -291,3 +291,4 @@ template string& DoublyLinkedList<string>::operator[](size_t idx);
 template DoublyLinkedList<string>::~DoublyLinkedList();
 template void DoublyLinkedList<string>::sort(CompareFn<string> compare_fn);
 template void DoublyLinkedList<string>::insert(string data, const size_t idx);
+template string DoublyLinkedList<string>::remove(const size_t idx);

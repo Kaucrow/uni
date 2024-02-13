@@ -58,8 +58,14 @@ int main() {
         cout << number << '\n';
     }
 
-    if(numbers_list[0] == numbers_list[8]) {
+    if(numbers_list[0] == numbers_list[9]) {
         cout << "FOUND EQUAL NUMBERS\n";
+    }
+
+    cout << "---------------------\nREVERSED:\n";
+    numbers_list.remove(0); 
+    for(auto it = numbers_list.rbegin(); it != numbers_list.rend(); --it) {
+        cout << (*it) << '\n';
     }
 
     cout << "Terminating execution... :)\n";

@@ -53,8 +53,11 @@ typename DoublyLinkedList<T>::DoubleIterator DoublyLinkedList<T>::rend() const {
 template DoublyLinkedList<string>::DoubleIterator& DoublyLinkedList<string>::DoubleIterator::operator++();
 template string& DoublyLinkedList<string>::DoubleIterator::operator*() const;
 template bool DoublyLinkedList<string>::DoubleIterator::operator!=(const DoublyLinkedList<string>::DoubleIterator& other) const;
+template DoublyLinkedList<string>::DoubleIterator& DoublyLinkedList<string>::DoubleIterator::operator--();
 template DoublyLinkedList<string>::DoubleIterator DoublyLinkedList<string>::begin() const;
 template DoublyLinkedList<string>::DoubleIterator DoublyLinkedList<string>::end() const;
+template DoublyLinkedList<string>::DoubleIterator DoublyLinkedList<string>::rbegin() const;
+template DoublyLinkedList<string>::DoubleIterator DoublyLinkedList<string>::rend() const;
 
 template DoublyLinkedList<Student>::DoubleIterator& DoublyLinkedList<Student>::DoubleIterator::operator++();
 template DoublyLinkedList<Student>::DoubleIterator& DoublyLinkedList<Student>::DoubleIterator::operator--();
