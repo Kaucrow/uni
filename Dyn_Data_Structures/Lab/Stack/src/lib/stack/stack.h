@@ -1,5 +1,8 @@
 #pragma once
 #include <cstddef>
+#include <string>
+
+using std::string;
 
 template <typename T>
 struct Frame {
@@ -20,6 +23,7 @@ class Stack {
         void push(const T &data);
         T pop();
         T& peek();
+        string to_string();
     private:
         FramePtr<T> top;
         size_t size;

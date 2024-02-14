@@ -1,5 +1,6 @@
 #include <iostream>     // debug
 #include <stdexcept>
+#include <algorithm>
 #include "../misc/panic/panic.h"
 #include "stack.h"
 
@@ -53,9 +54,31 @@ T& Stack<T>::peek() {
     return top->data;
 }
 
+template <typename T>
+string Stack<T>::to_string() {
+    FramePtr<T> frames[size];
+    FramePtr<T> next = top;
+
+    for(int i = size - 1; i >= 0; i--) {
+        frames[i] = next;
+        next = next->next;
+    }
+
+    string ret = "[";
+
+    for(int i = 0; i < size; i++)
+        ret.append(std::to_string(frames[i]->data) + ", ");
+
+    ret = ret.substr(0, ret.size() - 2);
+    ret.append("]");
+
+    return ret;
+}
+
 template Stack<int>::Stack();
 template Stack<int>::~Stack();
 template size_t Stack<int>::len();
 template void Stack<int>::push(const int &data);
 template int Stack<int>::pop();
 template int& Stack<int>::peek();
+template string Stack<int>::to_string();
