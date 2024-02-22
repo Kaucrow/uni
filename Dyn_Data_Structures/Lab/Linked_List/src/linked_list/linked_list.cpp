@@ -217,6 +217,10 @@ template Student LinkedList<Student>::remove(size_t idx);
 template size_t LinkedList<Student>::len();
 template void LinkedList<Student>::sort(CompareFn<Student> compare_fn);
 
-template string& LinkedList<string>::operator[](size_t idx);
+template LinkedList<string>::LinkedList();
 template LinkedList<string>::~LinkedList();
+template string& LinkedList<string>::operator[](size_t idx);
+template void LinkedList<string>::append(string data);
+template string LinkedList<string>::remove(size_t idx);
+template void LinkedList<string>::clear();
 template void LinkedList<string>::sort(CompareFn<string> compare_fn);

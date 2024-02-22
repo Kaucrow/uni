@@ -1,7 +1,6 @@
 #include <fstream>
 #include <string>
 #include "queue.h"
-#include <iostream>
 
 using std::string, std::ifstream;
 
@@ -105,7 +104,7 @@ void Queue<T>::sort(CompareFn<T> compare_fn) {
     first = first_check;
 }
 
-/*namespace QueueFn {
+namespace QueueFn {
     Queue<Request> from_reqs_file(const char* filename, char delim) {
         Queue<Request> queue;
 
@@ -123,7 +122,7 @@ void Queue<T>::sort(CompareFn<T> compare_fn) {
 
         return queue;
     }
-}*/
+}
 
 template Queue<int>::Queue();
 template Queue<int>::~Queue();
@@ -133,9 +132,10 @@ template int Queue<int>::pop();
 template int& Queue<int>::peek();
 template void Queue<int>::sort(CompareFn<int> compare_fn);
 
-/*template Queue<Request>::Queue();
+template Queue<Request>::Queue();
 template Queue<Request>::~Queue();
 template size_t Queue<Request>::len();
 template void Queue<Request>::push(const Request &data);
 template Request Queue<Request>::pop();
-template Request& Queue<Request>::peek();*/
+template Request& Queue<Request>::peek();
+template void Queue<Request>::sort(CompareFn<Request> compare_fn);

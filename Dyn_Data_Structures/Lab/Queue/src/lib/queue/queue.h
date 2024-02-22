@@ -35,6 +35,6 @@ class Queue {
         size_t size;
 };
 
-/*namespace QueueFn {
+namespace QueueFn {
     Queue<Request> from_reqs_file(const char* filename, char delim);
-}*/
+}
