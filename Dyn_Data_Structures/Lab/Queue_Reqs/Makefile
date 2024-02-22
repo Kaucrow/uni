@@ -20,4 +20,4 @@ panic.o:
 	g++ -c src/lib/misc/panic/panic.cpp
 
 clean:
-	del /s main.o request.o queue.o panic.o
+	del /s main.o request.o queue.o linked_list.o linked_list_iter.o panic.o
