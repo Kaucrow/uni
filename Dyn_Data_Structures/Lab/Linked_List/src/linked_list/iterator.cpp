@@ -61,3 +61,15 @@ template TreeNodePtr<int>& LinkedList<TreeNodePtr<int>>::Iterator::operator*() c
 template bool LinkedList<TreeNodePtr<int>>::Iterator::operator!=(const LinkedList<TreeNodePtr<int>>::Iterator& other) const;
 template LinkedList<TreeNodePtr<int>>::Iterator LinkedList<TreeNodePtr<int>>::begin() const;
 template LinkedList<TreeNodePtr<int>>::Iterator LinkedList<TreeNodePtr<int>>::end() const;
+
+template <typename T>
+struct BSTNode {};
+
+template <typename T>
+using BSTNodePtr = BSTNode<T>*;
+
+template LinkedList<BSTNodePtr<int>>::Iterator& LinkedList<BSTNodePtr<int>>::Iterator::operator++();
+template BSTNodePtr<int>& LinkedList<BSTNodePtr<int>>::Iterator::operator*() const;
+template bool LinkedList<BSTNodePtr<int>>::Iterator::operator!=(const LinkedList<BSTNodePtr<int>>::Iterator& other) const;
+template LinkedList<BSTNodePtr<int>>::Iterator LinkedList<BSTNodePtr<int>>::begin() const;
+template LinkedList<BSTNodePtr<int>>::Iterator LinkedList<BSTNodePtr<int>>::end() const;

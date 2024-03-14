@@ -267,3 +267,16 @@ template void LinkedList<TreeNodePtr<int>>::append(TreeNodePtr<int> data);
 template TreeNodePtr<int> LinkedList<TreeNodePtr<int>>::remove(size_t idx);
 template size_t LinkedList<TreeNodePtr<int>>::len();
 template LinkedList<int>& LinkedList<int>::operator=(const LinkedList& other);
+
+template <typename T>
+struct BSTNode {};
+
+template <typename T>
+using BSTNodePtr = BSTNode<T>*;
+
+template LinkedList<BSTNodePtr<int>>::LinkedList();
+template LinkedList<BSTNodePtr<int>>::~LinkedList();
+template BSTNodePtr<int>& LinkedList<BSTNodePtr<int>>::operator[](size_t idx);
+template void LinkedList<BSTNodePtr<int>>::append(BSTNodePtr<int> data);
+template BSTNodePtr<int> LinkedList<BSTNodePtr<int>>::remove(size_t idx);
+template size_t LinkedList<BSTNodePtr<int>>::len();

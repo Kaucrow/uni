@@ -91,7 +91,7 @@ LinkedList<T> Tree<T>::get_preorder() {
 }
 
 template <typename T>
-void Tree<T>::get_preorder_backend(TreeNodePtr<T> node, LinkedList<TreeNodePtr<T>>* adder) {
+void Tree<T>::get_preorder_backend(TRAVERSAL_ARGS) {
     adder->append(node);
 
     for (auto child_node : node->children)
@@ -114,7 +114,7 @@ LinkedList<T> Tree<T>::get_inorder() {
 }
 
 template <typename T>
-void Tree<T>::get_inorder_backend(TreeNodePtr<T> node, LinkedList<TreeNodePtr<T>>* adder) {
+void Tree<T>::get_inorder_backend(TRAVERSAL_ARGS) {
     int counter = 0;
 
     for (auto child_node : node->children) {
@@ -145,7 +145,7 @@ LinkedList<T> Tree<T>::get_postorder() {
 }
 
 template <typename T>
-void Tree<T>::get_postorder_backend(TreeNodePtr<T> node, LinkedList<TreeNodePtr<T>>* adder) {
+void Tree<T>::get_postorder_backend(TRAVERSAL_ARGS) {
     for (auto child_node : node->children)
         this->get_postorder_backend(child_node, adder);
 
@@ -202,8 +202,6 @@ void Tree<T>::get_group(TRAVERSAL_ARGS) {
     for (auto child_node : node->children) {
         this->get_group(child_node, adder);
     }
-
-    return;
 }
 
 template <typename T>
