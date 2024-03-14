@@ -17,4 +17,5 @@ panic.o:
 	g++ -c ../Stack/src/lib/misc/panic/panic.cpp
 
 clean:
-	del /s main.o bst.o linked_list.o linked_list_iter.o panic.o
+#	del /s main.o bst.o linked_list.o linked_list_iter.o panic.o
+	rm -f main.o bst.o linked_list.o linked_list_iter.o panic.o
