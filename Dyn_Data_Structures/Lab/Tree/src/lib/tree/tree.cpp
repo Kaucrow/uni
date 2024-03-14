@@ -9,8 +9,12 @@ Tree<T>::Tree(T root) : root(new TreeNode(root, 0)), height(0), nodes_per_level(
 
 template <typename T>
 Tree<T>::~Tree() {
-    if (this->root)
-        delete this->root;
+    LinkedList<TreeNodePtr<T>> adder;
+
+    this->get_group(this->root, &adder);
+
+    for (auto node : adder)
+        delete node;
 }
 
 template <typename T>
