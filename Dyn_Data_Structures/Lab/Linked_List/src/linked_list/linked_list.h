@@ -23,6 +23,7 @@ template <typename T>
 class LinkedList {
     public:
         LinkedList();
+        LinkedList(string values);
         LinkedList(const LinkedList& other);
         LinkedList& operator=(const LinkedList& other);
         ~LinkedList();

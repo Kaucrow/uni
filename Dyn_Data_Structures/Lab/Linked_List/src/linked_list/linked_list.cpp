@@ -3,6 +3,7 @@
 #include <string>
 #include "../classes/student/student.h"
 #include "linked_list.h"
+#include "../../../Stack/src/lib/misc/panic/panic.h"
 
 using std::ifstream, std::ofstream, std::getline, std::string;
 
@@ -10,6 +11,25 @@ template <typename T>
 LinkedList<T>::LinkedList()
     : head(nullptr), size(0)
 {}
+
+template <>
+LinkedList<int>::LinkedList(string values) : head(nullptr), size(0) {
+    if (values.empty()) return;
+
+    size_t next_comma = string::npos;
+
+    try {
+        while (next_comma = values.find(',') != string::npos) {
+            this->append(stoi(values.substr(0, next_comma)));
+
+            values = values.substr(next_comma + 1);
+        }
+
+        this->append(stoi(values));
+    } catch (...) {
+        panic("Could not parse values string `" + values + "`. Remember to use commas as separators.");
+    }
+}
 
 template <typename T>
 LinkedList<T>::LinkedList(const LinkedList& other) {
@@ -224,3 +244,26 @@ template void LinkedList<string>::append(string data);
 template string LinkedList<string>::remove(size_t idx);
 template void LinkedList<string>::clear();
 template void LinkedList<string>::sort(CompareFn<string> compare_fn);
+
+template LinkedList<int>::LinkedList();
+template LinkedList<int>::~LinkedList();
+template int& LinkedList<int>::operator[](size_t idx);
+template void LinkedList<int>::append(int data);
+template int LinkedList<int>::remove(size_t idx);
+template void LinkedList<int>::clear();
+template void LinkedList<int>::sort(CompareFn<int> compare_fn);
+template size_t LinkedList<int>::len();
+
+template <typename T>
+struct TreeNode {};
+
+template <typename T>
+using TreeNodePtr = TreeNode<T>*;
+
+template LinkedList<TreeNodePtr<int>>::LinkedList();
+template LinkedList<TreeNodePtr<int>>::~LinkedList();
+template TreeNodePtr<int>& LinkedList<TreeNodePtr<int>>::operator[](size_t idx);
+template void LinkedList<TreeNodePtr<int>>::append(TreeNodePtr<int> data);
+template TreeNodePtr<int> LinkedList<TreeNodePtr<int>>::remove(size_t idx);
+template size_t LinkedList<TreeNodePtr<int>>::len();
+template LinkedList<int>& LinkedList<int>::operator=(const LinkedList& other);
