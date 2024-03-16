@@ -11,7 +11,7 @@ template <typename T>
 Tree<T>::~Tree() {
     LinkedList<TreeNodePtr<T>> adder;
 
-    this->get_group(this->root, &adder);
+    this->get_preorder_backend(this->root, &adder);
 
     for (auto node : adder)
         delete node;
@@ -76,17 +76,23 @@ void Tree<T>::get_level_backend
 }
 
 template <typename T>
-LinkedList<T> Tree<T>::get_preorder() {
+void Tree<T>::traverse(Traversal type, LinkedList<T>* ret) {
     LinkedList<TreeNodePtr<T>> adder;
 
-    this->get_preorder_backend(this->root, &adder);
-
-    LinkedList<T> ret;
-
-    for (auto node : adder) {
-        ret.append(node->data);
+    switch (type) {
+        case Traversal::PREORDER:   this->get_preorder_backend(this->root, &adder); break;
+        case Traversal::INORDER:    this->get_inorder_backend(this->root, &adder); break;
+        case Traversal::POSTORDER:  this->get_postorder_backend(this->root, &adder); break;
     }
 
+    for (auto& node : adder)
+        ret->append(node->data);
+}
+
+template <typename T>
+LinkedList<T> Tree<T>::get_preorder() {
+    LinkedList<T> ret;
+    this->traverse(Traversal::PREORDER, &ret);
     return ret;
 }
 
@@ -100,16 +106,8 @@ void Tree<T>::get_preorder_backend(TRAVERSAL_ARGS) {
 
 template <typename T>
 LinkedList<T> Tree<T>::get_inorder() {
-    LinkedList<TreeNodePtr<T>> adder;
-
-    this->get_inorder_backend(this->root, &adder);
-
     LinkedList<T> ret;
-
-    for (auto node : adder) {
-        ret.append(node->data);
-    }
-
+    this->traverse(Traversal::INORDER, &ret);
     return ret;
 }
 
@@ -131,16 +129,8 @@ void Tree<T>::get_inorder_backend(TRAVERSAL_ARGS) {
 
 template <typename T>
 LinkedList<T> Tree<T>::get_postorder() {
-    LinkedList<TreeNodePtr<T>> adder;
-
-    this->get_postorder_backend(this->root, &adder);
-
     LinkedList<T> ret;
-
-    for (auto node : adder) {
-        ret.append(node->data);
-    }
-
+    this->traverse(Traversal::POSTORDER, &ret);
     return ret;
 }
 
@@ -157,9 +147,8 @@ void Tree<T>::remove(LinkedList<int> path) {
     TreeNodePtr<T> remove_node = this->root;
     TreeNodePtr<T> prev_node = nullptr;
 
-    if (path.len() == 0) {
+    if (path.len() == 0)
         panic("Attempted to remove the tree root");
-    }
 
     try {
         for (auto val : path) {
@@ -192,7 +181,7 @@ void Tree<T>::remove(LinkedList<int> path) {
     }
 }
 
-template <typename T>
+/*template <typename T>
 void Tree<T>::get_group(TRAVERSAL_ARGS) {
     adder->append(node);
 
@@ -202,11 +191,11 @@ void Tree<T>::get_group(TRAVERSAL_ARGS) {
     for (auto child_node : node->children) {
         this->get_group(child_node, adder);
     }
-}
+}*/
 
 template <typename T>
 void Tree<T>::get_children(TRAVERSAL_ARGS) {
-    this->get_group(node, adder);
+    this->get_preorder_backend(node, adder);
     adder->remove(0);
 }
 
@@ -234,6 +223,11 @@ LinkedList<T> Tree<T>::get_direct_children(LinkedList<int> path) {
 template <typename T>
 size_t Tree<T>::get_height() {
     return this->height;
+}
+
+template <typename T>
+bool Tree<T>::empty() {
+    return !this->root();
 }
 
 template Tree<int>::Tree(int root);

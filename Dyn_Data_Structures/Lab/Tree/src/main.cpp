@@ -33,7 +33,6 @@ int main() {
         cout << "\n\n";
 
         LinkedList<int> order_list = tree.get_preorder();
-
         cout << "* " << cyan << "Preorder: " << white;
         for (auto val : order_list)
             cout << val << ' ';

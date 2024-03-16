@@ -4,6 +4,12 @@
 
 #define TRAVERSAL_ARGS TreeNodePtr<T> node, LinkedList<TreeNodePtr<T>>* adder
 
+enum Traversal {
+    PREORDER,
+    INORDER,
+    POSTORDER
+};
+
 template<typename T>
 class LinkedList;
 
@@ -13,7 +19,6 @@ struct TreeNode {
 
     T data;
     int level;
-    TreeNodePtr parent;
     LinkedList<TreeNodePtr> children;
     
     TreeNode(T data, int level) : data(data), level(level) {}
@@ -36,6 +41,7 @@ class Tree {
         LinkedList<T> get_preorder();
         LinkedList<T> get_inorder();
         LinkedList<T> get_postorder();
+        bool empty();
     private:
         TreeNodePtr<T> root;
         size_t height;
@@ -49,10 +55,11 @@ class Tree {
                 size_t tgt_level
             );
 
+        void traverse(Traversal type, LinkedList<T>* ret);
+
         void get_preorder_backend(TRAVERSAL_ARGS);
         void get_inorder_backend(TRAVERSAL_ARGS);
         void get_postorder_backend(TRAVERSAL_ARGS);
 
-        void get_group(TRAVERSAL_ARGS);
         void get_children(TRAVERSAL_ARGS);
 };

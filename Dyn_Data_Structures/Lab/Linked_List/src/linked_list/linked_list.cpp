@@ -32,7 +32,7 @@ LinkedList<int>::LinkedList(string values) : head(nullptr), size(0) {
 }
 
 template <typename T>
-LinkedList<T>::LinkedList(const LinkedList& other) {
+LinkedList<T>::LinkedList(const LinkedList& other) : head(nullptr), size(0) {
     copy_list(other);
 }
 
@@ -246,6 +246,7 @@ template void LinkedList<string>::clear();
 template void LinkedList<string>::sort(CompareFn<string> compare_fn);
 
 template LinkedList<int>::LinkedList();
+template LinkedList<int>::LinkedList(const LinkedList& other);
 template LinkedList<int>::~LinkedList();
 template int& LinkedList<int>::operator[](size_t idx);
 template void LinkedList<int>::append(int data);
