@@ -5,20 +5,26 @@ En este documento estan detalladas las caracteristicas de cada uno de los algori
 Algunos de los conceptos basicos sobre estos algoritmos son:
 
 * **Iteracion:** Repeticion de un ciclo o proceso.
-<br>
+
 * **Complejidad de un algoritmo:** Medida de cuan eficiente es el algoritmo para resolver el problema. En otras palabras, es una medida de cuanto tiempo y espacio (memoria) requiere el algoritmo para producir una solucion. Cada algoritmo tiene una **complejidad en tiempo** (cuantas iteraciones realiza por cada elemento que se anade) y **complejidad en espacio** (cuanto espacio de memoria utiliza, por ejemplo, para guardar datos temporales).
 
 <br>
-<img src="./Images/complexity_types_esp.jpg" height=250 style="display:block; width:250; margin:auto"></img>
-<span style="display:table; margin:auto">Mientras la complejidad del algoritmo se acerque mas a O(1), mas eficiente es.</span>
+
+<p align="center">
+   <img src="./Images/complexity_types_esp.jpg" height=250></img>
+</p>
+<p align="center">
+Mientras la complejidad del algoritmo se acerque mas a O(1), mas eficiente es.
+</p>
+
 <br>
 
 * **Algoritmo estable:** Los algoritmos de ordenamiento estables aseguran que, en caso de haber 2 elementos iguales en la lista de *entrada*, despues del ordenamiento, los 2 elementos seguiran estando en el mismo orden en la lista de *salida*. Los algoritmos de ordenamiento no estables no garantizan esto.
 
-    **<u>Ejemplo:</u>**
-    Entrada: &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; **4~A~** 5 3 2 **4~B~** 1
-    Salida estable: &ensp; &ensp; 1 2 3 **4~A~** **4~B~** 5
-    Salida no estable: &nbsp; 1 2 3 **4~B~** **4~A~** 5
+**<u>Ejemplo:</u>**
+Entrada: &ensp; &ensp; &ensp; **4<sub>A</sub>** 5 3 2 **4<sub>B</sub>** 1 <br>
+Salida estable: &ensp; &ensp; &ensp; &ensp; &nbsp; 1 2 3 **4<sub>A</sub>** **4<sub>B</sub>** 5 <br>
+Salida no estable: &ensp; &ensp; &nbsp; 1 2 3 **4<sub>B</sub>** **4<sub>A</sub>** 5
 
 ## [Bubble Sort](https://www.geeksforgeeks.org/bubble-sort/)
 
@@ -135,6 +141,10 @@ Al igual que Quick Sort, este es un algoritmo de "Divide y Venceras", por lo que
 
 <br>
 
-<span style="display:table; margin:auto">Gracias por leer :)</span>
+<p align="center">
+   Gracias por leer :)
+</p>
 
-<img src="./Images/cpp-pet.gif" height=150 style="display:block; width:250; margin:auto"></img>
+<p align="center">
+   <img src="./Images/cpp-pet.gif" height=150></img>
+</p>
