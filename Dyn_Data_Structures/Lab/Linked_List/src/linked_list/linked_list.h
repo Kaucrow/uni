@@ -29,6 +29,7 @@ class LinkedList {
         ~LinkedList();
         T& operator[](const size_t idx);
         void append(T data);
+        int find(T data);
         T remove(const size_t idx);
         void obliterate_student(const size_t idx, const char* csv_path);
         void clear();

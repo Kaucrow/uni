@@ -86,6 +86,21 @@ void LinkedList<T>::clear() {
 }
 
 template <typename T>
+int LinkedList<T>::find(T data) {
+    NodePtr<T> curr = head;
+    int idx = 0;
+    while(curr) {
+        if (curr->data == data)
+            return idx;
+        else {
+            idx++;
+            curr = curr->next;
+        }
+    }
+    return -1; 
+}
+
+template <typename T>
 void LinkedList<T>::append(T data) {
     this->size++;
     NodePtr<T> new_node = new Node<T>(data);
@@ -281,3 +296,15 @@ template BSTNodePtr<int>& LinkedList<BSTNodePtr<int>>::operator[](size_t idx);
 template void LinkedList<BSTNodePtr<int>>::append(BSTNodePtr<int> data);
 template BSTNodePtr<int> LinkedList<BSTNodePtr<int>>::remove(size_t idx);
 template size_t LinkedList<BSTNodePtr<int>>::len();
+
+struct PersonNode {};
+
+using PersonNodePtr = PersonNode*;
+
+template LinkedList<PersonNodePtr>::LinkedList();
+template LinkedList<PersonNodePtr>::~LinkedList();
+template PersonNodePtr& LinkedList<PersonNodePtr>::operator[](size_t idx);
+template void LinkedList<PersonNodePtr>::append(PersonNodePtr data);
+template PersonNodePtr LinkedList<PersonNodePtr>::remove(size_t idx);
+template int LinkedList<PersonNodePtr>::find(PersonNodePtr data);
+template size_t LinkedList<PersonNodePtr>::len();

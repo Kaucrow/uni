@@ -73,3 +73,20 @@ template BSTNodePtr<int>& LinkedList<BSTNodePtr<int>>::Iterator::operator*() con
 template bool LinkedList<BSTNodePtr<int>>::Iterator::operator!=(const LinkedList<BSTNodePtr<int>>::Iterator& other) const;
 template LinkedList<BSTNodePtr<int>>::Iterator LinkedList<BSTNodePtr<int>>::begin() const;
 template LinkedList<BSTNodePtr<int>>::Iterator LinkedList<BSTNodePtr<int>>::end() const;
+
+struct PersonNode;
+using PersonNodePtr = PersonNode*;
+
+template LinkedList<PersonNodePtr>::Iterator& LinkedList<PersonNodePtr>::Iterator::operator++();
+template PersonNodePtr& LinkedList<PersonNodePtr>::Iterator::operator*() const;
+template bool LinkedList<PersonNodePtr>::Iterator::operator!=(const LinkedList<PersonNodePtr>::Iterator& other) const;
+template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::begin() const;
+template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::end() const;
+
+//using LinkPtr = LinkedList<PersonNodePtr>*;
+
+//template LinkPtr::Iterator& LinkedList<PersonNodePtr>*::Iterator::operator++();
+///*template PersonNodePtr& LinkedList<PersonNodePtr>*::Iterator::operator*() const;
+//template bool LinkedList<PersonNodePtr>*::Iterator::operator!=(const LinkedList<PersonNodePtr>*::Iterator& other) const;
+//template LinkedList<PersonNodePtr>*::Iterator LinkedList<PersonNodePtr>*::begin() const;
+//template LinkedList<PersonNodePtr>*::Iterator LinkedList<PersonNodePtr>*::end() const;*/
