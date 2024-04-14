@@ -49,6 +49,21 @@ void PersonNode::divorce() {
     }
 }
 
+void PersonNode::display_cousins() {
+    if (!this->parent || !this->parent->parent)
+        throw("[ ERR ] There is no information about the siblings of this person's parents.");
+
+    for (auto uncle : *this->parent->parent->children) {
+        if (uncle != this->parent) {
+            if (uncle->children) {
+                for (auto cousin : *uncle->children) {
+                    cout << "[ " << this->name << "'s cousin ] " << cousin->name << '\n';
+                }
+            }
+        }
+    }
+}
+
 PersonNode::~PersonNode() {
     if (this->parent) {
         if ((*this->parent->children)[this->parent->children->len() - 1] == this)
@@ -138,7 +153,10 @@ void FamilyTree::destructor_backend(PersonNodePtr node) {
 }
 
 void FamilyTree::get_person_ref(string name, PersonNodePtr &store_in) {
+    store_in = nullptr;
     get_person_ref_backend(name, this->root, store_in);
+    if (!store_in)
+        throw("\n[ ERR ] Couldn't find the person specified.\n");
 }
 
 void FamilyTree::get_person_ref_backend(string name, PersonNodePtr node, PersonNodePtr &store_in) {
@@ -232,8 +250,13 @@ void FamilyTree::display_others_backend(DisplayType display_type, PersonNodePtr 
                 cout << "[ Childless couple ] Woman: " << node->name << " | Man: " << node->spouse->name << '\n'; break;
 
         case DisplayType::MAIDENLESS:
-            if (!node->spouse || node->spouse->spouse == nullptr)
-                cout << "[ Single ] " << node->name << '\n'; break;
+            if (!node->spouse) 
+                cout << "[ Single ] " << node->name << '\n';
+            else if (node->spouse->spouse == nullptr) {
+                cout << "[ Single ] " << node->name << '\n';
+                cout << "[ Single ] " << node->spouse->name << '\n';
+            }
+            break;
 
         default:
             panic(); break;

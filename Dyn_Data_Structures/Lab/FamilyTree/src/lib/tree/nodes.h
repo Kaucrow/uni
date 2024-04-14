@@ -29,6 +29,7 @@ struct PersonNode {
     void marry(PersonNode* spouse);
     void add_child(PersonNode* child);
     void divorce();
+    void display_cousins();
 
     PersonNode* spouse;
     PersonNode* parent;
