@@ -308,3 +308,30 @@ template void LinkedList<PersonNodePtr>::append(PersonNodePtr data);
 template PersonNodePtr LinkedList<PersonNodePtr>::remove(size_t idx);
 template int LinkedList<PersonNodePtr>::find(PersonNodePtr data);
 template size_t LinkedList<PersonNodePtr>::len();
+
+template <typename T>
+struct GraphNodeEdge {};
+
+struct Room {};
+
+template LinkedList<GraphNodeEdge<Room>>::LinkedList();
+template LinkedList<GraphNodeEdge<Room>>::~LinkedList();
+template GraphNodeEdge<Room>& LinkedList<GraphNodeEdge<Room>>::operator[](size_t idx);
+template void LinkedList<GraphNodeEdge<Room>>::append(GraphNodeEdge<Room> data);
+template GraphNodeEdge<Room> LinkedList<GraphNodeEdge<Room>>::remove(size_t idx);
+//template int LinkedList<GraphNodeEdge<Room>>::find(GraphNodeEdge<Room> data);
+template size_t LinkedList<GraphNodeEdge<Room>>::len();
+
+template <typename T>
+struct GraphNode {};
+
+template <typename T>
+using GraphNodePtr = GraphNode<T>*;
+
+template LinkedList<GraphNodePtr<Room>>::LinkedList();
+template LinkedList<GraphNodePtr<Room>>::~LinkedList();
+template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::operator[](size_t idx);
+template void LinkedList<GraphNodePtr<Room>>::append(GraphNodePtr<Room> data);
+template GraphNodePtr<Room> LinkedList<GraphNodePtr<Room>>::remove(size_t idx);
+//template int LinkedList<GraphNodePtr>::find(GraphNodePtr data);
+template size_t LinkedList<GraphNodePtr<Room>>::len();

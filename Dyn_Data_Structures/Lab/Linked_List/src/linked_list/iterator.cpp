@@ -83,10 +83,16 @@ template bool LinkedList<PersonNodePtr>::Iterator::operator!=(const LinkedList<P
 template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::begin() const;
 template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::end() const;
 
-//using LinkPtr = LinkedList<PersonNodePtr>*;
+struct Room;
 
-//template LinkPtr::Iterator& LinkedList<PersonNodePtr>*::Iterator::operator++();
-///*template PersonNodePtr& LinkedList<PersonNodePtr>*::Iterator::operator*() const;
-//template bool LinkedList<PersonNodePtr>*::Iterator::operator!=(const LinkedList<PersonNodePtr>*::Iterator& other) const;
-//template LinkedList<PersonNodePtr>*::Iterator LinkedList<PersonNodePtr>*::begin() const;
-//template LinkedList<PersonNodePtr>*::Iterator LinkedList<PersonNodePtr>*::end() const;*/
+template <typename T>
+struct GraphNode;
+
+template <typename T>
+using GraphNodePtr = GraphNode<T>*;
+
+template LinkedList<GraphNodePtr<Room>>::Iterator& LinkedList<GraphNodePtr<Room>>::Iterator::operator++();
+template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::Iterator::operator*() const;
+template bool LinkedList<GraphNodePtr<Room>>::Iterator::operator!=(const LinkedList<GraphNodePtr<Room>>::Iterator& other) const;
+template LinkedList<GraphNodePtr<Room>>::Iterator LinkedList<GraphNodePtr<Room>>::begin() const;
+template LinkedList<GraphNodePtr<Room>>::Iterator LinkedList<GraphNodePtr<Room>>::end() const;
