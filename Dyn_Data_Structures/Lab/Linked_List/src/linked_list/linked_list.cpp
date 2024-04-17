@@ -100,6 +100,25 @@ int LinkedList<T>::find(T data) {
     return -1; 
 }
 
+struct PersonNode {};
+
+using PersonNodePtr = PersonNode*;
+
+template <>
+int LinkedList<PersonNodePtr>::find(PersonNodePtr data) {
+    NodePtr<PersonNodePtr> curr = head;
+    int idx = 0;
+    while(curr) {
+        if (curr->data == data)
+            return idx;
+        else {
+            idx++;
+            curr = curr->next;
+        }
+    }
+    return -1; 
+}
+
 template <typename T>
 void LinkedList<T>::append(T data) {
     this->size++;
@@ -266,9 +285,20 @@ template LinkedList<int>::~LinkedList();
 template int& LinkedList<int>::operator[](size_t idx);
 template void LinkedList<int>::append(int data);
 template int LinkedList<int>::remove(size_t idx);
+template int LinkedList<int>::find(int data);
 template void LinkedList<int>::clear();
 template void LinkedList<int>::sort(CompareFn<int> compare_fn);
 template size_t LinkedList<int>::len();
+
+template LinkedList<LinkedList<int>>::LinkedList();
+template LinkedList<LinkedList<int>>::LinkedList(const LinkedList& other);
+template LinkedList<LinkedList<int>>::~LinkedList();
+template LinkedList<int>& LinkedList<LinkedList<int>>::operator[](size_t idx);
+//template void LinkedList<LinkedList<int>>::append(int data);
+//template int LinkedList<LinkedList<int>>::remove(size_t idx);
+//template int LinkedList<LinkedList<int>>::find(int data);
+template void LinkedList<LinkedList<int>>::clear();
+template size_t LinkedList<LinkedList<int>>::len();
 
 template <typename T>
 struct TreeNode {};
@@ -297,16 +327,11 @@ template void LinkedList<BSTNodePtr<int>>::append(BSTNodePtr<int> data);
 template BSTNodePtr<int> LinkedList<BSTNodePtr<int>>::remove(size_t idx);
 template size_t LinkedList<BSTNodePtr<int>>::len();
 
-struct PersonNode {};
-
-using PersonNodePtr = PersonNode*;
-
 template LinkedList<PersonNodePtr>::LinkedList();
 template LinkedList<PersonNodePtr>::~LinkedList();
 template PersonNodePtr& LinkedList<PersonNodePtr>::operator[](size_t idx);
 template void LinkedList<PersonNodePtr>::append(PersonNodePtr data);
 template PersonNodePtr LinkedList<PersonNodePtr>::remove(size_t idx);
-template int LinkedList<PersonNodePtr>::find(PersonNodePtr data);
 template size_t LinkedList<PersonNodePtr>::len();
 
 template <typename T>
@@ -319,7 +344,6 @@ template LinkedList<GraphNodeEdge<Room>>::~LinkedList();
 template GraphNodeEdge<Room>& LinkedList<GraphNodeEdge<Room>>::operator[](size_t idx);
 template void LinkedList<GraphNodeEdge<Room>>::append(GraphNodeEdge<Room> data);
 template GraphNodeEdge<Room> LinkedList<GraphNodeEdge<Room>>::remove(size_t idx);
-//template int LinkedList<GraphNodeEdge<Room>>::find(GraphNodeEdge<Room> data);
 template size_t LinkedList<GraphNodeEdge<Room>>::len();
 
 template <typename T>
@@ -333,5 +357,4 @@ template LinkedList<GraphNodePtr<Room>>::~LinkedList();
 template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::operator[](size_t idx);
 template void LinkedList<GraphNodePtr<Room>>::append(GraphNodePtr<Room> data);
 template GraphNodePtr<Room> LinkedList<GraphNodePtr<Room>>::remove(size_t idx);
-//template int LinkedList<GraphNodePtr>::find(GraphNodePtr data);
 template size_t LinkedList<GraphNodePtr<Room>>::len();

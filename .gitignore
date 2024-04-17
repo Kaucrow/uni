@@ -121,3 +121,7 @@ Dyn_Data_Structures/Lab/Queue/bin/*
 
 # Queue Requests
 Dyn_Data_Structures/Lab/Queue_Reqs/bin/*
+
+# Graph
+Dyn_Data_Structures/Lab/Graph/bin/*
+Dyn_Data_Structures/Lab/Graph/data/*
