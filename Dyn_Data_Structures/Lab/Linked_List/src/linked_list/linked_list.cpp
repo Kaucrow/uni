@@ -8,6 +8,37 @@
 using std::ifstream, std::ofstream, std::getline, std::string;
 
 template <typename T>
+struct GraphNode {};
+
+template <typename T>
+using GraphNodePtr = GraphNode<T>*;
+
+template <typename T>
+struct GraphNodeEdge {
+    GraphNodeEdge(GraphNodePtr<T> node_to, int weight) : node_to(node_to), weight(weight) {}
+    GraphNodeEdge(const GraphNodeEdge &other);
+
+    GraphNodePtr<T> node_to;
+    int weight;
+};
+
+struct Room {};
+
+template <typename T>
+Node<T>::Node(T data) : data(data), next(nullptr) {}
+
+/*template <typename T>
+struct GraphNodeEdge {};
+
+struct Room {};*/
+
+/*template <>
+Node<GraphNodeEdge<Room>>::Node(GraphNodeEdge<Room> data) : data(data), next(nullptr) {
+    std::cout << data.weight << '\n';
+    std::cout << "INVOKED NODE CONSTR\n";
+}*/
+
+template <typename T>
 LinkedList<T>::LinkedList()
     : head(nullptr), size(0)
 {}
@@ -138,6 +169,30 @@ void LinkedList<T>::append(T data) {
     curr_node->next = new_node;
 }
 
+struct Val { int val; };
+
+/*template <>
+void LinkedList<Val>::append(Val data) {
+    std::cout << "LLHERE\n";
+    std::cout << data.val;
+    this->size++;
+    NodePtr<Val> new_node = new Node<Val>(data);
+    std::cout << "LLHERE1\n";
+
+    if(!head) {
+        head = new_node;
+        return;
+    }
+
+    NodePtr<Val> curr_node = this->head;
+
+    while(curr_node->next) {
+        curr_node = curr_node->next;
+    }
+
+    curr_node->next = new_node;
+}*/
+
 template <typename T>
 T LinkedList<T>::remove(const size_t idx) {
     this->size--;
@@ -263,7 +318,7 @@ namespace LinkedListFn {
     }
 }
 
-template LinkedList<Student>::LinkedList();
+/*template LinkedList<Student>::LinkedList();
 template LinkedList<Student>::~LinkedList();
 template Student& LinkedList<Student>::operator[](size_t idx);
 template void LinkedList<Student>::append(Student data);
@@ -278,7 +333,7 @@ template void LinkedList<string>::append(string data);
 template string LinkedList<string>::remove(size_t idx);
 template void LinkedList<string>::clear();
 template void LinkedList<string>::sort(CompareFn<string> compare_fn);
-
+*/
 template LinkedList<int>::LinkedList();
 template LinkedList<int>::LinkedList(const LinkedList& other);
 template LinkedList<int>::~LinkedList();
@@ -299,7 +354,7 @@ template LinkedList<int>& LinkedList<LinkedList<int>>::operator[](size_t idx);
 //template int LinkedList<LinkedList<int>>::find(int data);
 template void LinkedList<LinkedList<int>>::clear();
 template size_t LinkedList<LinkedList<int>>::len();
-
+/*
 template <typename T>
 struct TreeNode {};
 
@@ -333,11 +388,7 @@ template PersonNodePtr& LinkedList<PersonNodePtr>::operator[](size_t idx);
 template void LinkedList<PersonNodePtr>::append(PersonNodePtr data);
 template PersonNodePtr LinkedList<PersonNodePtr>::remove(size_t idx);
 template size_t LinkedList<PersonNodePtr>::len();
-
-template <typename T>
-struct GraphNodeEdge {};
-
-struct Room {};
+*/
 
 template LinkedList<GraphNodeEdge<Room>>::LinkedList();
 template LinkedList<GraphNodeEdge<Room>>::~LinkedList();
@@ -346,15 +397,16 @@ template void LinkedList<GraphNodeEdge<Room>>::append(GraphNodeEdge<Room> data);
 template GraphNodeEdge<Room> LinkedList<GraphNodeEdge<Room>>::remove(size_t idx);
 template size_t LinkedList<GraphNodeEdge<Room>>::len();
 
-template <typename T>
-struct GraphNode {};
-
-template <typename T>
-using GraphNodePtr = GraphNode<T>*;
-
 template LinkedList<GraphNodePtr<Room>>::LinkedList();
 template LinkedList<GraphNodePtr<Room>>::~LinkedList();
 template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::operator[](size_t idx);
 template void LinkedList<GraphNodePtr<Room>>::append(GraphNodePtr<Room> data);
 template GraphNodePtr<Room> LinkedList<GraphNodePtr<Room>>::remove(size_t idx);
 template size_t LinkedList<GraphNodePtr<Room>>::len();
+
+template LinkedList<Val>::LinkedList();
+template LinkedList<Val>::~LinkedList();
+template Val& LinkedList<Val>::operator[](size_t idx);
+template void LinkedList<Val>::append(Val data);
+template Val LinkedList<Val>::remove(size_t idx);
+template size_t LinkedList<Val>::len();

@@ -2,6 +2,23 @@
 #include "../classes/student/student.h"
 
 template <typename T>
+struct GraphNode {};
+
+template <typename T>
+using GraphNodePtr = GraphNode<T>*;
+
+template <typename T>
+struct GraphNodeEdge {
+    GraphNodeEdge(GraphNodePtr<T> node_to, int weight) : node_to(node_to), weight(weight) {}
+    GraphNodeEdge(const GraphNodeEdge &other);
+
+    GraphNodePtr<T> node_to;
+    int weight;
+};
+
+struct Room {};
+
+template <typename T>
 LinkedList<T>::Iterator::Iterator(NodePtr<T> start) : current(start) {}
 
 template <typename T>
@@ -83,16 +100,22 @@ template bool LinkedList<PersonNodePtr>::Iterator::operator!=(const LinkedList<P
 template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::begin() const;
 template LinkedList<PersonNodePtr>::Iterator LinkedList<PersonNodePtr>::end() const;
 
-struct Room;
-
-template <typename T>
-struct GraphNode;
-
-template <typename T>
-using GraphNodePtr = GraphNode<T>*;
-
 template LinkedList<GraphNodePtr<Room>>::Iterator& LinkedList<GraphNodePtr<Room>>::Iterator::operator++();
 template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::Iterator::operator*() const;
 template bool LinkedList<GraphNodePtr<Room>>::Iterator::operator!=(const LinkedList<GraphNodePtr<Room>>::Iterator& other) const;
 template LinkedList<GraphNodePtr<Room>>::Iterator LinkedList<GraphNodePtr<Room>>::begin() const;
 template LinkedList<GraphNodePtr<Room>>::Iterator LinkedList<GraphNodePtr<Room>>::end() const;
+
+template LinkedList<GraphNodeEdge<Room>>::Iterator& LinkedList<GraphNodeEdge<Room>>::Iterator::operator++();
+template GraphNodeEdge<Room>& LinkedList<GraphNodeEdge<Room>>::Iterator::operator*() const;
+template bool LinkedList<GraphNodeEdge<Room>>::Iterator::operator!=(const LinkedList<GraphNodeEdge<Room>>::Iterator& other) const;
+template LinkedList<GraphNodeEdge<Room>>::Iterator LinkedList<GraphNodeEdge<Room>>::begin() const;
+template LinkedList<GraphNodeEdge<Room>>::Iterator LinkedList<GraphNodeEdge<Room>>::end() const;
+
+struct Val {};
+
+template LinkedList<Val>::Iterator& LinkedList<Val>::Iterator::operator++();
+template Val& LinkedList<Val>::Iterator::operator*() const;
+template bool LinkedList<Val>::Iterator::operator!=(const LinkedList<Val>::Iterator& other) const;
+template LinkedList<Val>::Iterator LinkedList<Val>::begin() const;
+template LinkedList<Val>::Iterator LinkedList<Val>::end() const;

@@ -8,7 +8,7 @@ using std::string, std::function;
 
 template <typename T>
 struct Node {
-    Node(T data) : data(data), next(nullptr) {}
+    Node(T data);
     T data;
     Node* next;
 };
