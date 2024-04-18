@@ -19,5 +19,9 @@ int main() {
 
     LinkedList<GraphNodePtr<Room>> shortest_distance = graph.get_shortest_distance(Room(1), Room(3));
 
+    cout << "--- SHORTEST DISTANCE ---\n";
+    for (auto node : shortest_distance)
+        cout << node->data << "->";
+
     cout << "\n[ Execution End ]\n";
 }

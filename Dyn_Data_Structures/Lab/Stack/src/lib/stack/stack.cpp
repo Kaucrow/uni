@@ -5,6 +5,14 @@
 #include "stack.h"
 
 template <typename T>
+struct GraphNode {};
+
+template <typename T>
+using GraphNodePtr = GraphNode<T>*;
+
+struct Room {};
+
+template <typename T>
 Stack<T>::Stack()
     : size(0), top(nullptr)
 {}
@@ -82,3 +90,10 @@ template void Stack<int>::push(const int &data);
 template int Stack<int>::pop();
 template int& Stack<int>::peek();
 template string Stack<int>::to_string();
+
+template Stack<GraphNodePtr<Room>>::Stack();
+template Stack<GraphNodePtr<Room>>::~Stack();
+template size_t Stack<GraphNodePtr<Room>>::len();
+template void Stack<GraphNodePtr<Room>>::push(const GraphNodePtr<Room> &data);
+template GraphNodePtr<Room> Stack<GraphNodePtr<Room>>::pop();
+template GraphNodePtr<Room>& Stack<GraphNodePtr<Room>>::peek();

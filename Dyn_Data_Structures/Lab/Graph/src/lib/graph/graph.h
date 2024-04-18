@@ -97,6 +97,9 @@ class Graph {
         DijkstraMap<T> const gen_dijkstra_map(GraphNodePtr<T> from);
         LinkedList<GraphNodePtr<T>> const get_shortest_distance(T from, T to);
         LinkedList<GraphNodePtr<T>> const get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to);
+
+        GraphNodePtr<Room> get_proproom(RoomProp prop);
+
         size_t len();
     private:
         LinkedList<GraphNodePtr<T>> data;

@@ -1,5 +1,6 @@
 #include "graph.h"
 #include <iostream>
+#include "../../../../Stack/src/lib/stack/stack.h"
 #include "../../../../Stack/src/lib/misc/panic/panic.h"
 
 using std::cout, std::cerr;
@@ -147,8 +148,22 @@ LinkedList<GraphNodePtr<T>> const Graph<T>::get_shortest_distance(T from, T to) 
 template <typename T>
 LinkedList<GraphNodePtr<T>> const Graph<T>::get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to) {
     try {
-        this->gen_dijkstra_map(from);
+        DijkstraMap<T> map = this->gen_dijkstra_map(from);
+        
+        Stack<GraphNodePtr<T>> aux;
+
+        GraphNodePtr<T> search = to;
+
+        while (search) {
+            DijkstraRow<T> &row = map.data[search->data.number - 1];
+            aux.push(row.node);
+            search = row.prev_node;
+        }
+
         LinkedList<GraphNodePtr<T>> ret;
+        while (aux.len() > 0)
+            ret.append(aux.pop());
+
         return ret;
     } catch (...) {
         cerr << "[ ERR ] Couldn't find a path from node " << from->data << "to node " << to->data << ".\n";
@@ -194,7 +209,6 @@ DijkstraMap<T> const Graph<T>::gen_dijkstra_map(GraphNodePtr<T> from) {
         }
 
         if (!min_node) {
-            //panic("[ ERR ] Couldn't find the minimum distance node.");
             GraphNodePtr<T> min_edges_node = visited[0];
             for (auto node : visited)
                 if (node->edges.len() < min_edges_node->edges.len())
@@ -260,6 +274,15 @@ void const Graph<T>::display() {
         new_node = true;
         cout << "]\n";
     }
+}
+
+template <>
+GraphNodePtr<Room> Graph<Room>::get_proproom(RoomProp prop) {
+    for (auto node : this->data) {
+        if (node->data.prop == prop)
+            return node;
+    }
+    panic("[ ERR ] Could not find a room with the provided property.");
 }
 
 template void Graph<Room>::add_node(Room data);
