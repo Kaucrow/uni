@@ -14,6 +14,13 @@ template <typename T>
 using GraphNodePtr = GraphNode<T>*;
 
 template <typename T>
+struct DijkstraRow {
+    GraphNodePtr<T> node;
+    int dist_origin;
+    GraphNodePtr<T> prev_node;
+};
+
+template <typename T>
 struct GraphNodeEdge {
     GraphNodeEdge(GraphNodePtr<T> node_to, int weight) : node_to(node_to), weight(weight) {}
     GraphNodeEdge(const GraphNodeEdge &other);
@@ -402,11 +409,12 @@ template LinkedList<GraphNodePtr<Room>>::~LinkedList();
 template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::operator[](size_t idx);
 template void LinkedList<GraphNodePtr<Room>>::append(GraphNodePtr<Room> data);
 template GraphNodePtr<Room> LinkedList<GraphNodePtr<Room>>::remove(size_t idx);
+template int LinkedList<GraphNodePtr<Room>>::find(GraphNodePtr<Room> data);
 template size_t LinkedList<GraphNodePtr<Room>>::len();
 
-template LinkedList<Val>::LinkedList();
-template LinkedList<Val>::~LinkedList();
-template Val& LinkedList<Val>::operator[](size_t idx);
-template void LinkedList<Val>::append(Val data);
-template Val LinkedList<Val>::remove(size_t idx);
-template size_t LinkedList<Val>::len();
+template LinkedList<DijkstraRow<Room>>::LinkedList();
+template LinkedList<DijkstraRow<Room>>::~LinkedList();
+template DijkstraRow<Room>& LinkedList<DijkstraRow<Room>>::operator[](size_t idx);
+template void LinkedList<DijkstraRow<Room>>::append(DijkstraRow<Room> data);
+template DijkstraRow<Room> LinkedList<DijkstraRow<Room>>::remove(size_t idx);
+template size_t LinkedList<DijkstraRow<Room>>::len();

@@ -8,6 +8,13 @@ template <typename T>
 using GraphNodePtr = GraphNode<T>*;
 
 template <typename T>
+struct DijkstraRow {
+    GraphNodePtr<T> node;
+    int dist_origin;
+    GraphNodePtr<T> prev_node;
+};
+
+template <typename T>
 struct GraphNodeEdge {
     GraphNodeEdge(GraphNodePtr<T> node_to, int weight) : node_to(node_to), weight(weight) {}
     GraphNodeEdge(const GraphNodeEdge &other);
@@ -112,10 +119,8 @@ template bool LinkedList<GraphNodeEdge<Room>>::Iterator::operator!=(const Linked
 template LinkedList<GraphNodeEdge<Room>>::Iterator LinkedList<GraphNodeEdge<Room>>::begin() const;
 template LinkedList<GraphNodeEdge<Room>>::Iterator LinkedList<GraphNodeEdge<Room>>::end() const;
 
-struct Val {};
-
-template LinkedList<Val>::Iterator& LinkedList<Val>::Iterator::operator++();
-template Val& LinkedList<Val>::Iterator::operator*() const;
-template bool LinkedList<Val>::Iterator::operator!=(const LinkedList<Val>::Iterator& other) const;
-template LinkedList<Val>::Iterator LinkedList<Val>::begin() const;
-template LinkedList<Val>::Iterator LinkedList<Val>::end() const;
+template LinkedList<DijkstraRow<Room>>::Iterator& LinkedList<DijkstraRow<Room>>::Iterator::operator++();
+template DijkstraRow<Room>& LinkedList<DijkstraRow<Room>>::Iterator::operator*() const;
+template bool LinkedList<DijkstraRow<Room>>::Iterator::operator!=(const LinkedList<DijkstraRow<Room>>::Iterator& other) const;
+template LinkedList<DijkstraRow<Room>>::Iterator LinkedList<DijkstraRow<Room>>::begin() const;
+template LinkedList<DijkstraRow<Room>>::Iterator LinkedList<DijkstraRow<Room>>::end() const;

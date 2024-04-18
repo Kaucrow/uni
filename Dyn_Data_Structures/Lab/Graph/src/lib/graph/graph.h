@@ -55,6 +55,37 @@ struct GraphNode {
 };
 
 template <typename T>
+struct DijkstraRow {
+    DijkstraRow(GraphNodePtr<T> node, int dist_origin) : node(node), dist_origin(dist_origin), prev_node(nullptr) {}
+
+    GraphNodePtr<T> node;
+    int dist_origin;
+    GraphNodePtr<T> prev_node;
+};
+
+template <typename T>
+ostream& operator<<(ostream &os, const DijkstraRow<T> &row);
+
+template <typename T>
+struct DijkstraMap {
+    void const display();
+
+    GraphNodePtr<T> origin;
+    LinkedList<DijkstraRow<T>> data;
+    /*class Iterator {
+        public:
+            Iterator(DijkstraRow<T> start);
+            Iterator& operator++();
+            bool operator!=(const Iterator& other) const;
+            DijkstraRow<T>& operator*() const;
+        private:
+            DijkstraRow<T> current;
+    };
+    Iterator begin() const;
+    Iterator end() const;*/
+};
+
+template <typename T>
 class Graph {
     public:
         void add_node(T data);
@@ -62,6 +93,8 @@ class Graph {
         void add_edge(GraphNodePtr<T> from, GraphNodePtr<T> to, int weight = 0);
         void const display();
         GraphNodePtr<T> get_node(T data);
+        LinkedList<GraphNodePtr<T>> get_shortest_distance(T from, T to);
+        LinkedList<GraphNodePtr<T>> get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to);
         size_t len();
     private:
         LinkedList<GraphNodePtr<T>> data;

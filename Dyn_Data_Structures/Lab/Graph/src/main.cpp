@@ -7,17 +7,6 @@
 #include "../../Stack/src/lib/misc/panic/panic.h"
 
 using std::cout, std::string;
-const char* TREEFILE_PATH = "./data/tree.csv";
-
-struct Val {
-    Val(int val) : val(val) {}
-    int val;
-};
-
-ostream& operator<<(ostream& os, const Val &val) {
-    os << '(' << /*edge.node_to->data*/ "A" << ',' << val.val << ')';
-    return os;
-}
 
 int main() {
     cout << "[ Execution Begin ]\n\n";
@@ -25,6 +14,10 @@ int main() {
     Graph<Room> graph = gen_dungeon_level(DungeonProperties(5, 1, 3));
     cout << "GRAPH LEN: " << graph.len() << '\n';
     graph.display();
+
+    cout << '\n';
+
+    LinkedList<GraphNodePtr<Room>> shortest_distance = graph.get_shortest_distance(Room(1), Room(3));
 
     cout << "\n[ Execution End ]\n";
 }

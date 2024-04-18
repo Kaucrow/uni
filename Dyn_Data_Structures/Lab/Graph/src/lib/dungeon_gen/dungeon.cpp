@@ -144,6 +144,7 @@ string gen_level_layout_file(DungeonProperties &prop) {
             while 
             (
                 room_to == i ||
+                connections[room_to - 1].len() >= prop.max_conn ||
                 (i == start_room && room_to == end_room) ||
                 (i == end_room && room_to == start_room)
             )

@@ -4,9 +4,56 @@
 
 using std::cout, std::cerr;
 
+/*template <typename T>
+DijkstraMap<T>::Iterator::Iterator(DijkstraRow<T> start) : current(start) {}
+
 template <typename T>
-ostream& operator<<(ostream &os, const GraphNodePtr<T> &graphnodeptr) {
-    os << "TEMP\n";
+typename DijkstraMap<T>::Iterator& DijkstraMap<T>::Iterator::operator++() {
+    if (current) {
+        current = current->next;
+    }
+    return *this;
+}
+
+template <typename T>
+bool DijkstraMap<T>::Iterator::operator!=(const DijkstraMap<T>::Iterator& other) const {
+    return current != other.current;
+}
+
+template <typename T>
+DijkstraRow<T>& DijkstraMap<T>::Iterator::operator*() const {
+    return current->data;
+}
+
+template <typename T>
+typename DijkstraMap<T>::Iterator DijkstraMap<T>::begin() const {
+    return DijkstraMap<T>::Iterator(this->head);
+}
+
+template <typename T>
+typename DijkstraMap<T>::Iterator DijkstraMap<T>::end() const {
+    return DijkstraMap<T>::Iterator(nullptr);
+}*/
+
+template <typename T>
+void const DijkstraMap<T>::display() {
+    for (auto row : this->data) {
+        cout << row << '\n';
+    }
+}
+
+template <typename T>
+ostream& operator<<(ostream &os, const DijkstraRow<T> &row) {
+    os << "NODE: " << row.node << " DIST: " << row.dist_origin << " PREV: ";
+    if (row.prev_node)
+        os << row.prev_node;
+    return os;
+}
+
+template <typename T>
+ostream& operator<<(ostream &os, const GraphNodePtr<T> &nodeptr) {
+    os << nodeptr->data;
+    return os;
 }
 
 template <typename T>
@@ -93,6 +140,80 @@ GraphNodePtr<T> Graph<T>::get_node(T data) {
 }
 
 template <typename T>
+LinkedList<GraphNodePtr<T>> Graph<T>::get_shortest_distance(T from, T to) {
+    try {
+        return this->get_shortest_distance(this->get_node(from), this->get_node(to));
+    } catch (const char* err) {
+        cerr << err;
+    }
+}
+
+template <typename T>
+LinkedList<GraphNodePtr<T>> Graph<T>::get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to) {
+    LinkedList<GraphNodePtr<T>> unvisited;
+    LinkedList<GraphNodePtr<T>> visited;
+    DijkstraMap<T> map;
+    map.origin = from;
+
+    auto get_min_dist_node = [&]() -> GraphNodePtr<T> {
+        GraphNodePtr<T> min_node = nullptr;
+        int min_dist = INT_MAX;
+        for (auto row : map.data) {
+            if (row.dist_origin <= min_dist && visited.find(row.node) == -1) {
+                min_node = row.node;
+                min_dist = row.dist_origin;
+            }
+        }
+
+        if (!min_node)
+            panic("[ ERR ] Couldn't find the minimum distance node.");
+
+        return min_node;
+    };
+
+    for (auto node : this->data) {
+        if (node == from)
+            map.data.append(DijkstraRow(node, 0));
+        else
+            map.data.append(DijkstraRow(node, INT_MAX));
+
+        unvisited.append(node);
+    }
+
+    GraphNodePtr<T> prev_node = nullptr;
+    while (unvisited.len() > 0) {
+        GraphNodePtr<T> curr_node = nullptr;
+        if (!prev_node) curr_node = from;
+        else curr_node = get_min_dist_node();
+
+        unvisited.remove(unvisited.find(curr_node));
+        visited.append(curr_node);
+
+        const DijkstraRow<T> &curr_node_row = map.data[curr_node->data.number - 1];
+        for (auto edge : curr_node->edges) {
+            DijkstraRow<T> &node_to_row = map.data[edge.node_to->data.number - 1];
+            if 
+            (
+                edge.weight + curr_node_row.dist_origin < //(node_to_row.dist_origin == INT_MAX ? 0 : node_to_row.dist_origin) <
+                node_to_row.dist_origin &&
+                visited.find(edge.node_to) == -1
+            )
+            {
+                node_to_row.dist_origin = edge.weight + curr_node_row.dist_origin;//(row.dist_origin == INT_MAX ? 0 : row.dist_origin);
+                node_to_row.prev_node = curr_node;
+            }
+        }
+
+        prev_node = curr_node;
+    }
+
+    map.display();
+
+    LinkedList<GraphNodePtr<T>> ret;
+    return ret;
+}
+
+template <typename T>
 void const Graph<T>::display() {
     bool new_node = true;
     for (const auto &node : this->data) {
@@ -113,3 +234,11 @@ template void Graph<Room>::add_edge(GraphNodePtr<Room> node_from, GraphNodePtr<R
 template GraphNodePtr<Room> Graph<Room>::get_node(Room data);
 template void const Graph<Room>::display();
 template size_t Graph<Room>::len();
+template LinkedList<GraphNodePtr<Room>> Graph<Room>::get_shortest_distance(Room from, Room to);
+template LinkedList<GraphNodePtr<Room>> Graph<Room>::get_shortest_distance(GraphNodePtr<Room> from, GraphNodePtr<Room> to);
+
+/*template DijkstraMap<Room>::Iterator& DijkstraMap<Room>::Iterator::operator++();
+template DijkstraRow<Room>& DijkstraMap<Room>::Iterator::operator*() const;
+template bool DijkstraMap<Room>::Iterator::operator!=(const DijkstraMap<Room>::Iterator& other) const;
+template DijkstraMap<Room>::Iterator DijkstraMap<Room>::begin() const;
+template DijkstraMap<Room>::Iterator DijkstraMap<Room>::end() const;*/
