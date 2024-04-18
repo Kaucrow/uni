@@ -92,9 +92,11 @@ class Graph {
         void add_edge(T from, T to, int weight = 0);
         void add_edge(GraphNodePtr<T> from, GraphNodePtr<T> to, int weight = 0);
         void const display();
+        void connect_components();
         GraphNodePtr<T> get_node(T data);
-        LinkedList<GraphNodePtr<T>> get_shortest_distance(T from, T to);
-        LinkedList<GraphNodePtr<T>> get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to);
+        DijkstraMap<T> const gen_dijkstra_map(GraphNodePtr<T> from);
+        LinkedList<GraphNodePtr<T>> const get_shortest_distance(T from, T to);
+        LinkedList<GraphNodePtr<T>> const get_shortest_distance(GraphNodePtr<T> from, GraphNodePtr<T> to);
         size_t len();
     private:
         LinkedList<GraphNodePtr<T>> data;

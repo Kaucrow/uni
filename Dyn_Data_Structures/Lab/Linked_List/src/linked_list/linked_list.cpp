@@ -405,6 +405,7 @@ template GraphNodeEdge<Room> LinkedList<GraphNodeEdge<Room>>::remove(size_t idx)
 template size_t LinkedList<GraphNodeEdge<Room>>::len();
 
 template LinkedList<GraphNodePtr<Room>>::LinkedList();
+template LinkedList<GraphNodePtr<Room>>::LinkedList(const LinkedList& other);
 template LinkedList<GraphNodePtr<Room>>::~LinkedList();
 template GraphNodePtr<Room>& LinkedList<GraphNodePtr<Room>>::operator[](size_t idx);
 template void LinkedList<GraphNodePtr<Room>>::append(GraphNodePtr<Room> data);

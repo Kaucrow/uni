@@ -94,6 +94,9 @@ Graph<Room> gen_dungeon_level(DungeonProperties prop) {
             }
         }
     }
+
+    level.connect_components();
+
     return level;
 }
 
