@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "lib/tree/tree.h"
-#include "../../../../Tools/Cpp/termcolor.hpp"
+#include "../../../../tools/cpp/termcolor.hpp"
 
 using std::cout, std::cin, std::string;
 

@@ -20,7 +20,7 @@ stack.o:
 	g++ -c ../Stack/src/lib/stack/stack.cpp
 
 random_gen.o:
-	g++ -c ../../../Tools/Cpp/random_gen.cpp
+	g++ -c ../../../tools/cpp/random_gen.cpp
 
 panic.o:
 	g++ -c ../Stack/src/lib/misc/panic/panic.cpp

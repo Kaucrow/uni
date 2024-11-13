@@ -1,6 +1,6 @@
 #include <iostream>
 #include "lib/BST/bst.h"
-#include "../../../../Tools/Cpp/termcolor.hpp"
+#include "../../../../tools/cpp/termcolor.hpp"
 
 using std::cout, std::cin, std::getline;
 

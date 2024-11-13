@@ -6,7 +6,7 @@
 #include <filesystem>
 #include "dungeon.h"
 #include "../../../../Stack/src/lib/misc/panic/panic.h"
-#include "../../../../../../Tools/Cpp/random_gen.h"
+#include "../../../../../../tools/cpp/random_gen.h"
 
 using   std::ofstream, std::getline, std::string, std::ifstream,
         std::cout, std::stringstream;
