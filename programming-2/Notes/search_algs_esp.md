@@ -78,5 +78,5 @@ Supongamos que tenemos una lista: (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144,
 
 <p align="center">
    Necesito -->
-   <img src="./Images/its-dangerous-to-go-alone.jpg" height=250></img>
+   <img src="./images/its-dangerous-to-go-alone.jpg" height=250></img>
 </p>

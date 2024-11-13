@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "../student/student.h"
-#include "../linked_list/linked_list.h"
+#include "../linked-list/linked_list.h"
 #include "doubly_linked_list.h"
 
 using std::ifstream, std::ofstream, std::getline, std::string;

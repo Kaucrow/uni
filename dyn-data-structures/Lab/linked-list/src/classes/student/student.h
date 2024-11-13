@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../linked_list/linked_list.h"
+#include "../../linked-list/linked_list.h"
 
 using std::string;
 

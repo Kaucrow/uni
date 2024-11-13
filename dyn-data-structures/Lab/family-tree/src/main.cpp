@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "./lib/tree/familytree.h"
+#include "./lib/tree/family-tree.h"
 #include "../../Stack/src/lib/misc/panic/panic.h"
 
 using std::cout, std::string;

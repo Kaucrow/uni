@@ -1,7 +1,7 @@
 #pragma once
 #include <cstddef>
 #include "./nodes.h"
-#include "../../../../Linked_List/src/linked_list/linked_list.h"
+#include "../../../../linked-list/src/linked-list/linked_list.h"
 
 #define TRAVERSAL_ARGS PersonNodePtr node, LinkedList<PersonNodePtr>* adder
 

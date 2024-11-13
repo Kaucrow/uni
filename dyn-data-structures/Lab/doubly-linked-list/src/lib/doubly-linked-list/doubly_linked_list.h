@@ -4,7 +4,7 @@
 #include <functional>
 #include <iterator>
 #include <iostream>
-#include "../linked_list/linked_list.h"
+#include "../linked-list/linked_list.h"
 
 using std::string, std::function;
 

@@ -11,7 +11,7 @@ Algunos de los conceptos basicos sobre estos algoritmos son:
 <br>
 
 <p align="center">
-   <img src="./Images/complexity_types_esp.jpg" height=250></img>
+   <img src="./images/complexity_types_esp.jpg" height=250></img>
 </p>
 <p align="center">
 Mientras la complejidad del algoritmo se acerque mas a O(1), mas eficiente es.
@@ -146,5 +146,5 @@ Al igual que Quick Sort, este es un algoritmo de "Divide y Venceras", por lo que
 </p>
 
 <p align="center">
-   <img src="./Images/cpp-pet.gif" height=150></img>
+   <img src="./images/cpp-pet.gif" height=150></img>
 </p>
