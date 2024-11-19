@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <!-- Edit component container -->
+  <div id="edit-div"></div>
+
+  <!-- Submit button -->
+  <button class="submit-btn" onclick="submit()">Submit</button>
+
+  <script src="edit.js"></script>
+  <script>
+    // Create the edit component
+    const edit = Edit();
+
+    // Append it to the edit div
+    const editDiv = document.getElementById('edit-div');
+    editDiv.appendChild(edit.element);
+
+    // Test submit function
+    function submit() {
+      if (edit.isValid()) {
+        console.log(edit.getValue());
+      } else {
+        console.log('The input is not valid');
+      }
+    }
+  </script>
+</body>
+
+</html>
