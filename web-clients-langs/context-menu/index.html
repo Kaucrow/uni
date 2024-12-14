@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="ContextMenu.js"></script>
+  <script>
+    // Using the component
+    document.addEventListener('DOMContentLoaded', () => {
+      const menu = new ContextMenu('#app');
+
+      menu.addMenuItem('File', [
+        { label: 'New file', action: () => console.log('New file') },
+        { label: 'Open file', action: () => console.log('Open file') },
+        { 
+          label: 'Export >', 
+          submenu: [
+            { label: 'PDF', action: () => console.log('Export as PDF') },
+            { label: 'DOCX', action: () => console.log('Export as DOCX') },
+          ],
+        },
+      ]);
+
+      menu.addMenuItem('Edit', [
+        { label: 'Undo', action: () => console.log('Undo') },
+        { label: 'Redo', action: () => console.log('Redo') },
+        { 
+          label: 'Tools >', 
+          submenu: [
+            { label: 'Search', action: () => console.log('Search') },
+            { label: 'Replace', action: () => console.log('Replace') },
+            {
+              label: 'Advanced >',
+              submenu: [
+                { label: 'Autocomplete', action: () => console.log('Autocomplete') },
+                { label: 'Format', action: () => console.log('Format') },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      menu.addMenuItem('View', [
+        { label: 'Zoom In', action: () => console.log('Zoom In') },
+        { label: 'Zoom Out', action: () => console.log('Zoom Out') },
+        { label: 'Fullscreen', action: () => console.log('Fullscreen') },
+      ]);
+    });
+  </script>
+</body>
+</html>

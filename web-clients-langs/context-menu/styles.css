@@ -1,0 +1,59 @@
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('/fonts/RobotoMono-Regular.ttf') format('truetype');
+}
+
+:root {
+  --font: "Roboto Mono";
+  --bg-color: "#272d33";
+  --bg-light: "#424c51";
+}
+
+body {
+  font-family: var(--font);
+  background-color: #1f2428;
+}
+
+.menu-bar {
+  display: flex;
+  background-color: #272d33;
+  color: white;
+  padding: 5px 10px;
+}
+
+.menu-item {
+  position: relative;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #333c42;
+  color: white;
+  padding: 5px 0;
+  border: 1px solid #555;
+  z-index: 1000;
+}
+
+.submenu-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.submenu-item:hover {
+  background-color: #3c464e;
+}
+
+.submenu.show {
+  display: block;
+}
+
+.submenu .submenu {
+  top: 0;
+  left: 100%;
+}
