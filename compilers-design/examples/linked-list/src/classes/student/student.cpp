@@ -34,6 +34,10 @@ void Student::write_to_file(const char* out_dir) {
                 << "Section: " << this->section;
 }
 
+bool Student::operator == (const Student &other) {
+    return true;
+}
+
 namespace StudentFn {
     Student from_row(string row, int csv_pos) {
         Student student;
@@ -81,4 +85,32 @@ namespace StudentFn {
 
         return linked_list;
     }
+}
+
+template <>
+void LinkedList<Student>::obliterate_student(const size_t idx, const char* csv_path) {
+    Student deleted = this->remove(idx);
+    int csv_remove_line = deleted.csv_pos;
+
+    string csv_path_str = string(csv_path);
+    ifstream infile(csv_path_str);
+
+    string tempfile_path = csv_path_str.substr(0, csv_path_str.rfind('/') + 1) + "temp.csv";
+    ofstream tempfile(tempfile_path);
+
+    string reading_line;
+    while(getline(infile, reading_line)) {
+        if(csv_remove_line == 1) {
+            csv_remove_line--;
+            continue;
+        }
+        tempfile << reading_line << '\n';
+        csv_remove_line--;
+    }
+
+    infile.close();
+    tempfile.close();
+    
+    std::remove(csv_path);
+    std::rename(tempfile_path.c_str(), csv_path);
 }

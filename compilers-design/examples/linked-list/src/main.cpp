@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "classes/student/student.h"
-#include "linked-list/linked_list.h"
+#include "includes.h"
 
 using   std::string, std::cout, std::cin, std::getline,
         std::ifstream, std::ofstream;
@@ -10,7 +10,7 @@ using   std::string, std::cout, std::cin, std::getline,
 int main() {
     cout << "Execution start :)\n\n";
 
-    LinkedList<Student> students = StudentFn::list_from_csv("C:/Users/Javier/Desktop/Javier/Code/uni/compilers-design/linked-list/data/students.csv");
+    LinkedList<Student> students = StudentFn::list_from_csv("C:/Users/Javier/Desktop/Javier/Code/uni/compilers-design/examples/linked-list/data/students.csv");
 
     students.sort([](const Student& a, const Student& b) {
         return a.av_grade < b.av_grade;
@@ -31,11 +31,5 @@ int main() {
         cout << student.first_name << ' ' << student.last_name << " (" << student.av_grade << ")\n";
     }
 
-    cout << '\n' << students[1].first_name << '\n';
-
-    students.obliterate_student(1, "C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/students.csv");
-
-    students[0].write_to_file("C:/Users/Javier/Desktop/Javier/Code/Uni/Dyn_Data_Structures/Lab/Linked_List/data/");
-
-    cout << "Terminating execution... :)\n";
+    cout << "\nTerminating execution... :)\n";
 }

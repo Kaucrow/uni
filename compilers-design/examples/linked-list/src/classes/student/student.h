@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../../linked-list/linked_list.h"
+#include "../../includes.h"
 
 using std::string;
 
@@ -18,6 +18,7 @@ class Student {
             int school_year, char section, int csv_pos
         );
         void write_to_file(const char* out_dir);
+        bool operator == (const Student &other);
 
         int ci;
         string first_name;
