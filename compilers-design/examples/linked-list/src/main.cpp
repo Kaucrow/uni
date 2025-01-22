@@ -16,19 +16,15 @@ int main() {
         return a.av_grade < b.av_grade;
     });
 
-    size_t count = 0;
-    LinkedList<Student> top_10_students;
+    size_t count = 1;
+
     cout << "*** TOP 10 GIGACHADS OF ALL TIME ***\n";
-    for(auto student : students) {
-        if(students.len() - 10 <= count)
-            top_10_students.append(student);
-        else
-            count++;
+    for (auto student : students) {
+        if (students.len() - 10 < count) {
+            cout << count - students.len() + 10 << ". " << student.first_name << " - " << student.av_grade << '\n';
+        }
 
-    }
-
-    for(auto student : top_10_students) {
-        cout << student.first_name << ' ' << student.last_name << " (" << student.av_grade << ")\n";
+        count++;
     }
 
     cout << "\nTerminating execution... :)\n";

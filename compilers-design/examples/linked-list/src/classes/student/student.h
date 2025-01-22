@@ -34,4 +34,5 @@ class Student {
 namespace StudentFn {
     Student from_row(string row, int csv_pos);
     LinkedList<Student> list_from_csv(const char* csvfile_path);
+    void obliterate_student(LinkedList<Student> &list, const size_t idx, const char* csv_path);
 }

@@ -1,7 +1,7 @@
 #include <iostream> // debug
 #include <fstream>
 #include <string>
-#include "../misc/panic.h"
+#include "../../misc/panic.h"
 #include "student.h"
 
 using std::string, std::getline, std::ifstream, std::ofstream;
@@ -38,14 +38,14 @@ namespace StudentFn {
     Student from_row(string row, int csv_pos) {
         Student student;
 
-        LinkedList<string> fields = LinkedListFn::from_row(row);
+        DoublyLinkedList<string> fields = LinkedListFn::from_row(row);
         int field_num = 0;
         try {
             student.ci = stoi(fields[0]);
             student.first_name = fields[1];
             student.last_name = fields[2];
             student.email = fields[3];
-            switch(fields[4][0]) {
+            switch (fields[4][0]) {
                 case 'M': student.gender = Gender::Male; break;
                 case 'F': student.gender = Gender::Female; break;
                 default: throw(nullptr);
@@ -61,13 +61,13 @@ namespace StudentFn {
         return student;
     }
 
-    LinkedList<Student> list_from_csv(const char* csv_path) {
+    DoublyLinkedList<Student> list_from_csv(const char* csv_path) {
         LinkedList<Student> linked_list;
 
         ifstream csvfile;
         try {
             csvfile.open(csv_path);
-            if(!csvfile)
+            if (!csvfile)
                 throw(nullptr);
         } catch(...) {
             panic("[ ERR ] Could not open the .csv file using path \'" + string(csv_path) + "\'.");
@@ -76,9 +76,36 @@ namespace StudentFn {
         string reading_line;
         getline(csvfile, reading_line);
 
-        while(getline(csvfile, reading_line))
+        while (getline(csvfile, reading_line))
             linked_list.append(StudentFn::from_row(reading_line, linked_list.len() + 2));
 
         return linked_list;
+    }
+
+    void obliterate_student(DoublyLinkedList<Student> &list, size_t idx, const char* csv_path) {
+        Student deleted = list.remove(idx);
+        int csv_remove_line = deleted.csv_pos;
+
+        string csv_path_str = string(csv_path);
+        ifstream infile(csv_path_str);
+
+        string tempfile_path = csv_path_str.substr(0, csv_path_str.rfind('/') + 1) + "temp.csv";
+        ofstream tempfile(tempfile_path);
+
+        string reading_line;
+        while (getline(infile, reading_line)) {
+            if (csv_remove_line == 1) {
+                csv_remove_line--;
+                continue;
+            }
+            tempfile << reading_line << '\n';
+            csv_remove_line--;
+        }
+
+        infile.close();
+        tempfile.close();
+        
+        std::remove(csv_path);
+        std::rename(tempfile_path.c_str(), csv_path);
     }
 }

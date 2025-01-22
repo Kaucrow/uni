@@ -12,6 +12,10 @@ using   std::ifstream, std::ofstream, std::getline, std::string,
 //  Declarations
 // ==============
 
+// Forward declaration of DoublyLinkedList
+template <typename T>
+class DoublyLinkedList;
+
 template <typename T>
 struct Node {
     Node(T data);
@@ -37,7 +41,6 @@ class LinkedList {
         void append(T data);
         int find(T data);
         T remove(const size_t idx);
-        void obliterate_student(const size_t idx, const char* csv_path);
         void clear();
         void sort(CompareFn<T> compare_fn = std::less<T>());
         size_t len();
@@ -58,6 +61,7 @@ class LinkedList {
         NodePtr<T> merge(NodePtr<T> left, NodePtr<T> right, CompareFn<T> compare_fn);
         NodePtr<T> head;
         size_t size;
+        friend class DoublyLinkedList<T>;
 };
 
 namespace LinkedListFn {
@@ -100,7 +104,7 @@ inline LinkedList<T>::LinkedList(const LinkedList& other) : head(nullptr), size(
 
 template <typename T>
 inline LinkedList<T>& LinkedList<T>::operator=(const LinkedList& other) {
-    if(this != &other) {
+    if (this != &other) {
         this->clear();
         this->copy_list(other);
     }
@@ -117,12 +121,12 @@ inline T& LinkedList<T>::operator[](const size_t idx) {
     NodePtr<T> current = this->head;
     size_t count = 0;
 
-    while(current && count < idx) {
+    while (current && count < idx) {
         current = current->next;
         count++;
     }
 
-    if(!current) {
+    if (!current) {
         throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
     }
 
@@ -132,7 +136,7 @@ inline T& LinkedList<T>::operator[](const size_t idx) {
 template <typename T>
 inline void LinkedList<T>::copy_list(const LinkedList<T>& other) {
     NodePtr<T> other_current = other.head;
-    while(other_current) {
+    while (other_current) {
         this->append(other_current->data);
         other_current = other_current->next;
     }
@@ -140,7 +144,7 @@ inline void LinkedList<T>::copy_list(const LinkedList<T>& other) {
 
 template <typename T>
 inline void LinkedList<T>::clear() {
-    while(head) {
+    while (head) {
         NodePtr<T> temp = head;
         head = head->next;
         delete temp;
@@ -151,7 +155,7 @@ template <typename T>
 inline int LinkedList<T>::find(T data) {
     NodePtr<T> curr = head;
     int idx = 0;
-    while(curr) {
+    while (curr) {
         if (curr->data == data)
             return idx;
         else {
@@ -167,14 +171,14 @@ inline void LinkedList<T>::append(T data) {
     this->size++;
     NodePtr<T> new_node = new Node<T>(data);
 
-    if(!head) {
+    if (!head) {
         head = new_node;
         return;
     }
 
     NodePtr<T> curr_node = this->head;
 
-    while(curr_node->next) {
+    while (curr_node->next) {
         curr_node = curr_node->next;
     }
 
@@ -188,17 +192,17 @@ inline T LinkedList<T>::remove(const size_t idx) {
     NodePtr<T> current = this->head;
     size_t count = 0;
 
-    while(current && count < idx) {
+    while (current && count < idx) {
         previous = current;
         current = current->next;
         count++;
     }
 
-    if(!current) {
+    if (!current) {
         throw std::out_of_range("[ ERR ] Linked list index out of bounds.");
     }
 
-    if(previous)
+    if (previous)
         previous->next = current->next;
     else
         this->head = current->next;
@@ -222,7 +226,7 @@ inline void LinkedList<T>::sort(CompareFn<T> compare_fn) {
 
 template <typename T>
 inline NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head, CompareFn<T> compare_fn) {
-    if(!head || !head->next) {
+    if (!head || !head->next) {
         return head;
     }
 
@@ -245,14 +249,14 @@ inline NodePtr<T> LinkedList<T>::merge_sort(NodePtr<T> head, CompareFn<T> compar
 
 template <typename T>
 inline NodePtr<T> LinkedList<T>::merge(NodePtr<T> left, NodePtr<T> right, CompareFn<T> compare_fn) {
-    if(!left) {
+    if (!left) {
         return right;
     }
-    if(!right) {
+    if (!right) {
         return left;
     }
 
-    if(compare_fn(left->data, right->data)) {
+    if (compare_fn(left->data, right->data)) {
         left->next = merge(left->next, right, compare_fn);
         return left;
     } else {
@@ -267,7 +271,7 @@ namespace LinkedListFn {
         size_t field_start = 0;
         size_t field_end = row.find(',');
 
-        while(field_end != string::npos) {
+        while (field_end != string::npos) {
             linked_list.append(row.substr(field_start, field_end - field_start));
             field_start = field_end + 1;
             field_end = row.find(',', field_start);
@@ -287,7 +291,7 @@ LinkedList<T>::Iterator::Iterator(NodePtr<T> start) : current(start) {}
 
 template <typename T>
 typename LinkedList<T>::Iterator& LinkedList<T>::Iterator::operator++() {
-    if(current) {
+    if (current) {
         current = current->next;
     }
     return *this;

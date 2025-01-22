@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../linked-list/linked_list.h"
+#include "../../../../../doubly-linked-list/src/doubly-linked-list/doubly_linked_list.h"
 
 using std::string;
 
@@ -32,5 +32,6 @@ class Student {
 
 namespace StudentFn {
     Student from_row(string row, int csv_pos);
-    LinkedList<Student> list_from_csv(const char* csvfile_path);
+    void obliterate_student(DoublyLinkedList<Student> &list, size_t idx, const char* csv_path);
+    DoublyLinkedList<Student> list_from_csv(const char* csvfile_path);
 }
