@@ -70,6 +70,11 @@ bin/*
 test/test_runner
 
 # ==========
+# Rust 
+# ==========
+**/target
+
+# ==========
 # VSCode
 # ==========
 
