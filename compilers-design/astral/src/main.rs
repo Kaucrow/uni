@@ -1,5 +1,5 @@
-use lexical_analyzer::prelude::*;
-use lexical_analyzer::settings::{ self, Settings };
+use astral::prelude::*;
+use astral::settings::{ self, Settings };
 use anyhow::Result;
 
 fn main() -> Result<()> {
@@ -55,7 +55,27 @@ fn main() -> Result<()> {
         tokens_list.push(line_tokens);
     }
 
-    println!("{:?}", tokens_list);
+    let mut pda = syntax::PDA::new();
+
+    pda.build();
+
+    let mut ast = syntax::Tree::new();
+
+    for line in tokens_list {
+        for token in line {
+            pda.transition(&token, &mut ast).or_else(|err| {
+                println!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
+                println!();
+                bail!(format!("{:#?} State: {}, Input: {:?}, Stack: {:?}", err, pda.state, token, pda.stack));
+            })?;
+        }
+    }
+
+    /*pda.transition(tokens_list.first().unwrap().first().unwrap())?;
+    pda.transition(tokens_list.first().unwrap().get(1).unwrap())?;
+    pda.transition(tokens_list.first().unwrap().get(2).unwrap())?;
+    pda.transition(tokens_list.get(2).unwrap().get(0).unwrap())?;
+    */
 
     Ok(())
 }

@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum TokenType {
     Keyword,
+    DataType,
     Identifier,
     Symbol,
     Operator,
@@ -14,8 +15,6 @@ pub enum TokenType {
 pub const KEYWORDS: Lazy<HashSet<&'static str>> = Lazy::new(|| HashSet::from([
     // Variables
     "var",
-    // Data types
-    "integer", "string", "char", "boolean",
     // Flow control
     "begin", "end",
     // Metadata
@@ -25,6 +24,7 @@ pub const KEYWORDS: Lazy<HashSet<&'static str>> = Lazy::new(|| HashSet::from([
 ]));
 
 pub const LEX_DICT: Lazy<Vec<(TokenType, Regex)>> = Lazy::new(|| vec![
+    (TokenType::DataType, Regex::new(r"\b(?:integer|string|char|boolean)\b").unwrap()),
     (TokenType::Identifier, Regex::new(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b").unwrap()),
     (TokenType::Symbol, Regex::new(r":=|[();:,.]").unwrap()),
     (TokenType::Operator, Regex::new(r"(:=|[+\-*/])").unwrap()),
