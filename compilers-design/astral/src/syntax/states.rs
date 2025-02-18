@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use super::{
-    Mode, Action, Id, Node, StackType, Transition, TreeAction, PDA
-};
+use super::*;
 
 impl PDA {
     pub fn build(&mut self) {
@@ -300,7 +298,7 @@ impl PDA {
                     to_state: "q_expression",
                     action: Some(vec![
                         Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Return)))),
-                        Action::SwitchMode(Mode::Expr),
+                        Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
                     ]),
                     input: (TokenType::Symbol, Some(":=")),
                     cmp_stack: false,

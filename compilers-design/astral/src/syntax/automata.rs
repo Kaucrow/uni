@@ -55,7 +55,7 @@ impl StackElem {
 #[derive(Clone)]
 pub enum Mode {
     Normal,
-    Expr,
+    Expr(Box<ExprHelper>),
 }
 
 pub enum Action {
@@ -93,6 +93,25 @@ impl Transition {
     }
 }
 
+#[derive(Clone)]
+pub struct ExprHelper {
+    pub output: Vec<String>,
+    pub operators: Vec<String>,
+    pub arg_count: Vec<usize>,
+    pub ident_found: Option<String>,
+}
+
+impl ExprHelper {
+    pub fn new() -> Self {
+        Self {
+            output: Vec::new(),
+            operators: Vec::new(),
+            arg_count: Vec::new(),
+            ident_found: None,
+        }
+    }
+}
+
 pub struct PDA {
     pub state: &'static str,
     mode: Mode,
@@ -116,7 +135,7 @@ impl PDA {
 
     pub fn transition(&mut self, input: &(TokenType, String), tree: &mut Tree) -> Result<()> {
         
-        match self.mode {
+        match &mut self.mode {
             Mode::Normal => {
                 let transition = {
                     let transitions = self.states.get(self.state).ok_or(
@@ -206,10 +225,96 @@ impl PDA {
 
                 self.state = transition.to_state;
             }
-            Mode::Expr => {
-                bail!("expr mode is not yet implemented lol")
+            Mode::Expr(helper) => {
+                Self::parse_expression(helper, input, ';')?;
             }
         }
+
+        Ok(())
+    }
+
+    pub fn parse_expression(helper: &mut Box<ExprHelper>, input: &(TokenType, String), eof: char) -> Result<()> {
+        // Determines operator precedence
+        fn precedence(op: &str) -> i32 {
+            match op {
+                "+" | "-" => 1, // Lowest precedence
+                "*" | "/" => 2, // Higher precedence
+                _ => 0,         // Default case
+            }
+        }
+        let token_type = &input.0;
+        let value = &input.1;
+        
+        let output = &mut helper.output;
+        let operators = &mut helper.operators;
+        let arg_count = &mut helper.arg_count;
+
+        match token_type {
+            TokenType::Number => output.push(value.clone()),
+
+            TokenType::Identifier => helper.ident_found = Some(value.clone()),
+
+            TokenType::Symbol if value == "(" => {
+                // If a function identifier is stored
+                if let Some(function) = &helper.ident_found {
+                    operators.push(function.clone());
+                    operators.push(value.clone());
+                    arg_count.push(1);  // Initialize argument count
+                } else {
+                    operators.push(value.clone());
+                }
+            }
+
+            TokenType::Symbol if value == "," => {
+                while let Some(top) = operators.last() {
+                    // Pop until we find a left parenthesis
+                    if !matches!(top.as_str(), "(") {
+                        output.push(operators.pop().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+                // Increase argument count
+                if let Some(last) = arg_count.last_mut() {
+                    *last += 1;
+                }
+            }
+
+            TokenType::Symbol if matches!(value.as_str(), "+" | "-" | "*" | "/") => {
+                while let Some(top) = operators.last() {
+                    if matches!(top.as_str(), "+" | "-" | "*" | "/") {
+                        if precedence(top) >= precedence(value) {
+                            output.push(operators.pop().unwrap());  // Pop higher precedence ops
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                operators.push(value.clone());
+            }
+
+            // Right parenthesis triggers popping until left parenthesis is found
+            TokenType::Symbol if value == ")" => {
+                while let Some(top) = operators.last() {
+                    if !matches!(top.as_str(), "(") {
+                        output.push(operators.pop().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+                operators.pop();    // Remove '(' from stack
+
+                // If a function is on top, pop it to output
+                todo!()
+                //if let Some(TokenType::Identifier) = operators
+            }
+
+            _ => todo!()
+        }
+
+        helper.ident_found = None;
 
         Ok(())
     }
