@@ -2,9 +2,10 @@ use crate::prelude::*;
 use super::*;
 
 impl PDA {
-    pub fn build(&mut self) {
+    pub fn add_normal_states(&mut self) {
         self.add_state(
             "q_start",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_identifier",
@@ -19,6 +20,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_identifier",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_semicolon",
@@ -37,6 +39,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_semicolon",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_var_decl",
@@ -75,6 +78,7 @@ impl PDA {
 
         self.add_state(
             "q_declarations",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_var_decl",
@@ -112,6 +116,7 @@ impl PDA {
 
         self.add_state(
             "q_var_decl",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_colon",
@@ -138,6 +143,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_colon",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_datatype",
@@ -152,6 +158,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_datatype",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_semicolon",
@@ -200,6 +207,7 @@ impl PDA {
 
         self.add_state(
             "q_func_decl",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_lparen",
@@ -218,6 +226,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_lparen",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_func_params",
@@ -234,6 +243,7 @@ impl PDA {
 
         self.add_state(
             "q_func_params",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_colon",
@@ -248,6 +258,7 @@ impl PDA {
 
         self.add_state(
             "q_func_params_end",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_func_params",
@@ -272,6 +283,7 @@ impl PDA {
 
         self.add_state(
             "q_exp_begin",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_neutral",
@@ -286,6 +298,7 @@ impl PDA {
 
         self.add_state(
             "q_neutral",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_exp_assignment",
@@ -311,9 +324,10 @@ impl PDA {
 
         self.add_state(
             "q_exp_assignment",
+            ModeProto::Normal,
             vec![
                 Transition {
-                    to_state: "q_expression",
+                    to_state: "q_exp_value",
                     action: Some(vec![
                         Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Return)))),
                         Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
@@ -324,7 +338,7 @@ impl PDA {
                     push_stack: Some(StackType::Returned),
                 },
                 Transition {
-                    to_state: "q_expression",
+                    to_state: "q_exp_value",
                     action: Some(vec![
                         Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
                     ]),
@@ -338,6 +352,7 @@ impl PDA {
 
         self.add_state(
             "q_expression",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_func_ended",
@@ -360,6 +375,7 @@ impl PDA {
 
         self.add_state(
             "q_func_ended",
+            ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_declarations",

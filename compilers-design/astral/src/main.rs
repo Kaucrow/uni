@@ -115,7 +115,7 @@ fn main() -> Result<()> {
             pda.transition(&token, &mut ast).or_else(|err| {
                 println!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
                 println!();
-                bail!(format!("{:#?} State: {}, Input: {:?}, Stack: {:?}", err, pda.state, token, pda.stack));
+                bail!(format!("{:#?} Mode: {:?}, State: {}, Input: {:?}, Stack: {:?}", err, pda.mode, pda.state, token, pda.stack));
             })?;
         }
     }
