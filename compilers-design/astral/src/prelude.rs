@@ -1,5 +1,5 @@
 pub use crate::constants::*;
-//pub use crate::syntax;
+pub use crate::syntax;
 pub use std::{
     fs::File,
     io::{ self, BufRead },

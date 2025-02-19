@@ -4,10 +4,10 @@ use anyhow::Result;
 
 #[derive(Debug)]
 pub enum StackElem {
-    Func(String),
     FuncParams,
     FuncReturn,
-    Proc(String),
+    ExpReturn(String),
+    Returned,
     VarBegun,
     VarCanExit,
     Main,
@@ -15,25 +15,31 @@ pub enum StackElem {
 
 #[derive(PartialEq)]
 pub enum StackType {
-    Func,
     FuncParams,
     FuncReturn,
-    Proc,
+    ExpReturn,
+    Returned,
     VarBegun,
     VarCanExit,
     Main,
 }
 
 impl StackType {
-    fn to_stack_elem(&self, input: &(TokenType, String)) -> StackElem {
+    fn to_stack_elem(&self, token: Token) -> Result<StackElem> {
         match self {
-            Self::Func => StackElem::Func(input.1.clone()),
-            Self::FuncParams => StackElem::FuncParams,
-            Self::FuncReturn => StackElem::FuncReturn,
-            Self::Proc => StackElem::Proc(input.1.clone()),
-            Self::VarBegun => StackElem::VarBegun,
-            Self::VarCanExit => StackElem::VarCanExit,
-            Self::Main => StackElem::Main,
+            Self::FuncParams => Ok(StackElem::FuncParams),
+            Self::FuncReturn => Ok(StackElem::FuncReturn),
+            Self::ExpReturn => {
+                if let Token::FuncIdent(val) = token {
+                    Ok(StackElem::ExpReturn(val))
+                } else {
+                    bail!(format!("Cannot build an ExpReturn stack element from token: {:?}", token))
+                }
+            }
+            Self::Returned => Ok(StackElem::Returned),
+            Self::VarBegun => Ok(StackElem::VarBegun),
+            Self::VarCanExit => Ok(StackElem::VarCanExit),
+            Self::Main => Ok(StackElem::Main),
         }
     }
 }
@@ -41,13 +47,13 @@ impl StackType {
 impl StackElem {
     fn to_stacktype(&self) -> StackType {
         match self {
-            StackElem::Func(_) => StackType::Func,
-            StackElem::FuncParams => StackType::FuncParams,
-            StackElem::FuncReturn => StackType::FuncReturn,
-            StackElem::Proc(_) => StackType::Proc,
-            StackElem::VarBegun => StackType::VarBegun,
-            StackElem::VarCanExit => StackType::VarCanExit,
-            StackElem::Main => StackType::Main,
+            Self::FuncParams => StackType::FuncParams,
+            Self::FuncReturn => StackType::FuncReturn,
+            Self::ExpReturn(_) => StackType::ExpReturn,
+            Self::Returned => StackType::Returned,
+            Self::VarBegun => StackType::VarBegun,
+            Self::VarCanExit => StackType::VarCanExit,
+            Self::Main => StackType::Main,
         }
     }
 }
@@ -66,39 +72,18 @@ pub enum Action {
 pub struct Transition {
     pub to_state: &'static str,
     pub action: Option<Vec<Action>>,
-    pub input: (TokenType, Option<&'static str>),
-    pub cmp_stack: bool,
+    pub input: TokenProto,
+    pub cmp_stack: Option<StackType>,
     pub pop_stack: Option<StackType>,
     pub push_stack: Option<StackType>,
 }
 
-impl Transition {
-    pub fn new(
-        to_state: &'static str,
-        action: Option<Vec<Action>>,
-        input: (TokenType, Option<&'static str>),
-        cmp_stack: bool,
-        pop_stack: Option<StackType>,
-        push_stack: Option<StackType>,
-    ) -> Self
-    {
-        Self {
-            to_state,
-            action,
-            input,
-            cmp_stack,
-            pop_stack,
-            push_stack,
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct ExprHelper {
-    pub output: Vec<String>,
-    pub operators: Vec<String>,
+    pub output: Vec<Token>,
+    pub operators: Vec<Token>,
     pub arg_count: Vec<usize>,
-    pub ident_found: Option<String>,
+    pub arg_count_final: Vec<usize>,
 }
 
 impl ExprHelper {
@@ -107,7 +92,7 @@ impl ExprHelper {
             output: Vec::new(),
             operators: Vec::new(),
             arg_count: Vec::new(),
-            ident_found: None,
+            arg_count_final: Vec::new(),
         }
     }
 }
@@ -133,8 +118,8 @@ impl PDA {
         self.states.insert(name, transitions);
     }
 
-    pub fn transition(&mut self, input: &(TokenType, String), tree: &mut Tree) -> Result<()> {
-        
+    pub fn transition(&mut self, input: &Token, tree: &mut Tree) -> Result<()> {
+
         match &mut self.mode {
             Mode::Normal => {
                 let transition = {
@@ -146,8 +131,7 @@ impl PDA {
                     let mut transition_ret: Option<&Transition> = None;
 
                     for transition in transitions {
-                        if transition.input.0 == input.0
-                        && (transition.input.1.is_none() || transition.input.1 == Some(input.1.as_str())) {
+                        if transition.input == input.proto() {
                             let stack_matches = match transition.pop_stack.as_ref() {
                                 Some(transition_pop) => next_stack
                                     .as_ref()
@@ -156,15 +140,23 @@ impl PDA {
                             };
 
                             if stack_matches {
-                                if transition.cmp_stack {
-                                    match next_stack {
-                                        Some(StackElem::Func(name)) => if *name != input.1 {
-                                            bail!("Bad function return.");
-                                        },
-                                        Some(StackElem::Proc(name)) => if *name != input.1 {
-                                            bail!("Bad process return.");
-                                        },
-                                        _ => bail!("A stack comparison does not make sense in this context."),
+                                if transition.cmp_stack.is_some() {
+                                    let mut cmp_succeed = false;
+
+                                    if matches!(transition.cmp_stack, Some(StackType::ExpReturn)) {
+                                        if let Token::Identifier(val) = input {
+                                            if let Some(StackElem::ExpReturn(exp_return)) = self.stack.last() {
+                                                if exp_return == val {
+                                                    cmp_succeed = true;
+                                                }
+                                            } else {
+                                                bail!("Stack contains no elements");
+                                            }
+                                        }
+                                    }
+
+                                    if !cmp_succeed {
+                                        continue;
                                     }
                                 }
 
@@ -203,7 +195,7 @@ impl PDA {
                                         if let Some(value) = node {
                                             unimplemented!("append child with defined value");
                                         } else {
-                                            tree.append_child(Node::Val(input.1.clone()))?;
+                                            tree.append_child(Node::Val(input.clone()))?;
                                         }
                                     }
                                     TreeAction::GoUp => {
@@ -219,7 +211,7 @@ impl PDA {
                     if let Some(popped) = popped.filter(|p| *stack_type == p.to_stacktype()) {
                         self.stack.push(popped);
                     } else {
-                        self.stack.push(stack_type.to_stack_elem(input));
+                        self.stack.push(stack_type.to_stack_elem(input.clone())?);
                     }
                 }
 
@@ -233,7 +225,7 @@ impl PDA {
         Ok(())
     }
 
-    pub fn parse_expression(helper: &mut Box<ExprHelper>, input: &(TokenType, String), eof: char) -> Result<()> {
+    pub fn parse_expression(helper: &mut Box<ExprHelper>, input: &Token, eof: char) -> Result<()> {
         // Determines operator precedence
         fn precedence(op: &str) -> i32 {
             match op {
@@ -242,33 +234,23 @@ impl PDA {
                 _ => 0,         // Default case
             }
         }
-        let token_type = &input.0;
-        let value = &input.1;
         
         let output = &mut helper.output;
         let operators = &mut helper.operators;
         let arg_count = &mut helper.arg_count;
 
-        match token_type {
-            TokenType::Number => output.push(value.clone()),
+        match input {
+            Token::Number(_) | Token::Identifier(_) => output.push(input.clone()),
 
-            TokenType::Identifier => helper.ident_found = Some(value.clone()),
-
-            TokenType::Symbol if value == "(" => {
-                // If a function identifier is stored
-                if let Some(function) = &helper.ident_found {
-                    operators.push(function.clone());
-                    operators.push(value.clone());
-                    arg_count.push(1);  // Initialize argument count
-                } else {
-                    operators.push(value.clone());
-                }
+            Token::FuncCall(name) => {
+                operators.push(Token::FuncCall(name.clone()));
+                arg_count.push(1);  // Initialize argument count
             }
 
-            TokenType::Symbol if value == "," => {
+            Token::Comma => {
                 while let Some(top) = operators.last() {
                     // Pop until we find a left parenthesis
-                    if !matches!(top.as_str(), "(") {
+                    if !matches!(top, Token::LParen) {
                         output.push(operators.pop().unwrap());
                     } else {
                         break;
@@ -280,25 +262,23 @@ impl PDA {
                 }
             }
 
-            TokenType::Symbol if matches!(value.as_str(), "+" | "-" | "*" | "/") => {
-                while let Some(top) = operators.last() {
-                    if matches!(top.as_str(), "+" | "-" | "*" | "/") {
-                        if precedence(top) >= precedence(value) {
-                            output.push(operators.pop().unwrap());  // Pop higher precedence ops
-                        } else {
-                            break;
-                        }
+            Token::Operator(op) => {
+                while let Some(&Token::Operator(top_op)) = operators.last().as_ref() {
+                    if precedence(&top_op) >= precedence(op) {
+                        output.push(operators.pop().unwrap());  // Pop higher precedence ops
                     } else {
                         break;
                     }
                 }
-                operators.push(value.clone());
+                operators.push(Token::Operator(op.clone()));
             }
 
+            Token::LParen => operators.push(Token::LParen),
+
             // Right parenthesis triggers popping until left parenthesis is found
-            TokenType::Symbol if value == ")" => {
+            Token::RParen => {
                 while let Some(top) = operators.last() {
-                    if !matches!(top.as_str(), "(") {
+                    if !matches!(top, Token::LParen) {
                         output.push(operators.pop().unwrap());
                     } else {
                         break;
@@ -307,14 +287,31 @@ impl PDA {
                 operators.pop();    // Remove '(' from stack
 
                 // If a function is on top, pop it to output
-                todo!()
-                //if let Some(TokenType::Identifier) = operators
+                if let Some(Token::FuncCall(name)) = operators.last().cloned() {
+                    let arg_count = arg_count.pop().unwrap_or(1);
+                    output.push(Token::FuncCall(name));
+                    helper.arg_count_final.push(arg_count);
+                    operators.pop();
+                }
             }
 
-            _ => todo!()
-        }
+            // A semicolon indicates the end of the expression
+            Token::Semicolon => {
+                while let Some(op) = operators.pop() {
+                    output.push(op);
+                }
 
-        helper.ident_found = None;
+                for token in output {
+                    println!("{:?}", token);
+                }
+
+                println!("{:?}", helper.arg_count_final);
+
+                todo!("Expression AST build");
+            }
+
+            _ => bail!(format!("Unexpected token found in expression: {:?}", input)),
+        }
 
         Ok(())
     }

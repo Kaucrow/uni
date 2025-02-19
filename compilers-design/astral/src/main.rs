@@ -104,9 +104,6 @@ fn main() -> Result<()> {
 
     println!("{:?}", tokens_list);
 
-    panic!();
-
-    /*
     let mut pda = syntax::PDA::new();
 
     pda.build();
@@ -122,7 +119,6 @@ fn main() -> Result<()> {
             })?;
         }
     }
-    */
 
     /*pda.transition(tokens_list.first().unwrap().first().unwrap())?;
     pda.transition(tokens_list.first().unwrap().get(1).unwrap())?;

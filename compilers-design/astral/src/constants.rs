@@ -57,9 +57,9 @@ pub enum Token {
     Dot,
     // Other
     Identifier(String),
-    Number,
-    String,
-    Comment,
+    Number(String),
+    String(String),
+    Comment(String),
 }
 
 impl TokenProto {
@@ -85,9 +85,39 @@ impl TokenProto {
             TokenProto::Comma => Token::Comma,
             TokenProto::Dot => Token::Dot,
             TokenProto::Identifier => Token::Identifier(input),
-            TokenProto::Number => Token::Number,
-            TokenProto::String => Token::String,
-            TokenProto::Comment => Token::Comment,
+            TokenProto::Number => Token::Number(input),
+            TokenProto::String => Token::String(input),
+            TokenProto::Comment => Token::Comment(input),
+        }
+    }
+}
+
+impl Token {
+    pub fn proto(&self) -> TokenProto {
+        match self {
+            Token::Var => TokenProto::Var,
+            Token::Begin => TokenProto::Begin,
+            Token::End => TokenProto::End,
+            Token::Program => TokenProto::Program,
+            Token::Proc => TokenProto::Proc,
+            Token::ProcIdent(_) => TokenProto::ProcIdent,
+            Token::Func => TokenProto::Func,
+            Token::FuncIdent(_) => TokenProto::FuncIdent,
+            Token::FuncCall(_) => TokenProto::FuncCall,
+            Token::DataType(_) => TokenProto::DataType,
+            Token::BuiltinFunc(_) => TokenProto::BuiltinFunc,
+            Token::LParen => TokenProto::LParen,
+            Token::RParen => TokenProto::RParen,
+            Token::Assignment => TokenProto::Assignment,
+            Token::Operator(_) => TokenProto::Operator,
+            Token::Semicolon => TokenProto::Semicolon,
+            Token::Colon => TokenProto::Colon,
+            Token::Comma => TokenProto::Comma,
+            Token::Dot => TokenProto::Dot,
+            Token::Identifier(_) => TokenProto::Identifier,
+            Token::Number(_) => TokenProto::Number,
+            Token::String(_) => TokenProto::String,
+            Token::Comment(_) => TokenProto::Comment,
         }
     }
 }

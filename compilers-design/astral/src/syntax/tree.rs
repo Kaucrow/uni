@@ -4,7 +4,7 @@ use anyhow::Result;
 #[derive(Debug, Clone)]
 pub enum Node {
     Id(Id),
-    Val(String),
+    Val(Token),
 }
 
 //type Node = (Option<NodeType>, String);
