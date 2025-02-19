@@ -5,7 +5,7 @@ var
 
 function sum(x: integer; y: integer): integer;
 begin
-    sum := x + y;
+    sum := (x + y) * 4 - sum(sum(3, 5), 1);
 end;
 
 begin
