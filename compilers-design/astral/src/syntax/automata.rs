@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use super::{ TreeAction, Tree, Node };
+use super::{ TreeAction, Tree, Node, ProgressResult };
 use anyhow::Result;
 
 #[derive(Debug)]
@@ -218,7 +218,9 @@ impl PDA {
                 self.state = transition.to_state;
             }
             Mode::Expr(helper) => {
-                Self::parse_expression(helper, input, tree)?;
+                if let ProgressResult::Ok = Self::parse_expression(helper, input, tree)? {
+                    self.mode = Mode::Normal;
+                }
             }
         }
 

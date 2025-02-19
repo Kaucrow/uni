@@ -2,16 +2,16 @@ use crate::prelude::*;
 use super::*;
 use anyhow::Result;
 
-enum ShuntingYardResult {
+pub enum ProgressResult {
     Ok,
     Continue,
 }
 
 impl PDA {
-    pub fn parse_expression(helper: &mut Box<ExprHelper>, input: &Token, ast: &mut Tree) -> Result<()> {
+    pub fn parse_expression(helper: &mut Box<ExprHelper>, input: &Token, ast: &mut Tree) -> Result<ProgressResult> {
         match Self::shunting_yard(helper, input)? {
-            ShuntingYardResult::Continue => Ok(()),
-            ShuntingYardResult::Ok => {
+            ProgressResult::Continue => Ok(ProgressResult::Continue),
+            ProgressResult::Ok => {
                 let (expr_tree, root) = Self::build_expression_ast(helper)?;
 
                 let mut index_map = Vec::new();
@@ -32,16 +32,12 @@ impl PDA {
 
                 ast.data.add_edge(ast.curr_node.unwrap(), new_root, ());
 
-                println!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
-
-                todo!("Return to normal mode after expression parsing");
-
-                Ok(())
+                Ok(ProgressResult::Ok)
             }
         }
     }
 
-    fn shunting_yard(helper: &mut Box<ExprHelper>, input: &Token) -> Result<ShuntingYardResult> {
+    fn shunting_yard(helper: &mut Box<ExprHelper>, input: &Token) -> Result<ProgressResult> {
         // Determines operator precedence
         fn precedence(op: &str) -> i32 {
             match op {
@@ -123,13 +119,13 @@ impl PDA {
 
                 println!("{:?}", helper.arg_count_final);
 
-                return Ok(ShuntingYardResult::Ok)
+                return Ok(ProgressResult::Ok)
             }
 
             _ => bail!(format!("Unexpected token found in expression: {:?}", input)),
         }
 
-        Ok(ShuntingYardResult::Continue)
+        Ok(ProgressResult::Continue)
     }
 
     fn build_expression_ast(helper: &mut Box<ExprHelper>) -> Result<(DiGraph<Token, ()>, NodeIndex)> {
