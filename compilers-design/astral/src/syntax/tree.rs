@@ -23,8 +23,9 @@ pub enum Id {
     Return,
     Main,
     Assign,
-    Call,
     Writeln,
+    If,
+    Else,
 }
 
 pub enum TreeAction {
@@ -44,16 +45,6 @@ impl Tree {
             curr_node: None,
             data: DiGraph::new(),
         }
-
-        /*
-        let program = ast.add_node("Program");
-        ast.add_edge(main_block, print_statement, ());
-
-        // Export the AST to a DOT file
-        let dot_output = format!("{:#?}", Dot::with_config(&ast, &[Config::EdgeNoLabel]));
-
-        println!("{}", dot_output);
-        */
     }
 
     pub fn add_node(&mut self, value: Node) {

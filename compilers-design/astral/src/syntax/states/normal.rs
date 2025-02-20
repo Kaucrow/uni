@@ -293,13 +293,23 @@ impl PDA {
             "q_exp_begin",
             ModeProto::Normal,
             vec![
+                // Func declaration begin
                 Transition {
                     to_state: "q_neutral",
                     action: Some(vec![Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Body))))]),
                     input: TokenProto::Begin,
                     cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
+                    pop_stack: Some(StackType::ExpReturn),
+                    push_stack: Some(StackType::ExpReturn),
+                },
+                // "If" begin
+                Transition {
+                    to_state: "q_neutral",
+                    action: None,
+                    input: TokenProto::Begin,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::If),
+                    push_stack: Some(StackType::If),
                 }
             ]
         );
@@ -339,6 +349,29 @@ impl PDA {
                     input: TokenProto::Identifier,
                     cmp_stack: Some(StackType::ExpReturn),
                     pop_stack: Some(StackType::ExpReturn),
+                    push_stack: None,
+                },
+                // If
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::If)))),
+                        Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
+                    ]),
+                    input: TokenProto::If,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: Some(StackType::If),
+                },
+                // "If" end
+                Transition {
+                    to_state: "q_neutral",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
+                    ]),
+                    input: TokenProto::End,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::If),
                     push_stack: None,
                 },
                 // Assignment

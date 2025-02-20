@@ -15,6 +15,7 @@ pub enum StackElem {
     VarCanExit,
     Declarations,
     Main,
+    If,
     // Expression parsing
     LParen,
     Func,
@@ -33,6 +34,7 @@ pub enum StackType {
     VarCanExit,
     Declarations,
     Main,
+    If,
     // Expression parsing
     LParen,
     Func,
@@ -57,6 +59,7 @@ impl StackType {
             Self::VarCanExit => Ok(StackElem::VarCanExit),
             Self::Declarations => Ok(StackElem::Declarations),
             Self::Main => Ok(StackElem::Main),
+            Self::If => Ok(StackElem::If),
             Self::LParen => Ok(StackElem::LParen),
             Self::Func => Ok(StackElem::Func),
             Self::Writeln => Ok(StackElem::Writeln),
@@ -75,6 +78,7 @@ impl StackElem {
             Self::VarCanExit => StackType::VarCanExit,
             Self::Declarations => StackType::Declarations,
             Self::Main => StackType::Main,
+            Self::If => StackType::If,
             Self::LParen => StackType::LParen,
             Self::Func => StackType::Func,
             Self::Writeln => StackType::Writeln,

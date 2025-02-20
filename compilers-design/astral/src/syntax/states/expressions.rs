@@ -55,6 +55,7 @@ impl PDA {
             "q_got_value",
             ModeProto::Expr,
             vec![
+                // Operators
                 Transition {
                     to_state: "q_exp_value",
                     action: Some(vec![
@@ -68,6 +69,37 @@ impl PDA {
                 Transition {
                     to_state: "q_exp_value",
                     action: Some(vec![
+                        Action::ParseExpr(operator)
+                    ]),
+                    input: TokenProto::Comparison,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::ParseExpr(operator)
+                    ]),
+                    input: TokenProto::LogicalAnd,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::ParseExpr(operator)
+                    ]),
+                    input: TokenProto::LogicalOr,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                // Comma
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
                         Action::ParseExpr(comma)
                     ]),
                     input: TokenProto::Comma,
@@ -75,6 +107,7 @@ impl PDA {
                     pop_stack: Some(StackType::Func),
                     push_stack: Some(StackType::Func),
                 },
+                // RParen
                 Transition {
                     to_state: "q_got_value",
                     action: Some(vec![
@@ -117,6 +150,19 @@ impl PDA {
                         Action::Tree(TreeAction::GoUp),
                     ]),
                     input: TokenProto::Semicolon,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                // "If" expression end
+                Transition {
+                    to_state: "q_exp_begin",
+                    action: Some(vec![
+                        Action::ParseExpr(expression_end),
+                        Action::ParseExpr(build_expr_tree),
+                        Action::SwitchMode(Mode::Normal),
+                    ]),
+                    input: TokenProto::Then,
                     cmp_stack: None,
                     pop_stack: None,
                     push_stack: None,
@@ -183,8 +229,12 @@ impl PDA {
 // Determines operator precedence
 fn precedence(op: &str) -> i32 {
     match op {
-        "+" | "-" => 1, // Lowest precedence
-        "*" | "/" => 2, // Higher precedence
+        "||" => 1, // Lowest precedence
+        "&&" => 2,
+        "=" | "<>" => 3,
+        "<" | "<=" | ">" | ">=" => 4,
+        "+" | "-" => 5,
+        "*" | "/" => 6, // Highest precedence
         _ => 0,         // Default case
     }
 }
@@ -205,18 +255,21 @@ fn operator(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result
     let output = &mut helper.output;
     let operators = &mut helper.operators;
 
-    if let Token::Operator(op) = input {
-        while let Some(&Token::Operator(top_op)) = operators.last().as_ref() {
-            if precedence(&top_op) >= precedence(op) {
-                output.push(operators.pop().unwrap()); // Pop higher precedence ops
-            } else {
-                break;
-            }
+    let op = match input {
+        Token::Operator(op) | Token::Comparison(op) => op,
+        Token::LogicalAnd => "&&",
+        Token::LogicalOr => "||",
+        _ => bail!("Tried to parse as an operator: {:?}", input)
+    };
+
+    while let Some(&Token::Operator(top_op)) = operators.last().as_ref() {
+        if precedence(&top_op) >= precedence(op) {
+            output.push(operators.pop().unwrap()); // Pop higher precedence ops
+        } else {
+            break;
         }
-        operators.push(Token::Operator(op.clone()));
-    } else {
-        bail!(format!("Tried to parse as an operator: {:?}", input))
     }
+    operators.push(input.clone());
 
     Ok(())
 }
@@ -327,7 +380,7 @@ fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree) -> R
             Token::Identifier(_) => stack.push(tree.add_node(token.clone())),   // Create variable node
 
             // If token is an operator, pop two operands and create an operator node
-            Token::Operator(_) => {
+            Token::Operator(_) | Token::Comparison(_) | Token::LogicalAnd | Token::LogicalOr => {
                 let right = stack.pop().expect("Right operand missing");
                 let left = stack.pop().expect("Left operand missing");
 
