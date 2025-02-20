@@ -70,6 +70,14 @@ impl PDA {
                     action: Some(vec![Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Declarations))))]),
                     input: TokenProto::Semicolon,
                     cmp_stack: None,
+                    pop_stack: Some(StackType::Declarations),
+                    push_stack: Some(StackType::Declarations),
+                },
+                Transition {
+                    to_state: "q_neutral",
+                    action: None,
+                    input: TokenProto::Semicolon,
+                    cmp_stack: None,
                     pop_stack: None,
                     push_stack: None,
                 },
@@ -310,6 +318,15 @@ impl PDA {
                     cmp_stack: None,
                     pop_stack: Some(StackType::If),
                     push_stack: Some(StackType::If),
+                },
+                // "Else" begin
+                Transition {
+                    to_state: "q_neutral",
+                    action: None,
+                    input: TokenProto::Begin,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Else),
+                    push_stack: Some(StackType::Else),
                 }
             ]
         );
@@ -365,13 +382,23 @@ impl PDA {
                 },
                 // "If" end
                 Transition {
-                    to_state: "q_neutral",
+                    to_state: "q_if_ended",
+                    action: None,
+                    input: TokenProto::End,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::If),
+                    push_stack: Some(StackType::If),
+                },
+                // "Else" end
+                Transition {
+                    to_state: "q_exp_semicolon",
                     action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
                         Action::Tree(TreeAction::GoUp),
                     ]),
                     input: TokenProto::End,
                     cmp_stack: None,
-                    pop_stack: Some(StackType::If),
+                    pop_stack: Some(StackType::Else),
                     push_stack: None,
                 },
                 // Assignment
@@ -500,6 +527,33 @@ impl PDA {
                     cmp_stack: None,
                     pop_stack: Some(StackType::Writeln),
                     push_stack: Some(StackType::LParen),
+                }
+            ]
+        );
+
+        self.add_state(
+            "q_if_ended",
+            ModeProto::Normal,
+            vec![
+                Transition {
+                    to_state: "q_neutral",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
+                    ]),
+                    input: TokenProto::Semicolon,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::If),
+                    push_stack: None,
+                },
+                Transition {
+                    to_state: "q_exp_begin",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Else)))),
+                    ]),
+                    input: TokenProto::Else,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::If),
+                    push_stack: Some(StackType::Else),
                 }
             ]
         );

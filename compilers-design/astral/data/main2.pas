@@ -10,9 +10,13 @@ end;
 
 begin
     if 2 < 4 then
-    begin
+        begin
         x := 4;
-    end
+        end
+    else
+        begin
+        x := 2;
+        end;
 
     x := sum(5, 10);  { Example call to the function }
     writeln('The sum is: ', x);

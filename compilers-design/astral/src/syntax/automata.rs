@@ -16,6 +16,7 @@ pub enum StackElem {
     Declarations,
     Main,
     If,
+    Else,
     // Expression parsing
     LParen,
     Func,
@@ -35,6 +36,7 @@ pub enum StackType {
     Declarations,
     Main,
     If,
+    Else,
     // Expression parsing
     LParen,
     Func,
@@ -60,6 +62,7 @@ impl StackType {
             Self::Declarations => Ok(StackElem::Declarations),
             Self::Main => Ok(StackElem::Main),
             Self::If => Ok(StackElem::If),
+            Self::Else => Ok(StackElem::Else),
             Self::LParen => Ok(StackElem::LParen),
             Self::Func => Ok(StackElem::Func),
             Self::Writeln => Ok(StackElem::Writeln),
@@ -79,6 +82,7 @@ impl StackElem {
             Self::Declarations => StackType::Declarations,
             Self::Main => StackType::Main,
             Self::If => StackType::If,
+            Self::Else => StackType::Else,
             Self::LParen => StackType::LParen,
             Self::Func => StackType::Func,
             Self::Writeln => StackType::Writeln,
