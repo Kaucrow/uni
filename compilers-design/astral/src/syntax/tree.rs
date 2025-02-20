@@ -7,9 +7,6 @@ pub enum Node {
     Val(Token),
 }
 
-//type Node = (Option<NodeType>, String);
-//type NodeProto = (Option<NodeType>, Option<&'static str>);
-
 #[derive(Debug, Clone, Copy)]
 pub enum Id {
     Program,

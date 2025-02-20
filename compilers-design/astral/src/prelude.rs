@@ -2,7 +2,7 @@ pub use crate::constants::*;
 pub use crate::syntax;
 pub use std::{
     fs::File,
-    io::{ self, BufRead },
+    io::{ self, BufRead, Write },
     path::{ Path, PathBuf },
     collections::{ HashMap, HashSet },
 };
@@ -15,3 +15,6 @@ pub use petgraph::{
     graph::{ DiGraph, NodeIndex },
 };
 pub use aho_corasick::AhoCorasick;
+pub use indicatif::{ ProgressBar, ProgressStyle };
+pub use colored::Colorize;
+pub use urlencoding::encode;
