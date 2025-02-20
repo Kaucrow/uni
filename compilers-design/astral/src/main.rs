@@ -120,11 +120,7 @@ fn main() -> Result<()> {
         }
     }
 
-    /*pda.transition(tokens_list.first().unwrap().first().unwrap())?;
-    pda.transition(tokens_list.first().unwrap().get(1).unwrap())?;
-    pda.transition(tokens_list.first().unwrap().get(2).unwrap())?;
-    pda.transition(tokens_list.get(2).unwrap().get(0).unwrap())?;
-    */
-
+    println!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
+    
     Ok(())
 }

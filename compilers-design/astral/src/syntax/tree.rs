@@ -24,7 +24,7 @@ pub enum Id {
     Main,
     Assign,
     Call,
-    Print,
+    Writeln,
 }
 
 pub enum TreeAction {

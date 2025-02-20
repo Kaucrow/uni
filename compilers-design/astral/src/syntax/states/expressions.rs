@@ -2,9 +2,6 @@ use crate::prelude::*;
 use super::*;
 use anyhow::Result;
 
-// TODO
-// Remove lparen call from value fn
-
 impl PDA {
     pub fn add_expression_states(&mut self) {
         self.add_state(
@@ -98,12 +95,26 @@ impl PDA {
                     pop_stack: Some(StackType::LParen),
                     push_stack: None,
                 },
+                // Exits
+                Transition {
+                    to_state: "q_exp_end",
+                    action: Some(vec![
+                        Action::ParseExpr(expression_end),
+                        Action::ParseExpr(build_expr_tree),
+                        Action::SwitchMode(Mode::Normal)
+                    ]),
+                    input: TokenProto::Semicolon,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Declarations),
+                    push_stack: Some(StackType::Declarations),
+                },
                 Transition {
                     to_state: "q_neutral",
                     action: Some(vec![
                         Action::ParseExpr(expression_end),
                         Action::ParseExpr(build_expr_tree),
-                        Action::SwitchMode(Mode::Normal)
+                        Action::SwitchMode(Mode::Normal),
+                        Action::Tree(TreeAction::GoUp),
                     ]),
                     input: TokenProto::Semicolon,
                     cmp_stack: None,

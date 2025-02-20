@@ -14,7 +14,7 @@ pub enum TokenProto {
     FuncCall,
     DataType,
     // Built-in functions
-    BuiltinFunc,
+    Writeln,
     // Symbols
     LParen,
     RParen,
@@ -45,7 +45,7 @@ pub enum Token {
     FuncCall(String),
     DataType(String),
     // Built-in functions
-    BuiltinFunc(String),
+    Writeln(String),
     // Symbols
     LParen,
     RParen,
@@ -75,7 +75,7 @@ impl TokenProto {
             TokenProto::FuncIdent => Token::FuncIdent(input),
             TokenProto::FuncCall => Token::FuncCall(input),
             TokenProto::DataType => Token::DataType(input),
-            TokenProto::BuiltinFunc => Token::BuiltinFunc(input),
+            TokenProto::Writeln => Token::Writeln(input),
             TokenProto::LParen => Token::LParen,
             TokenProto::RParen => Token::RParen,
             TokenProto::Assignment => Token::Assignment,
@@ -105,7 +105,7 @@ impl Token {
             Token::FuncIdent(_) => TokenProto::FuncIdent,
             Token::FuncCall(_) => TokenProto::FuncCall,
             Token::DataType(_) => TokenProto::DataType,
-            Token::BuiltinFunc(_) => TokenProto::BuiltinFunc,
+            Token::Writeln(_) => TokenProto::Writeln,
             Token::LParen => TokenProto::LParen,
             Token::RParen => TokenProto::RParen,
             Token::Assignment => TokenProto::Assignment,
@@ -125,7 +125,7 @@ impl Token {
 pub const LEX_AHOCOR_DICT: Lazy<Vec<(TokenProto, Vec<&'static str>)>> = Lazy::new(|| vec![
     (TokenProto::DataType, vec!["integer", "string", "char", "boolean"]),
     (TokenProto::Program, vec!["program"]),
-    (TokenProto::BuiltinFunc, vec!["writeln"]),
+    (TokenProto::Writeln, vec!["writeln"]),
     (TokenProto::LParen, vec!["("]),
     (TokenProto::RParen, vec![")"]),
     (TokenProto::Assignment, vec![":="]),

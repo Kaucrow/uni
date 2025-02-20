@@ -13,7 +13,7 @@ impl PDA {
                     input: TokenProto::Program,
                     cmp_stack: None,
                     pop_stack: None,
-                    push_stack: None,
+                    push_stack: Some(StackType::Declarations),
                 }
             ]
         );
@@ -108,7 +108,7 @@ impl PDA {
                     ]),
                     input: TokenProto::Begin,
                     cmp_stack: None,
-                    pop_stack: None,
+                    pop_stack: Some(StackType::Declarations),
                     push_stack: Some(StackType::Main),
                 }
             ]
@@ -229,6 +229,14 @@ impl PDA {
             ModeProto::Normal,
             vec![
                 Transition {
+                    to_state: "q_exp_writeln_str",
+                    action: None,
+                    input: TokenProto::LParen,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Writeln),
+                    push_stack: Some(StackType::Writeln),
+                },
+                Transition {
                     to_state: "q_func_params",
                     action: Some(vec![
                         Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Params)))),
@@ -237,7 +245,7 @@ impl PDA {
                     cmp_stack: None,
                     pop_stack: None,
                     push_stack: Some(StackType::FuncParams),
-                }
+                },
             ]
         );
 
@@ -300,14 +308,40 @@ impl PDA {
             "q_neutral",
             ModeProto::Normal,
             vec![
+                // Declarations
+                Transition {
+                    to_state: "q_var_decl",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Var))))
+                    ]),
+                    input: TokenProto::Var,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: Some(StackType::VarBegun),
+                },
+                Transition {
+                    to_state: "q_func_decl",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::FuncDecl))))
+                    ]),
+                    input: TokenProto::Func,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                // General
+                // Function declaration's return
                 Transition {
                     to_state: "q_exp_assignment",
-                    action: None,
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Return)))),
+                    ]),
                     input: TokenProto::Identifier,
                     cmp_stack: Some(StackType::ExpReturn),
                     pop_stack: Some(StackType::ExpReturn),
-                    push_stack: Some(StackType::Returned),
+                    push_stack: None,
                 },
+                // Assignment
                 Transition {
                     to_state: "q_exp_assignment",
                     action: Some(vec![
@@ -315,6 +349,26 @@ impl PDA {
                         Action::Tree(TreeAction::AppendChild(None)),
                     ]),
                     input: TokenProto::Identifier,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+                // Builtin function call
+                Transition {
+                    to_state: "q_exp_lparen",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Writeln)))),
+                    ]),
+                    input: TokenProto::Writeln,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: Some(StackType::Writeln),
+                },
+                // EOF End
+                Transition {
+                    to_state: "q_exp_eof",
+                    action: None,
+                    input: TokenProto::End,
                     cmp_stack: None,
                     pop_stack: Some(StackType::Main),
                     push_stack: Some(StackType::Main),
@@ -329,13 +383,12 @@ impl PDA {
                 Transition {
                     to_state: "q_exp_value",
                     action: Some(vec![
-                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Return)))),
                         Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
                     ]),
                     input: TokenProto::Assignment,
                     cmp_stack: None,
-                    pop_stack: Some(StackType::Returned),
-                    push_stack: Some(StackType::Returned),
+                    pop_stack: None,
+                    push_stack: None,
                 },
                 Transition {
                     to_state: "q_exp_value",
@@ -351,24 +404,20 @@ impl PDA {
         );
 
         self.add_state(
-            "q_expression",
+            "q_exp_end",
             ModeProto::Normal,
             vec![
                 Transition {
                     to_state: "q_func_ended",
-                    action: None,
+                    action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
+                        Action::Tree(TreeAction::GoUp),
+                        Action::Tree(TreeAction::GoUp),
+                    ]),
                     input: TokenProto::End,
                     cmp_stack: None,
-                    pop_stack: Some(StackType::Returned),
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_neutral",
-                    action: None,
-                    input: TokenProto::End,
-                    cmp_stack: None,
-                    pop_stack: Some(StackType::Main),
-                    push_stack: Some(StackType::Main),
+                    pop_stack: Some(StackType::Declarations),
+                    push_stack: Some(StackType::Declarations),
                 }
             ]
         );
@@ -379,17 +428,68 @@ impl PDA {
             vec![
                 Transition {
                     to_state: "q_declarations",
-                    action: Some(vec![
-                        Action::Tree(TreeAction::GoUp),
-                        Action::Tree(TreeAction::GoUp),
-                        Action::Tree(TreeAction::GoUp),
-                    ]),
+                    action: None,
                     input: TokenProto::Semicolon,
                     cmp_stack: None,
-                    pop_stack: None,
+                    pop_stack: Some(StackType::Declarations),
+                    push_stack: Some(StackType::Declarations),
+                }
+            ] 
+        );
+
+        self.add_state(
+            "q_exp_writeln_str",
+            ModeProto::Normal,
+            vec![
+                Transition {
+                    to_state: "q_exp_comma",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::AppendChild(None)),
+                    ]),
+                    input: TokenProto::String,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Writeln),
+                    push_stack: Some(StackType::Writeln),
+                }
+            ]
+        );
+
+        self.add_state(
+            "q_exp_comma",
+            ModeProto::Normal,
+            vec![
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::SwitchMode(Mode::Expr(Box::new(ExprHelper::new()))),
+                    ]),
+                    input: TokenProto::Comma,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Writeln),
+                    push_stack: Some(StackType::LParen),
+                }
+            ]
+        );
+
+        self.add_state(
+            "q_exp_eof",
+            ModeProto::Normal,
+            vec![
+                Transition {
+                    to_state: "q_accepting",
+                    action: None,
+                    input: TokenProto::Dot,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Main),
                     push_stack: None,
                 }
             ]
-        )
+        );
+
+        self.add_state(
+            "q_accepting",
+            ModeProto::Normal,
+            vec![]
+        );
     }
 }

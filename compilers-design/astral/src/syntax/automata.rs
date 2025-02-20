@@ -13,10 +13,13 @@ pub enum StackElem {
     Returned,
     VarBegun,
     VarCanExit,
+    Declarations,
     Main,
     // Expression parsing
     LParen,
     Func,
+    // Builtin functions
+    Writeln,
 }
 
 #[derive(PartialEq)]
@@ -28,10 +31,13 @@ pub enum StackType {
     Returned,
     VarBegun,
     VarCanExit,
+    Declarations,
     Main,
     // Expression parsing
     LParen,
     Func,
+    // Builtin functions
+    Writeln,
 }
 
 impl StackType {
@@ -49,9 +55,11 @@ impl StackType {
             Self::Returned => Ok(StackElem::Returned),
             Self::VarBegun => Ok(StackElem::VarBegun),
             Self::VarCanExit => Ok(StackElem::VarCanExit),
+            Self::Declarations => Ok(StackElem::Declarations),
             Self::Main => Ok(StackElem::Main),
             Self::LParen => Ok(StackElem::LParen),
             Self::Func => Ok(StackElem::Func),
+            Self::Writeln => Ok(StackElem::Writeln),
         }
     }
 }
@@ -65,9 +73,11 @@ impl StackElem {
             Self::Returned => StackType::Returned,
             Self::VarBegun => StackType::VarBegun,
             Self::VarCanExit => StackType::VarCanExit,
+            Self::Declarations => StackType::Declarations,
             Self::Main => StackType::Main,
             Self::LParen => StackType::LParen,
             Self::Func => StackType::Func,
+            Self::Writeln => StackType::Writeln,
         }
     }
 }
