@@ -3,17 +3,20 @@ use anyhow::Result;
 
 pub enum StackElem {
     LParen,
+    Func,
 }
 
 #[derive(PartialEq, Eq)]
 pub enum StackType {
     LParen,
+    Func,
 }
 
 impl StackElem {
     fn to_stacktype(&self) -> StackType {
         match self {
             Self::LParen => StackType::LParen,
+            Self::Func => StackType::Func,
         }
     }
 }
@@ -22,6 +25,7 @@ impl StackType {
     fn to_stack_elem(&self, _: Token) -> Result<StackElem> {
         match self {
             Self::LParen => Ok(StackElem::LParen),
+            Self::Func => Ok(StackElem::Func),
         }
     }
 }

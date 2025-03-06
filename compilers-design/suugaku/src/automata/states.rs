@@ -37,6 +37,17 @@ impl PDA {
                     pop_stack: None,
                     push_stack: Some(StackType::LParen),
                 },
+                // Pow
+                Transition {
+                    to_state: "q_got_func",
+                    action: Some(vec![
+                        Action::ParseExpr(func)
+                    ]),
+                    input: TokenProto::Pow,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: Some(StackType::Func),
+                },
             ]
         );
 
@@ -52,6 +63,28 @@ impl PDA {
                     input: TokenProto::Operator,
                     cmp_stack: None,
                     pop_stack: None,
+                    push_stack: None,
+                },
+                // Comma
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::ParseExpr(comma)
+                    ]),
+                    input: TokenProto::Comma,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Func),
+                    push_stack: Some(StackType::Func),
+                },
+                // RParen
+                Transition {
+                    to_state: "q_got_value",
+                    action: Some(vec![
+                        Action::ParseExpr(rparen)
+                    ]),
+                    input: TokenProto::RParen,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::Func),
                     push_stack: None,
                 },
                 Transition {
@@ -125,6 +158,22 @@ impl PDA {
                 }
             ]
         );
+
+        self.add_state(
+            "q_got_func",
+            vec![
+                Transition {
+                    to_state: "q_exp_value",
+                    action: Some(vec![
+                        Action::ParseExpr(lparen)
+                    ]),
+                    input: TokenProto::LParen,
+                    cmp_stack: None,
+                    pop_stack: None,
+                    push_stack: None,
+                },
+            ]
+        );
     }
 }
 
@@ -187,10 +236,50 @@ fn lparen(helper: &mut ExprHelper, input: &Token) -> Result<()> {
     Ok(())
 }
 
+fn comma(helper: &mut ExprHelper, input: &Token) -> Result<()> {
+    let output = &mut helper.output;
+    let operators = &mut helper.operators;
+    let arg_count = &mut helper.arg_count;
+
+    if let Token::Comma = input {
+        while let Some(top) = operators.last() {
+            // Pop until we find a left parenthesis
+            if !matches!(top, Token::LParen) {
+                output.push(operators.pop().unwrap());
+            } else {
+                break;
+            }
+        }
+        // Increase argument count
+        if let Some(last) = arg_count.last_mut() {
+            *last += 1;
+        }
+    } else {
+        bail!(format!("Tried to parse as a comma: {:?}", input))
+    }
+
+    Ok(())
+}
+
+fn func(helper: &mut ExprHelper, input: &Token) -> Result<()> {
+    let operators = &mut helper.operators;
+    let arg_count = &mut helper.arg_count;
+
+    if let Token::Pow = input {
+        operators.push(input.clone());
+        arg_count.push(1);
+    } else {
+        bail!(format!("Tried to parse as a function: {:?}", input))
+    }
+
+    Ok(())
+}
+
 // Right parenthesis triggers popping until left parenthesis is found
 fn rparen(helper: &mut ExprHelper, input: &Token) -> Result<()> {
     let output = &mut helper.output;
     let operators = &mut helper.operators;
+    let arg_count = &mut helper.arg_count;
 
     if let Token::RParen = input {
         while let Some(top) = operators.last() {
@@ -201,6 +290,14 @@ fn rparen(helper: &mut ExprHelper, input: &Token) -> Result<()> {
             }
         }
         operators.pop(); // Remove '(' from stack
+
+        // If a function is on top, pop it to output
+        if let Some(Token::Pow) = operators.last().cloned() {
+            let arg_count = arg_count.pop().unwrap_or(1);
+            output.push(Token::Pow);
+            helper.arg_count_final.push(arg_count);
+            operators.pop();
+        }
     } else {
         bail!(format!("Tried to parse as an rparen: {:?}", input))
     }

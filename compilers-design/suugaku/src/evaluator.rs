@@ -17,6 +17,16 @@ pub fn evaluate_postfix(expr: Vec<Token>, ident_map: IdentMap) -> Result<f64> {
 
                 stack.push(value);
             }
+            Token::Pow => {
+                if stack.len() < 2 {
+                    bail!(format!("Not enough operands for operation: '{}'", "pow"));
+                }
+
+                let exponent = stack.pop().unwrap();
+                let base = stack.pop().unwrap();
+
+                stack.push(base.powf(exponent));
+            }
             Token::Operator(op) => {
                 if stack.len() < 2 {
                     bail!(format!("Not enough operands for operation: '{}'", op));

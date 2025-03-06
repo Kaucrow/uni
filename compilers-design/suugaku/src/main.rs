@@ -65,24 +65,22 @@ fn main() -> Result<()> {
 
     // Wait for the spinner thread to finish
     handle.join().unwrap();
+    println!("{}", ":) Done building tokens!".green());
 
-    println!(":) Done building tokens!");
-
-    println!("{:?}", &tokens);
-
-    let ident_map = build_ident_map(&tokens)?; 
-
-    println!("{:?}", ident_map);
+    let ident_map = build_ident_map(&tokens).or_else(|err| {
+        bail!(format!("{}", err.downcast::<&str>().unwrap().red()))
+    })?; 
 
     let mut pda = PDA::new();
+    let postfix = pda.run(tokens).or_else(|err| {
+        bail!(format!("{}", err.downcast::<&str>().unwrap().red()))
+    })?;
 
-    let postfix = pda.run(tokens)?;
+    let result = evaluate_postfix(postfix, ident_map).or_else(|err| {
+        bail!(format!("{}", err.downcast::<&str>().unwrap().red()))
+    })?;
 
-    println!("OUTPUT: {:?}", postfix);
-
-    let result = evaluate_postfix(postfix, ident_map)?;
-
-    println!("RESULT: {}", result);
+    println!("{} {}", "Result:".cyan(), result);
 
     Ok(())
 }

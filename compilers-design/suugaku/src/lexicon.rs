@@ -87,7 +87,7 @@ pub fn build_ident_map(tokens: &Vec<Token>) -> Result<IdentMap> {
 
                 match input.trim().parse::<f64>() {
                     Ok(num) => ident_map.insert(identifier.into(), Some(num)),
-                    Err(_) => bail!("Error: Input is not a valid number!"),
+                    Err(_) => bail!("Input is not a valid number"),
                 };
             }
         }
