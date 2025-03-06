@@ -9,9 +9,9 @@ pub struct Settings {
 impl Settings {
     pub fn new(matches: &ArgMatches) -> Result<Self> {
         let file_path_str = matches
-                .get_one::<String>("path")
-                .cloned()
-                .ok_or(anyhow!("Unexpected value for `path` argument"))?;
+            .get_one::<String>("path")
+            .cloned()
+            .ok_or(anyhow!("Unexpected value for `path` argument"))?;
 
         let file_path = PathBuf::try_from(file_path_str)?;
 

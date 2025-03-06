@@ -173,7 +173,6 @@ fn main() -> Result<()> {
                 eprintln!("{} {:?}\n", "- Stack: ".yellow(), pda.stack);
                 eprintln!();
                 bail!(err);
-                //bail!(format!("{:#?} Mode: {:?}, State: {}, Input: {:?}, Stack: {:?}", err, pda.mode, pda.state, token, pda.stack));
             })?;
 
             syntax_bar.inc(1);

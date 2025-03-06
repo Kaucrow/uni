@@ -243,7 +243,7 @@ impl PDA {
                                 }
                             }
                             TreeAction::AppendChild(node) => {
-                                if let Some(value) = node {
+                                if let Some(_) = node {
                                     unimplemented!("append child with defined value");
                                 } else {
                                     tree.append_child(Node::Val(input.clone()))?;
