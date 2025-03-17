@@ -8,6 +8,9 @@ begin
     sum := (x + y) * 4 - sum(sum(3, 5), 1);
 end;
 
+var
+    x: boolean;
+
 begin
     if 2 < 4 then
         begin

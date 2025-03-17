@@ -135,6 +135,19 @@ impl PDA {
                     push_stack: None,
                 },
                 // Exits
+                // Another variable declaration
+                Transition {
+                    to_state: "q_var_decl",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Var)))),
+                    ]),
+                    input: TokenProto::Var,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::VarCanExit),
+                    push_stack: Some(StackType::VarBegun),
+                },
+                // Function declaration
                 Transition {
                     to_state: "q_func_decl",
                     action: Some(vec![
@@ -145,7 +158,20 @@ impl PDA {
                     cmp_stack: None,
                     pop_stack: Some(StackType::VarCanExit),
                     push_stack: None,
-                }
+                },
+                // Main
+                Transition {
+                    to_state: "q_neutral",
+                    action: Some(vec![
+                        Action::Tree(TreeAction::GoUp),
+                        Action::Tree(TreeAction::GoUp),
+                        Action::Tree(TreeAction::AddNode(Some(Node::Id(Id::Main)))),
+                    ]),
+                    input: TokenProto::Begin,
+                    cmp_stack: None,
+                    pop_stack: Some(StackType::VarCanExit),
+                    push_stack: Some(StackType::Main),
+                },
             ]
         );
 

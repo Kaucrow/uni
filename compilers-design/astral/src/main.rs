@@ -27,5 +27,8 @@ fn main() -> Result<()> {
     // Run the syntactic analysis and display the resulting AST
     let ast = syntax::run_syntactic_analysis(tokens_list)?;
 
+    // Run the semantic analysis
+    semantic::run_semantic_analysis(ast)?;
+
     Ok(())
 }

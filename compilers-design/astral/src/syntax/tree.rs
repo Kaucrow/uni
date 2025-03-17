@@ -7,7 +7,7 @@ pub enum Node {
     Val(Token),
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Id {
     Program,
     Name,
@@ -71,5 +71,27 @@ impl Tree {
         }
 
         Ok(())
+    }
+
+    pub fn get_preorder_nodes(&self) -> Vec<(NodeIndex, i32)> {
+        let tree = &self.data;
+
+        // Find the tree root by looking for the node with no incoming edges
+        let root = tree.node_indices().find(|&node| tree.neighbors_directed(node, petgraph::Direction::Incoming).count() == 0).unwrap();
+
+        let mut result = Vec::new();
+        let mut stack = vec![(root, 0)];
+
+        while let Some((node, depth)) = stack.pop() {
+            result.push((node, depth));
+            // Collect children in left-to-right order
+            let children: Vec<_> = tree.neighbors(node).collect();
+            // Push children in reverse order so the leftmost child is processed first
+            for &child in children.iter() {
+                stack.push((child, depth + 1));
+            }
+        }
+
+        result
     }
 }
