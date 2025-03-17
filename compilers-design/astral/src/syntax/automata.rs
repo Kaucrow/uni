@@ -154,7 +154,7 @@ pub struct PDA {
 
 impl PDA {
     pub fn new() -> Self {
-        Self {
+        let mut pda = Self {
             state: "q_start",
             mode: Mode::Normal,
             states: HashMap::from([
@@ -162,7 +162,9 @@ impl PDA {
                 (ModeProto::Expr, HashMap::new()),
             ]),
             stack: Vec::new(),
-        }
+        };
+        pda.build();
+        pda
     }
 
     pub fn add_state(&mut self, name: &'static str, mode: ModeProto, transitions: Vec<Transition>) {

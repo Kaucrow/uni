@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::str::FromStr;
 
 #[derive(PartialEq, Clone)]
 pub enum TokenProto {
@@ -49,7 +50,7 @@ pub enum Token {
     Func,
     FuncIdent(String),
     FuncCall(String),
-    DataType(String),
+    DataType(DataType),
     If,
     Then,
     Else,
@@ -86,7 +87,7 @@ impl TokenProto {
             TokenProto::Func => Token::Func,
             TokenProto::FuncIdent => Token::FuncIdent(input),
             TokenProto::FuncCall => Token::FuncCall(input),
-            TokenProto::DataType => Token::DataType(input),
+            TokenProto::DataType => Token::DataType(DataType::from_str(&input).unwrap()),
             TokenProto::If => Token::If,
             TokenProto::Then => Token::Then,
             TokenProto::Else => Token::Else,
@@ -178,3 +179,25 @@ pub const LEX_REGEX_DICT: Lazy<Vec<(TokenProto, Regex)>> = Lazy::new(|| vec![
     (TokenProto::String, Regex::new(r"'([^']|'')*'").unwrap()),
     (TokenProto::Comment, Regex::new(r"\{[^}]*\}").unwrap())
 ]);
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub enum DataType {
+    Int,
+    String,
+    Char,
+    Bool,
+}
+
+impl FromStr for DataType {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "integer" => Ok(DataType::Int),
+            "string" => Ok(DataType::String),
+            "char" => Ok(DataType::Char),
+            "boolean" => Ok(DataType::Bool),
+            _ => bail!(format!("'{}' is not a valid datatype", s))
+        }
+    }
+}

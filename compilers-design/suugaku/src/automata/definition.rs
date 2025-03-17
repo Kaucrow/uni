@@ -115,7 +115,7 @@ impl PDA {
 
             transition_ret
         }
-        .ok_or(anyhow!("No suitable transition was found."))?;
+        .ok_or(anyhow!("Invalid expression. Please ensure you typed it correctly."))?;
 
         let popped = {
             if transition.pop_stack.is_some() {
