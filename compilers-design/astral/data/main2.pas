@@ -5,11 +5,11 @@ var
 
 function sum(x: integer; y: integer): integer;
 begin
-    sum := (x + y) * 4 - sum(sum(3, 5), 1);
-end;
+    var
+        z: integer;
 
-var
-    x: boolean;
+    sum := (x + y) * 4.3 - sum(sum(3, 5), 1);
+end;
 
 begin
     if 2 < 4 then

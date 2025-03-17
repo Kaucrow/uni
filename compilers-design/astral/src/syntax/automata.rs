@@ -120,10 +120,81 @@ pub enum Action {
 pub struct Transition {
     pub to_state: &'static str,
     pub action: Option<Vec<Action>>,
-    pub input: TokenProto,
+    pub input: Input,
+    pub peek_input: Option<TokenProto>,
     pub cmp_stack: Option<StackType>,
     pub pop_stack: Option<StackType>,
     pub push_stack: Option<StackType>,
+    pub peek_stack: Option<StackType>,
+}
+
+pub struct TransitionBuilder {
+    to_state: &'static str,
+    action: Option<Vec<Action>>,
+    input: Input,
+    peek_input: Option<TokenProto>,
+    cmp_stack: Option<StackType>,
+    pop_stack: Option<StackType>,
+    push_stack: Option<StackType>,
+    peek_stack: Option<StackType>,
+}
+
+impl TransitionBuilder {
+    pub fn new(to_state: &'static str, input: Input) -> Self {
+        Self {
+            to_state,
+            input,
+            action: None,
+            peek_input: None,
+            cmp_stack: None,
+            pop_stack: None,
+            push_stack: None,
+            peek_stack: None,
+        }
+    }
+
+    pub fn action(mut self, action: Vec<Action>) -> Self {
+        self.action = Some(action);
+        self
+    }
+
+    pub fn peek_input(mut self, input: TokenProto) -> Self {
+        self.peek_input = Some(input);
+        self
+    }
+
+    pub fn push_stack(mut self, stack: StackType) -> Self {
+        self.push_stack = Some(stack);
+        self
+    }
+    
+    pub fn pop_stack(mut self, stack: StackType) -> Self {
+        self.pop_stack = Some(stack);
+        self
+    }
+    
+    pub fn cmp_stack(mut self, stack: StackType) -> Self {
+        self.pop_stack = Some(stack);
+        self
+    }
+    
+    pub fn peek_stack(mut self, stack: StackType) -> Self {
+        self.peek_stack = Some(stack);
+        self
+    }
+
+    pub fn build(self) -> Transition {
+        Transition {
+            to_state: self.to_state,
+            action: self.action,
+            input: self.input,
+            peek_input: self.peek_input,
+            cmp_stack: self.cmp_stack,
+            pop_stack: self.pop_stack,
+            push_stack: self.push_stack,
+            peek_stack: self.peek_stack,
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -141,6 +212,20 @@ impl ExprHelper {
             operators: Vec::new(),
             arg_count: Vec::new(),
             arg_count_final: Vec::new(),
+        }
+    }
+}
+
+pub enum Input {
+    Any,
+    Token(TokenProto),
+}
+
+impl Input {
+    fn matches_token(&self, proto: &TokenProto) -> bool {
+        match self {
+            Input::Any => true,
+            Input::Token(t) => t == proto,
         }
     }
 }
@@ -172,7 +257,7 @@ impl PDA {
         states.insert(name, transitions);
     }
 
-    pub fn transition(&mut self, input: &Token, tree: &mut Tree) -> Result<()> {
+    pub fn transition(&mut self, input: &Token, next_token: Option<&&Token>, tree: &mut Tree) -> Result<()> {
         let states = self.states.get(&self.mode.proto()).expect(format!("Mode is not in PDA states: {:?}", self.mode).as_str());
 
         let transition = {
@@ -184,15 +269,29 @@ impl PDA {
             let mut transition_ret: Option<&Transition> = None;
 
             for transition in transitions {
-                if transition.input == input.proto() {
-                    let stack_matches = match transition.pop_stack.as_ref() {
-                        Some(transition_pop) => next_stack
-                            .as_ref()
-                            .map_or(false, |stack_elem| stack_elem.to_stacktype() == *transition_pop),
-                        None => true,
-                    };
+                // If the input matches
+                if transition.input.matches_token(&input.proto()) {
+                    // Check if a stack pop is required.
+                    // stack_pop_matches is true if either the requirement is met or there's no requirement
+                    let stack_pop_matches = transition.pop_stack.as_ref().map_or(true, |transition_pop| {
+                        next_stack.as_ref().map_or(false, |stack_elem| stack_elem.to_stacktype() == *transition_pop)
+                    });
 
-                    if stack_matches {
+                    // Check if a peek input match is required.
+                    // peek_input_matches is true if either the requirement is met or there's no requirement
+                    let peek_input_matches = transition.peek_input.as_ref().map_or(true, |peek_input|
+                        next_token.as_ref().map_or(false, |t| *peek_input == t.proto())
+                    );
+
+                    // Check peek_stack condition (second last element of the stack)
+                    // peek_stack_matches is true if either the requirement is met or there's no requirement
+                    let peek_stack_matches = transition.peek_stack.as_ref().map_or(true, |peek_stack| {
+                        self.stack.get(self.stack.len().saturating_sub(2)) // Safely get the second last element
+                            .map_or(false, |stack_elem| stack_elem.to_stacktype() == *peek_stack) // Compare
+                    });
+
+
+                    if stack_pop_matches && peek_input_matches && peek_stack_matches {
                         if transition.cmp_stack.is_some() {
                             let mut cmp_succeed = false;
 
@@ -276,6 +375,10 @@ impl PDA {
         }
 
         self.state = transition.to_state;
+
+        if let Input::Any = transition.input {
+            self.transition(input, next_token, tree)?;
+        }
 
         Ok(())
     }

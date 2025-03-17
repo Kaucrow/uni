@@ -8,46 +8,20 @@ impl PDA {
             "q_exp_value",
             ModeProto::Expr,
             vec![
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(value)
-                    ]),
-                    input: TokenProto::Number,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(value)
-                    ]),
-                    input: TokenProto::Identifier,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(lparen)
-                    ]),
-                    input: TokenProto::LParen,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: Some(StackType::LParen),
-                },
-                Transition {
-                    to_state: "q_got_func",
-                    action: Some(vec![
-                        Action::ParseExpr(func)
-                    ]),
-                    input: TokenProto::FuncCall,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: Some(StackType::Func)
-                }
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Number))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Identifier))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LParen))
+                    .action(vec![Action::ParseExpr(lparen)])
+                    .push_stack(StackType::LParen)
+                    .build(),
+                TransitionBuilder::new("q_got_func", Input::Token(TokenProto::FuncCall))
+                    .action(vec![Action::ParseExpr(func)])
+                    .push_stack(StackType::Func)
+                    .build(),
             ]
         );
 
@@ -56,117 +30,59 @@ impl PDA {
             ModeProto::Expr,
             vec![
                 // Operators
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(operator)
-                    ]),
-                    input: TokenProto::Operator,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(operator)
-                    ]),
-                    input: TokenProto::Comparison,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(operator)
-                    ]),
-                    input: TokenProto::LogicalAnd,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(operator)
-                    ]),
-                    input: TokenProto::LogicalOr,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Operator))
+                    .action(vec![Action::ParseExpr(operator)])
+                    .build(),
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comparison))
+                    .action(vec![Action::ParseExpr(operator)])
+                    .build(),
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalAnd))
+                    .action(vec![Action::ParseExpr(operator)])
+                    .build(),
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalOr))
+                    .action(vec![Action::ParseExpr(operator)])
+                    .build(),
                 // Comma
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(comma)
-                    ]),
-                    input: TokenProto::Comma,
-                    cmp_stack: None,
-                    pop_stack: Some(StackType::Func),
-                    push_stack: Some(StackType::Func),
-                },
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comma))
+                    .action(vec![Action::ParseExpr(comma)])
+                    .pop_stack(StackType::Func)
+                    .push_stack(StackType::Func)
+                    .build(),
                 // RParen
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(rparen)
-                    ]),
-                    input: TokenProto::RParen,
-                    cmp_stack: None,
-                    pop_stack: Some(StackType::Func),
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(rparen)
-                    ]),
-                    input: TokenProto::RParen,
-                    cmp_stack: None,
-                    pop_stack: Some(StackType::LParen),
-                    push_stack: None,
-                },
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::RParen))
+                    .action(vec![Action::ParseExpr(rparen)])
+                    .pop_stack(StackType::Func)
+                    .build(),
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::RParen))
+                    .action(vec![Action::ParseExpr(rparen)])
+                    .pop_stack(StackType::LParen)
+                    .build(),
                 // Exits
-                Transition {
-                    to_state: "q_exp_end",
-                    action: Some(vec![
+                TransitionBuilder::new("q_exp_end", Input::Token(TokenProto::Semicolon))
+                    .action(vec![
                         Action::ParseExpr(expression_end),
                         Action::ParseExpr(build_expr_tree),
-                        Action::SwitchMode(Mode::Normal)
-                    ]),
-                    input: TokenProto::Semicolon,
-                    cmp_stack: None,
-                    pop_stack: Some(StackType::Declarations),
-                    push_stack: Some(StackType::Declarations),
-                },
-                Transition {
-                    to_state: "q_neutral",
-                    action: Some(vec![
+                        Action::SwitchMode(Mode::Normal),
+                    ])
+                    .pop_stack(StackType::Declarations)
+                    .push_stack(StackType::Declarations)
+                    .build(),
+                TransitionBuilder::new("q_neutral", Input::Token(TokenProto::Semicolon))
+                    .action(vec![
                         Action::ParseExpr(expression_end),
                         Action::ParseExpr(build_expr_tree),
                         Action::SwitchMode(Mode::Normal),
                         Action::Tree(TreeAction::GoUp),
-                    ]),
-                    input: TokenProto::Semicolon,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
+                    ])
+                    .build(),
                 // "If" expression end
-                Transition {
-                    to_state: "q_exp_begin",
-                    action: Some(vec![
+                TransitionBuilder::new("q_exp_begin", Input::Token(TokenProto::Then))
+                    .action(vec![
                         Action::ParseExpr(expression_end),
                         Action::ParseExpr(build_expr_tree),
                         Action::SwitchMode(Mode::Normal),
-                    ]),
-                    input: TokenProto::Then,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
+                    ])
+                    .build(),
             ]
         );
 
@@ -174,36 +90,15 @@ impl PDA {
             "q_got_lparen",
             ModeProto::Expr,
             vec![
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(value)
-                    ]),
-                    input: TokenProto::Number,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_got_value",
-                    action: Some(vec![
-                        Action::ParseExpr(value)
-                    ]),
-                    input: TokenProto::Identifier,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
-                Transition {
-                    to_state: "q_got_lparen",
-                    action: Some(vec![
-                        Action::ParseExpr(lparen)
-                    ]),
-                    input: TokenProto::LParen,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                }
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Number))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Identifier))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                TransitionBuilder::new("q_got_lparen", Input::Token(TokenProto::LParen))
+                    .action(vec![Action::ParseExpr(lparen)])
+                    .build(),
             ]
         );
 
@@ -211,16 +106,9 @@ impl PDA {
             "q_got_func",
             ModeProto::Expr,
             vec![
-                Transition {
-                    to_state: "q_exp_value",
-                    action: Some(vec![
-                        Action::ParseExpr(lparen)
-                    ]),
-                    input: TokenProto::LParen,
-                    cmp_stack: None,
-                    pop_stack: None,
-                    push_stack: None,
-                },
+                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LParen))
+                    .action(vec![Action::ParseExpr(lparen)])
+                    .build(),
             ]
         );
     }

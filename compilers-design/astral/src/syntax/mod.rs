@@ -2,7 +2,7 @@ pub mod automata;
 pub mod tree;
 mod states;
 
-pub use automata::{ PDA, Transition, StackType, Action, Mode, ModeProto, ExprHelper };
+pub use automata::*;
 pub use tree::{ Tree, TreeAction, Node, Id };
 
 use crate::prelude::*;
@@ -23,8 +23,12 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
         .progress_chars("#>-"));
 
     for (i, line) in tokens_list.iter().enumerate() {
-        for token in line {
-            pda.transition(&token, &mut ast).or_else(|err| {
+        let mut line = line.iter().peekable();
+
+        while let Some(token) = line.next() {
+            let next_token = line.peek();
+
+            pda.transition(&token, next_token, &mut ast).or_else(|err| {
                 eprintln!("{} {}\n", "Syntax error found in line".red(), i + 1);
                 eprintln!("{}", "Automata status:".magenta());
                 eprintln!("{} {:?}", "- Mode: ".yellow(), pda.mode);

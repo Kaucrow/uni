@@ -1,14 +1,29 @@
 use crate::prelude::*;
 use std::hash::{ Hash, Hasher };
 
-pub type VarDict = HashMap<Scope, HashSet<Variable>>;
+pub type VarDict<'a> = HashMap<Scope<'a>, HashSet<Variable>>;
 
-pub type FuncDict = HashMap<String, HashSet<Variable>>;
+pub type FuncDict<'a> = HashMap<Scope<'a>, FuncDetails>;
+
+#[derive(Debug)]
+pub struct FuncDetails {
+    pub returntype: Option<DataType>,
+    pub parameters: Vec<DataType>,
+}
+
+impl FuncDetails {
+    pub fn new() -> Self {
+        Self {
+            returntype: None,
+            parameters: Vec::new(),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Variable {
-    name: String,
-    datatype: DataType,
+    pub name: String,
+    pub datatype: DataType,
 }
 
 // Implementing PartialEq to compare only by name
@@ -38,8 +53,8 @@ impl Variable {
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub enum Scope {
+pub enum Scope<'a> {
     Global,
     Main,
-    Func(String),
+    Func(&'a String),
 }
