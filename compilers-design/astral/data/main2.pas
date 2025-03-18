@@ -5,10 +5,7 @@ var
 
 function sum(x: integer; y: integer): integer;
 begin
-    var
-        z: integer;
-
-    sum := (x + z) * 4.3 - sum(sum(3, 5), 1);
+    sum := sum(sum(3, 2), 1);
 end;
 
 begin

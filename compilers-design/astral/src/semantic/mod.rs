@@ -3,7 +3,7 @@ pub mod constants;
 use crate::prelude::*;
 use constants::*;
 use anyhow::Result;
-use petgraph::data;
+use petgraph::{data, visit::Data};
 use syntax::tree::{ Node, Id };
 
 pub struct Dict {
@@ -143,8 +143,20 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node: NodeIndex,
     for &child in children.iter().rev() {
         match node {
             Node::Id(Id::Return) => {
-                let (scope, _) = helper.scope_stack.last().unwrap();
-                get_expression_type(child, Vec::new(), helper, dict, ast)?;
+                let (scope, _) = helper.scope_stack.last().ok_or(anyhow!("No scope"))?;
+
+                let exp_ret_type = dict.func.get(scope).ok_or(anyhow!("Function not found"))?
+                    .returntype
+                    .as_ref()
+                    .ok_or(anyhow!("Function has no return type"))?;
+
+                let ret_type = get_expression_type(child, VecDeque::new(), helper, dict, ast)?;
+
+                if *exp_ret_type != ret_type {
+                    if let Scope::Func(name) = scope {
+                        bail!("Function {} expected {:?} as return type, but got {:?} instead", name, exp_ret_type, ret_type);
+                    }
+                }
             }
             _ => {
                 preorder_traversal(dict, helper, child, ast, depth + 1)?;
@@ -155,55 +167,76 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node: NodeIndex,
     Ok(())
 }
 
-pub fn get_expression_type(node: NodeIndex, mut results: Vec<DataType>, helper: &Helper, dict: &Dict, ast: &syntax::Tree) -> Result<DataType> {
+pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, helper: &Helper, dict: &Dict, ast: &syntax::Tree) -> Result<DataType> {
     let children: Vec<_> = ast.data.neighbors(node).collect();
 
     for child in children.iter().rev() {
-        results.push(get_expression_type(*child, results.clone(), helper, dict, ast)?);
+        let result = get_expression_type(*child, VecDeque::new(), helper, dict, ast)?;
+        results.push_back(result);
     }
 
     let node = &ast.data[node];
 
-    if results.len() >= 2 {
-        match node {
-            Node::Val(Token::Operator(op)) => {
-                let rhs = results.pop().ok_or(anyhow!("RHS value missing"))?;
-                let lhs = results.pop().ok_or(anyhow!("LHS value missing"))?;
+    match node {
+        Node::Val(Token::Number(_)) => Ok(DataType::Int),
+        Node::Val(Token::String(_)) => Ok(DataType::String),
+        Node::Val(Token::Identifier(name)) => {
+            let mut datatype: Option<DataType> = None;
 
-                match (&lhs, op.as_str(), &rhs) {
-                    (DataType::Int, "+", DataType::Int) |
-                    (DataType::Int, "-", DataType::Int) |
-                    (DataType::Int, "*", DataType::Int) |
-                    (DataType::Int, "/", DataType::Int) => Ok(DataType::Int),
+            for (scope, _) in helper.scope_stack.iter().rev() {
+                let variable = &dict.var.get(scope).ok_or(anyhow!("Scope not found"))?
+                    .get(name.as_str());
 
-                    (DataType::String, "+", DataType::String) => Ok(DataType::String),
-
-                    _ => bail!(format!("Invalid operation: {:?} {} {:?}", lhs, op, rhs))
+                if let Some(variable) = variable {
+                    datatype = Some(variable.datatype.clone());
+                    break;
                 }
             }
-            _ => todo!("functions")
+
+            Ok(datatype.ok_or(anyhow!("Variable not found"))?)
         }
-    } else {
-        match node {
-            Node::Val(Token::Number(_)) => Ok(DataType::Int),
-            Node::Val(Token::String(_)) => Ok(DataType::String),
-            Node::Val(Token::Identifier(name)) => {
-                let mut datatype: Option<DataType> = None;
-
-                for (scope, _) in helper.scope_stack.iter().rev() {
-                    let variable = &dict.var.get(scope).ok_or(anyhow!("Scope not found"))?
-                        .get(name.as_str());
-
-                    if let Some(variable) = variable {
-                        datatype = Some(variable.datatype.clone());
-                        break;
-                    }
-                }
-
-                Ok(datatype.ok_or(anyhow!("Variable not found"))?)
+        Node::Val(Token::Operator(op)) => {
+            if results.len() != 2 {
+                bail!("Expected two values to operate")
             }
-            _ => bail!(format!("Unexpected token: {:?}", node))
+
+            let lhs = results.pop_front().ok_or(anyhow!("LHS value missing"))?;
+            let rhs = results.pop_front().ok_or(anyhow!("RHS value missing"))?;
+
+            match (&lhs, op.as_str(), &rhs) {
+                (DataType::Int, "+", DataType::Int) |
+                (DataType::Int, "-", DataType::Int) |
+                (DataType::Int, "*", DataType::Int) |
+                (DataType::Int, "/", DataType::Int) => Ok(DataType::Int),
+
+                (DataType::String, "+", DataType::String) => Ok(DataType::String),
+
+                _ => bail!(format!("Invalid operation: {:?} {} {:?}", lhs, op, rhs))
+            }
         }
+        Node::Val(Token::FuncCall(name)) => {
+            let func = dict.func.get(&Scope::Func(name.clone())).ok_or(anyhow!("Function not found"))?;
+
+            if results.len() > func.parameters.len() {
+                bail!("Function received more arguments than required")
+            }
+
+            for (i, (param_type, arg_type)) in func.parameters.iter().zip(results.clone()).enumerate() {
+                if *param_type != arg_type {
+                    bail!(format!("Parameter {} was expected to be of type {:?} but got {:?} as argument", i, param_type, arg_type));
+                }
+            }
+
+            if func.parameters.len() > results.len() {
+                println!("{:?}", func.parameters);
+                bail!(format!("Missing argument of type {:?}", func.parameters.get(results.len())));
+            }
+
+            results.clear();
+
+            Ok(func.returntype.clone().ok_or(anyhow!("Function has no return type"))?)
+        }
+        _ => bail!(format!("Unexpected token: {:?}", node))
     }
 }
 
@@ -216,113 +249,5 @@ pub fn run_semantic_analysis(ast: syntax::Tree) -> Result<()> {
 
     preorder_traversal(&mut dict, &mut helper, root, &ast, 0)?;
 
-    /*
-    for (node, depth) in preorder_nodes {
-        let node = &ast.data[node];
-        println!("{:?} - {}", node, depth);
-
-        // Clear up stack actions that have finished
-        while let Some((_, act_depth)) = act_stack.last() {
-            if depth <= *act_depth {    // If we're moving up the tree
-                act_stack.pop(); // Remove the last action
-            } else {
-                break; // Stop when we reach a higher node
-            }
-        }
-
-        // Clear up scopes that have finished
-        while let Some((_, scope_depth)) = scope_stack.last() {
-            if depth <= *scope_depth {    // If we're moving up the tree
-                scope_stack.pop(); // Remove the last action
-            } else {
-                break; // Stop when we reach a higher node
-            }
-        }
-
-        match node {
-            Node::Id(Id::Declarations) => {
-                scope_stack.push((Scope::Global, depth));
-            }
-            Node::Id(id) if *id == Id::Var || *id == Id::Assign || *id == Id::FuncDecl => {
-                act_stack.push((id, depth));
-            }
-            Node::Id(Id::Return) => {
-                act_stack.push((&Id::Return, depth));
-            }
-            Node::Val(val) => {
-                match val {
-                    Token::Identifier(name) => {
-                        if let Some(act) = act_stack.last() {
-                            match act {
-                                // Variable declaration
-                                (Id::Var, _) | (Id::FuncDecl, _) => {
-                                    temp_var = name.to_string();
-                                }
-                                //
-                                ()
-                                _ => {}
-                            }
-                        }
-                    }
-                    Token::DataType(data_type) => {
-                        if let Some(act) = act_stack.last() {
-                            match act {
-                                // Variable declaration
-                                (Id::Var, _) => {
-                                    let (scope, _) = scope_stack.last().unwrap();
-
-                                    let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
-                                    let success = variables.insert(Variable::new(temp_var, data_type.clone()));
-                                    if !success { bail!("Duplicated variable") }
-
-                                    temp_var = String::new();
-                                }
-                                // Function declaration parameters
-                                (Id::FuncDecl, _) => {
-                                    let (scope, _) = scope_stack.last().unwrap();
-
-                                    // The node is the return type
-                                    if temp_var.is_empty() {
-                                        let func = dict.func.entry(scope.clone()).or_insert_with(FuncDetails::new);
-                                        func.returntype = Some(data_type.clone());
-                                    // The node is a parameter
-                                    } else {
-                                        let func = dict.func.entry(scope.clone()).or_insert_with(FuncDetails::new);
-                                        func.parameters.push(data_type.clone());
-
-                                        let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
-                                        let success = variables.insert(Variable::new(temp_var, data_type.clone()));
-                                        if !success { bail!("Duplicated variable") }
-                                        
-                                        temp_var = String::new();
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                    Token::FuncIdent(name) => {
-                        if let Some(act) = act_stack.last() {
-                            match act {
-                                // Function declaration
-                                (Id::FuncDecl, _) => {
-                                    // Remove 2 to the depth to compensate for the fact that a function declaration is higher
-                                    // than its identifier in the AST
-                                    scope_stack.push((Scope::Func(name), depth - 2));
-                                }
-                                _ => {}
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
-        }
-    }
-
-    println!("{:#?}", dict.var);
-    println!("{:#?}", dict.func);
-    */
     Ok(())
 }

@@ -6,7 +6,7 @@ pub use std::{
     fs::File,
     io::{ self, BufRead, Write },
     path::{ Path, PathBuf },
-    collections::{ HashMap, HashSet },
+    collections::{ HashMap, HashSet, VecDeque },
 };
 pub use anyhow::{ anyhow, bail };
 pub use once_cell::sync::Lazy;
