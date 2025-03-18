@@ -22,7 +22,10 @@ pub fn run_lexical_analysis(settings: &Settings) -> Result<Vec<Vec<Token>>> {
 
     // Build Aho-Corasick state machines
     let ahocors: Vec<(TokenProto, AhoCorasick)> = LEX_AHOCOR_DICT.clone().into_iter().map(|(token_proto, matches)| {
-        (token_proto, AhoCorasick::new(matches).unwrap())
+        (
+            token_proto,
+            AhoCorasick::new(matches).unwrap()
+        )
     }).collect();
 
     let mut tokens_list: Vec<Vec<Token>> = Vec::new();

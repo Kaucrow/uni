@@ -11,13 +11,20 @@ impl PDA {
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Number))
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
+
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Identifier))
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
+
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Boolean))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LParen))
                     .action(vec![Action::ParseExpr(lparen)])
                     .push_stack(StackType::LParen)
                     .build(),
+
                 TransitionBuilder::new("q_got_func", Input::Token(TokenProto::FuncCall))
                     .action(vec![Action::ParseExpr(func)])
                     .push_stack(StackType::Func)
@@ -33,30 +40,37 @@ impl PDA {
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Operator))
                     .action(vec![Action::ParseExpr(operator)])
                     .build(),
+
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comparison))
                     .action(vec![Action::ParseExpr(operator)])
                     .build(),
+
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalAnd))
                     .action(vec![Action::ParseExpr(operator)])
                     .build(),
+
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalOr))
                     .action(vec![Action::ParseExpr(operator)])
                     .build(),
+
                 // Comma
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comma))
                     .action(vec![Action::ParseExpr(comma)])
                     .pop_stack(StackType::Func)
                     .push_stack(StackType::Func)
                     .build(),
+
                 // RParen
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::RParen))
                     .action(vec![Action::ParseExpr(rparen)])
                     .pop_stack(StackType::Func)
                     .build(),
+
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::RParen))
                     .action(vec![Action::ParseExpr(rparen)])
                     .pop_stack(StackType::LParen)
                     .build(),
+
                 // Exits
                 TransitionBuilder::new("q_exp_end", Input::Token(TokenProto::Semicolon))
                     .action(vec![
@@ -67,6 +81,7 @@ impl PDA {
                     .pop_stack(StackType::Declarations)
                     .push_stack(StackType::Declarations)
                     .build(),
+
                 TransitionBuilder::new("q_neutral", Input::Token(TokenProto::Semicolon))
                     .action(vec![
                         Action::ParseExpr(expression_end),
@@ -75,6 +90,7 @@ impl PDA {
                         Action::Tree(TreeAction::GoUp),
                     ])
                     .build(),
+
                 // "If" expression end
                 TransitionBuilder::new("q_exp_begin", Input::Token(TokenProto::Then))
                     .action(vec![
@@ -93,9 +109,11 @@ impl PDA {
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Number))
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
+
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Identifier))
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
+
                 TransitionBuilder::new("q_got_lparen", Input::Token(TokenProto::LParen))
                     .action(vec![Action::ParseExpr(lparen)])
                     .build(),
@@ -130,7 +148,7 @@ fn precedence(op: &str) -> i32 {
 fn value(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
     let output = &mut helper.output;
 
-    if let Token::Number(_) | Token::Identifier(_) = input {
+    if let Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) = input {
         output.push(input.clone());
     } else {
         bail!(format!("Tried to parse as a value: {:?}", input))
@@ -264,8 +282,8 @@ fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree) -> R
 
     for token in output {
         match token {
-            Token::Number(_) => stack.push(tree.add_node(token.clone())),   // Create number node
-            Token::Identifier(_) => stack.push(tree.add_node(token.clone())),   // Create variable node
+            Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) =>
+                stack.push(tree.add_node(token.clone())),   // Create value node
 
             // If token is an operator, pop two operands and create an operator node
             Token::Operator(_) | Token::Comparison(_) | Token::LogicalAnd | Token::LogicalOr => {

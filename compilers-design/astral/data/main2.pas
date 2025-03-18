@@ -3,9 +3,10 @@ Program test;
 var
     x: integer;
 
-function sum(x: integer; y: integer): integer;
+function sum(x: integer; y: integer): boolean;
 begin
-    sum := sum(sum(3, 2), 1);
+    { sum := sum(sum(3, 2), 1) + true; }
+    sum := true <> false = true >= true;
 end;
 
 begin
@@ -15,6 +16,7 @@ begin
         end
     else
         begin
+
         x := 2;
         end;
 

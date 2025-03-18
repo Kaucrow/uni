@@ -16,7 +16,7 @@ pub use petgraph::{
     dot::{ Dot, Config },
     graph::{ DiGraph, NodeIndex },
 };
-pub use aho_corasick::AhoCorasick;
+pub use aho_corasick::{ AhoCorasick, AhoCorasickKind };
 pub use indicatif::{ ProgressBar, ProgressStyle };
 pub use colored::Colorize;
 pub use urlencoding::encode;

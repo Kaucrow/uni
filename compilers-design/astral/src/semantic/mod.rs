@@ -3,7 +3,6 @@ pub mod constants;
 use crate::prelude::*;
 use constants::*;
 use anyhow::Result;
-use petgraph::{data, visit::Data};
 use syntax::tree::{ Node, Id };
 
 pub struct Dict {
@@ -179,6 +178,7 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
 
     match node {
         Node::Val(Token::Number(_)) => Ok(DataType::Int),
+        Node::Val(Token::Boolean(_)) => Ok(DataType::Bool),
         Node::Val(Token::String(_)) => Ok(DataType::String),
         Node::Val(Token::Identifier(name)) => {
             let mut datatype: Option<DataType> = None;
@@ -204,12 +204,51 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
             let rhs = results.pop_front().ok_or(anyhow!("RHS value missing"))?;
 
             match (&lhs, op.as_str(), &rhs) {
+                // Arithmetic operations
                 (DataType::Int, "+", DataType::Int) |
                 (DataType::Int, "-", DataType::Int) |
                 (DataType::Int, "*", DataType::Int) |
                 (DataType::Int, "/", DataType::Int) => Ok(DataType::Int),
 
+                // String concatenation
                 (DataType::String, "+", DataType::String) => Ok(DataType::String),
+
+                // Char ASCII operations
+                (DataType::Char, "+", DataType::Int) |
+                (DataType::Char, "-", DataType::Int) => Ok(DataType::Char),
+
+                // Boolean logic operations
+                (DataType::Bool, "&&", DataType::Bool) |
+                (DataType::Bool, "||", DataType::Bool) => Ok(DataType::Bool),
+
+                // Comparison operators (returning Bool)
+                (DataType::Int, "=", DataType::Int) |
+                (DataType::Int, "<>", DataType::Int) |
+                (DataType::Int, "<", DataType::Int) |
+                (DataType::Int, "<=", DataType::Int) |
+                (DataType::Int, ">", DataType::Int) |
+                (DataType::Int, ">=", DataType::Int) |
+
+                (DataType::String, "=", DataType::String) |
+                (DataType::String, "<>", DataType::String) |
+                (DataType::String, "<", DataType::String) |
+                (DataType::String, "<=", DataType::String) |
+                (DataType::String, ">", DataType::String) |
+                (DataType::String, ">=", DataType::String) |
+
+                (DataType::Char, "=", DataType::Char) |
+                (DataType::Char, "<>", DataType::Char) |
+                (DataType::Char, "<", DataType::Char) |
+                (DataType::Char, "<=", DataType::Char) |
+                (DataType::Char, ">", DataType::Char) |
+                (DataType::Char, ">=", DataType::Char) |
+
+                (DataType::Bool, "=", DataType::Bool) |
+                (DataType::Bool, "<>", DataType::Bool) |
+                (DataType::Bool, "<", DataType::Bool) |
+                (DataType::Bool, "<=", DataType::Bool) |
+                (DataType::Bool, ">", DataType::Bool) |
+                (DataType::Bool, ">=", DataType::Bool) => Ok(DataType::Bool),
 
                 _ => bail!(format!("Invalid operation: {:?} {} {:?}", lhs, op, rhs))
             }
