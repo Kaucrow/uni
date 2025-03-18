@@ -8,7 +8,7 @@ begin
     var
         z: integer;
 
-    sum := (x + y) * 4.3 - sum(sum(3, 5), 1);
+    sum := (x + z) * 4.3 - sum(sum(3, 5), 1);
 end;
 
 begin

@@ -1,9 +1,12 @@
 use crate::prelude::*;
-use std::hash::{ Hash, Hasher };
+use std::{
+    hash::{ Hash, Hasher },
+    borrow::Borrow,
+};
 
-pub type VarDict<'a> = HashMap<Scope<'a>, HashSet<Variable>>;
+pub type VarDict = HashMap<Scope, HashSet<Variable>>;
 
-pub type FuncDict<'a> = HashMap<Scope<'a>, FuncDetails>;
+pub type FuncDict = HashMap<Scope, FuncDetails>;
 
 #[derive(Debug)]
 pub struct FuncDetails {
@@ -43,6 +46,13 @@ impl Hash for Variable {
     }
 }
 
+// Implement Borrow<str> so HashSet can look up variables by &str
+impl Borrow<str> for Variable {
+    fn borrow(&self) -> &str {
+        &self.name
+    }
+}
+
 impl Variable {
     pub fn new(name: String, datatype: DataType) -> Self {
         Self {
@@ -53,8 +63,8 @@ impl Variable {
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub enum Scope<'a> {
+pub enum Scope {
     Global,
     Main,
-    Func(&'a String),
+    Func(String),
 }

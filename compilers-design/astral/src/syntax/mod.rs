@@ -53,7 +53,7 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
 
     println!("{}", url.green().bold());
 
-    open_in_browser(&url);
+    //open_in_browser(&url);
 
     Ok(ast)
 }
