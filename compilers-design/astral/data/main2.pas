@@ -6,6 +6,7 @@ var
 function sum(x: integer; y: integer): boolean;
 begin
     { sum := sum(sum(3, 2), 1) + true; }
+    x := 2;
     sum := true <> false = true >= true;
 end;
 

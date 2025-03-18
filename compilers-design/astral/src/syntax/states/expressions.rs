@@ -41,18 +41,6 @@ impl PDA {
                     .action(vec![Action::ParseExpr(operator)])
                     .build(),
 
-                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comparison))
-                    .action(vec![Action::ParseExpr(operator)])
-                    .build(),
-
-                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalAnd))
-                    .action(vec![Action::ParseExpr(operator)])
-                    .build(),
-
-                TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::LogicalOr))
-                    .action(vec![Action::ParseExpr(operator)])
-                    .build(),
-
                 // Comma
                 TransitionBuilder::new("q_exp_value", Input::Token(TokenProto::Comma))
                     .action(vec![Action::ParseExpr(comma)])
@@ -162,9 +150,7 @@ fn operator(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result
     let operators = &mut helper.operators;
 
     let op = match input {
-        Token::Operator(op) | Token::Comparison(op) => op,
-        Token::LogicalAnd => "&&",
-        Token::LogicalOr => "||",
+        Token::Operator(op) => op,
         _ => bail!("Tried to parse as an operator: {:?}", input)
     };
 
@@ -286,7 +272,7 @@ fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree) -> R
                 stack.push(tree.add_node(token.clone())),   // Create value node
 
             // If token is an operator, pop two operands and create an operator node
-            Token::Operator(_) | Token::Comparison(_) | Token::LogicalAnd | Token::LogicalOr => {
+            Token::Operator(_) => {
                 let right = stack.pop().expect("Right operand missing");
                 let left = stack.pop().expect("Left operand missing");
 

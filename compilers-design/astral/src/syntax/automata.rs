@@ -174,7 +174,7 @@ impl TransitionBuilder {
     }
     
     pub fn cmp_stack(mut self, stack: StackType) -> Self {
-        self.pop_stack = Some(stack);
+        self.cmp_stack = Some(stack);
         self
     }
     
