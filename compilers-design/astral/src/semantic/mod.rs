@@ -3,6 +3,7 @@ pub mod constants;
 use crate::prelude::*;
 use constants::*;
 use anyhow::Result;
+use petgraph::data;
 use syntax::tree::{ Node, Id };
 
 pub struct Dict {
@@ -35,15 +36,13 @@ impl Helper {
     }
 }
 
-pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node: NodeIndex, ast: &syntax::Tree, depth: i32) -> Result<()> {
-    println!("{:?} at depth {}", ast.data[node], depth);
+pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIndex, ast: &syntax::Tree, depth: i32) -> Result<()> {
+    println!("{:?} at depth {}", ast.data[node_idx], depth);
 
     let act_stack = &mut helper.act_stack;
     let temp_var = &mut helper.temp_var;
 
-    let children: Vec<_> = ast.data.neighbors(node).collect();
-
-    let node = &ast.data[node];
+    let node = &ast.data[node_idx];
 
     // Clear up stack actions that have finished
     while let Some((_, act_depth)) = act_stack.last() {
@@ -139,6 +138,7 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node: NodeIndex,
         _ => {}
     }
 
+    let children: Vec<_> = ast.data.neighbors(node_idx).collect();
     for &child in children.iter().rev() {
         match node {
             Node::Id(Id::Return) => {
@@ -155,6 +155,40 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node: NodeIndex,
                     if let Scope::Func(name) = scope {
                         bail!("Function {} expected {:?} as return type, but got {:?} instead", name, exp_ret_type, ret_type);
                     }
+                }
+            }
+            Node::Id(Id::Assign) => {
+                let var_node_idx = children.get(1).ok_or(anyhow!("Assign node has no left hand side child node"))?;
+                let var_node = &ast.data[var_node_idx.clone()];
+
+                if let Node::Val(Token::Identifier(name)) = var_node {
+                    let (scope, _) = helper.scope_stack.last().ok_or(anyhow!("No scope"))?;
+
+                    let var = dict.var.get(scope).ok_or(anyhow!("Scope not found"))?
+                        .get(name.as_str())
+                        .ok_or(anyhow!("Found no variable"))?;
+
+                    let exp_type = &var.datatype;
+
+                    let expression_root = children.get(0).ok_or(anyhow!("Assign node has no right hand side child node"))?;
+                    let datatype = get_expression_type(*expression_root, VecDeque::new(), helper, dict, ast)?;
+
+                    if *exp_type != datatype {
+                        bail!(format!("Invalid assignment: Cannot assign type {:?} to a variable of type {:?}", datatype, exp_type));
+                    }
+                } else {
+                    println!("HERE: {:?}", var_node);
+                    bail!("Attempted to assign to something other than a variable")
+                }
+            }
+            Node::Id(Id::If) => {
+                let cond_node_idx = children.last().ok_or(anyhow!("'If' node has no children"))?;
+                let cond_node = &ast.data[cond_node_idx.clone()];
+
+                let datatype = get_expression_type(*cond_node_idx, VecDeque::new(), helper, dict, ast)?;
+
+                if datatype != DataType::Bool {
+                    bail!("The if expression's condition expected type Bool but got type {:?} instead", datatype);
                 }
             }
             _ => {

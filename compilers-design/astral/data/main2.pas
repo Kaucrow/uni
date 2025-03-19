@@ -3,15 +3,17 @@ Program test;
 var
     x: integer;
 
-function sum(x: integer; y: integer): boolean;
+function sum(x: integer; y: integer): integer;
 begin
     { sum := sum(sum(3, 2), 1) + true; }
     x := 2;
-    sum := true <> false = true >= true;
+    { sum := true <> false = true >= true; }
+
+    sum := 3;
 end;
 
 begin
-    if 2 < 4 then
+    if 2 < sum(3) then
         begin
         x := 4;
         end
