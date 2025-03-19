@@ -13,14 +13,14 @@ begin
 end;
 
 begin
-    if 2 < sum(3) then
+    if 2 < sum(3, 2) then
         begin
         x := 4;
         end
     else
         begin
 
-        x := 2;
+        x := 'a';
         end;
 
     x := sum(5, 10);  { Example call to the function }

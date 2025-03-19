@@ -219,6 +219,10 @@ pub fn preorder_traversal(
                         format!("The if expression's condition expected type Bool but got type {:?} instead", datatype)
                     ));
                 }
+
+                for child in children.iter().take(children.len() - 1) {
+                    preorder_traversal(dict, helper, *child, ast, depth, pbar.clone())?;
+                }
             }
             _ => {
                 preorder_traversal(dict, helper, child, ast, depth + 1, pbar.clone())?;
@@ -243,6 +247,7 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
         Node::Val(Token::Number(_)) => Ok(DataType::Int),
         Node::Val(Token::Boolean(_)) => Ok(DataType::Bool),
         Node::Val(Token::String(_)) => Ok(DataType::String),
+        Node::Val(Token::Char(_)) => Ok(DataType::Char),
         Node::Val(Token::Identifier(name)) => {
             let mut datatype: Option<DataType> = None;
 

@@ -14,7 +14,6 @@ pub enum TokenProto {
     FuncIdent,
     FuncCall,
     DataType,
-    Boolean,
     If,
     Then,
     Else,
@@ -33,6 +32,8 @@ pub enum TokenProto {
     Identifier,
     Number,
     String,
+    Boolean,
+    Char,
     Comment,
 }
 
@@ -49,7 +50,6 @@ pub enum Token {
     FuncIdent(String),
     FuncCall(String),
     DataType(DataType),
-    Boolean(String),
     If,
     Then,
     Else,
@@ -68,6 +68,8 @@ pub enum Token {
     Identifier(String),
     Number(String),
     String(String),
+    Char(String),
+    Boolean(String),
     Comment(String),
 }
 
@@ -84,7 +86,6 @@ impl TokenProto {
             TokenProto::FuncIdent => Token::FuncIdent(input),
             TokenProto::FuncCall => Token::FuncCall(input),
             TokenProto::DataType => Token::DataType(DataType::from_str(&input).unwrap()),
-            TokenProto::Boolean => Token::Boolean(input),
             TokenProto::If => Token::If,
             TokenProto::Then => Token::Then,
             TokenProto::Else => Token::Else,
@@ -100,6 +101,8 @@ impl TokenProto {
             TokenProto::Identifier => Token::Identifier(input),
             TokenProto::Number => Token::Number(input),
             TokenProto::String => Token::String(input),
+            TokenProto::Boolean => Token::Boolean(input),
+            TokenProto::Char => Token::Char(input),
             TokenProto::Comment => Token::Comment(input),
         }
     }
@@ -118,7 +121,6 @@ impl Token {
             Token::FuncIdent(_) => TokenProto::FuncIdent,
             Token::FuncCall(_) => TokenProto::FuncCall,
             Token::DataType(_) => TokenProto::DataType,
-            Token::Boolean(_) => TokenProto::Boolean,
             Token::If => TokenProto::If,
             Token::Then => TokenProto::Then,
             Token::Else => TokenProto::Else,
@@ -134,6 +136,8 @@ impl Token {
             Token::Identifier(_) => TokenProto::Identifier,
             Token::Number(_) => TokenProto::Number,
             Token::String(_) => TokenProto::String,
+            Token::Boolean(_) => TokenProto::Boolean,
+            Token::Char(_) => TokenProto::Char,
             Token::Comment(_) => TokenProto::Comment,
         }
     }
@@ -168,6 +172,7 @@ pub const LEX_REGEX_DICT: Lazy<Vec<(TokenProto, Regex)>> = Lazy::new(|| vec![
     (TokenProto::FuncIdent, Regex::new(r"\b[a-zA-Z_][a-zA-Z0-9_]*\(").unwrap()),
     (TokenProto::Identifier, Regex::new(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b").unwrap()),
     (TokenProto::Number, Regex::new(r"\b-?\d+(\.\d+)?\b").unwrap()),
+    (TokenProto::Char, Regex::new(r"'([^']|''{1})'").unwrap()),
     (TokenProto::String, Regex::new(r"'([^']|'')*'").unwrap()),
     (TokenProto::Comment, Regex::new(r"\{[^}]*\}").unwrap())
 ]);

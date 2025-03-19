@@ -16,6 +16,14 @@ impl PDA {
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
 
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::String))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Char))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+
                 TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Boolean))
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
@@ -102,6 +110,18 @@ impl PDA {
                     .action(vec![Action::ParseExpr(value)])
                     .build(),
 
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::String))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+                
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Char))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+
+                TransitionBuilder::new("q_got_value", Input::Token(TokenProto::Boolean))
+                    .action(vec![Action::ParseExpr(value)])
+                    .build(),
+
                 TransitionBuilder::new("q_got_lparen", Input::Token(TokenProto::LParen))
                     .action(vec![Action::ParseExpr(lparen)])
                     .build(),
@@ -136,7 +156,7 @@ fn precedence(op: &str) -> i32 {
 fn value(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
 
-    if let Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) = input {
+    if let Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) | Token::String(_) | Token::Char(_) = input {
         output.push(input.clone());
     } else {
         bail!(format!("Tried to parse as a value: {:?}", input))
@@ -268,7 +288,7 @@ fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree, line
 
     for token in output {
         match token {
-            Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) =>
+            Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) | Token::String(_) | Token::Char(_) =>
                 stack.push(tree.add_node(token.clone())),   // Create value node
 
             // If token is an operator, pop two operands and create an operator node
