@@ -114,7 +114,7 @@ impl Mode {
 pub enum Action {
     Tree(TreeAction),
     SwitchMode(Mode),
-    ParseExpr(fn(&mut Box<ExprHelper>, &Token, &mut Tree) -> Result<()>)
+    ParseExpr(fn(&mut Box<ExprHelper>, &Token, &mut Tree, line: usize) -> Result<()>)
 }
 
 pub struct Transition {
@@ -257,7 +257,7 @@ impl PDA {
         states.insert(name, transitions);
     }
 
-    pub fn transition(&mut self, input: &Token, next_token: Option<&&Token>, tree: &mut Tree) -> Result<()> {
+    pub fn transition(&mut self, input: &Token, next_token: Option<&&Token>, tree: &mut Tree, line: usize) -> Result<()> {
         let states = self.states.get(&self.mode.proto()).expect(format!("Mode is not in PDA states: {:?}", self.mode).as_str());
 
         let transition = {
@@ -320,7 +320,7 @@ impl PDA {
 
             transition_ret
         }
-        .ok_or(anyhow!("No suitable transition was found."))?;
+        .ok_or(anyhow!("No suitable transition was found"))?;
 
         let popped = {
             if transition.pop_stack.is_some() {
@@ -338,7 +338,7 @@ impl PDA {
                         match action {
                             TreeAction::AddNode(node) => {
                                 if let Some(value) = node {
-                                    tree.add_node(value.clone());
+                                    tree.add_node(value.clone(), line);
                                 } else {
                                     unimplemented!("add node without defined value");
                                 }
@@ -347,7 +347,7 @@ impl PDA {
                                 if let Some(_) = node {
                                     unimplemented!("append child with defined value");
                                 } else {
-                                    tree.append_child(Node::Val(input.clone()))?;
+                                    tree.append_child(Node::Val(input.clone()), line)?;
                                 }
                             }
                             TreeAction::GoUp => {
@@ -357,7 +357,7 @@ impl PDA {
                     },
                     Action::ParseExpr(parse_fn) => {
                         if let Mode::Expr(helper) = &mut self.mode {
-                            parse_fn(helper, input, tree)?;
+                            parse_fn(helper, input, tree, line)?;
                         } else {
                             bail!("Cannot trigger a ParseExpr action on a mode other than Expr mode")
                         }
@@ -377,7 +377,7 @@ impl PDA {
         self.state = transition.to_state;
 
         if let Input::Any = transition.input {
-            self.transition(input, next_token, tree)?;
+            self.transition(input, next_token, tree, line)?;
         }
 
         Ok(())

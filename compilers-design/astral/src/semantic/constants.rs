@@ -3,6 +3,7 @@ use std::{
     hash::{ Hash, Hasher },
     borrow::Borrow,
 };
+pub use thiserror::Error;
 
 pub type VarDict = HashMap<Scope, HashSet<Variable>>;
 
@@ -67,4 +68,12 @@ pub enum Scope {
     Global,
     Main,
     Func(String),
+}
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Compiler error: {0}")]
+    Compiler(String),
+    #[error("Line {0}: {1}")]
+    User(usize, String),
 }

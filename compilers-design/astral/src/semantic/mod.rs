@@ -2,8 +2,6 @@ pub mod constants;
 
 use crate::prelude::*;
 use constants::*;
-use anyhow::Result;
-use petgraph::data;
 use syntax::tree::{ Node, Id };
 
 pub struct Dict {
@@ -36,13 +34,13 @@ impl Helper {
     }
 }
 
-pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIndex, ast: &syntax::Tree, depth: i32) -> Result<()> {
-    println!("{:?} at depth {}", ast.data[node_idx], depth);
-
+pub fn preorder_traversal(
+    dict: &mut Dict, helper: &mut Helper, node_idx: NodeIndex, ast: &syntax::Tree, depth: i32, pbar: Arc<ProgressBar>
+) -> Result<(), Error> {
     let act_stack = &mut helper.act_stack;
     let temp_var = &mut helper.temp_var;
 
-    let node = &ast.data[node_idx];
+    let (node, line) = &ast.data[node_idx];
 
     // Clear up stack actions that have finished
     while let Some((_, act_depth)) = act_stack.last() {
@@ -83,20 +81,23 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIn
                     }
                 }
                 Token::DataType(data_type) => {
-                    if let Some(act) = act_stack.last() {
+                    if let Some((act, _)) = act_stack.last() {
                         match act {
                             // Variable declaration
-                            (Id::Var, _) => {
+                            Id::Var => {
                                 let (scope, _) = helper.scope_stack.last().unwrap();
 
                                 let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
                                 let success = variables.insert(Variable::new(temp_var.clone(), data_type.clone()));
-                                if !success { bail!("Duplicated variable") }
+                                if !success { return Err(Error::User(
+                                    *line,
+                                    format!("Variable '{}' is already defined in scope {:?}", temp_var, scope)
+                                )); }
 
                                 *temp_var = String::new();
                             }
                             // Function declaration parameters
-                            (Id::FuncDecl, _) => {
+                            Id::FuncDecl => {
                                 let (scope, _) = helper.scope_stack.last().unwrap();
 
                                 // The node is the return type
@@ -110,7 +111,10 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIn
 
                                     let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
                                     let success = variables.insert(Variable::new(temp_var.clone(), data_type.clone()));
-                                    if !success { bail!("Duplicated variable") }
+                                    if !success { return Err(Error::User(
+                                        *line,
+                                        format!("Variable '{}' is already defined in scope {:?}", temp_var, scope)
+                                    )); }
                                     
                                     *temp_var = String::new();
                                 }
@@ -138,61 +142,86 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIn
         _ => {}
     }
 
+    pbar.inc(1);
+
     let children: Vec<_> = ast.data.neighbors(node_idx).collect();
     for &child in children.iter().rev() {
         match node {
             Node::Id(Id::Return) => {
-                let (scope, _) = helper.scope_stack.last().ok_or(anyhow!("No scope"))?;
+                let (scope, _) = helper.scope_stack.last().ok_or(Error::Compiler("No scope".to_string()))?;
 
-                let exp_ret_type = dict.func.get(scope).ok_or(anyhow!("Function not found"))?
-                    .returntype
-                    .as_ref()
-                    .ok_or(anyhow!("Function has no return type"))?;
+                let exp_ret_type = {
+                    if let Scope::Func(name) = scope {
+                        Ok(dict.func.get(scope).ok_or(Error::User(
+                            *line,
+                            format!("Function '{}' has not been defined", name)
+                        ))?
+                        .returntype
+                        .as_ref()
+                        .ok_or(Error::Compiler("Function has no return type".to_string()))?)
+                    } else {
+                        Err(Error::Compiler("The top of the scope stack doesn't contain a function".to_string()))
+                    }
+                }?;
 
                 let ret_type = get_expression_type(child, VecDeque::new(), helper, dict, ast)?;
 
                 if *exp_ret_type != ret_type {
                     if let Scope::Func(name) = scope {
-                        bail!("Function {} expected {:?} as return type, but got {:?} instead", name, exp_ret_type, ret_type);
+                        return Err(Error::User(
+                            *line,
+                            format!("Function {} expected {:?} as return type, but got {:?} instead", name, exp_ret_type, ret_type)
+                        ));
+                    } else {
+                        return Err(Error::Compiler(format!(
+                            "Unexpected scope found: {:?}", scope
+                        )));
                     }
                 }
             }
             Node::Id(Id::Assign) => {
-                let var_node_idx = children.get(1).ok_or(anyhow!("Assign node has no left hand side child node"))?;
-                let var_node = &ast.data[var_node_idx.clone()];
+                let var_node_idx = children.get(1).ok_or(Error::Compiler("Assign node has no left hand side child node".to_string()))?;
+                let (var_node, _) = &ast.data[var_node_idx.clone()];
 
                 if let Node::Val(Token::Identifier(name)) = var_node {
-                    let (scope, _) = helper.scope_stack.last().ok_or(anyhow!("No scope"))?;
+                    let (scope, _) = helper.scope_stack.last().ok_or(Error::Compiler("No scope".to_string()))?;
 
-                    let var = dict.var.get(scope).ok_or(anyhow!("Scope not found"))?
+                    let var = dict.var.get(scope).ok_or(Error::Compiler("Scope not found".to_string()))?
                         .get(name.as_str())
-                        .ok_or(anyhow!("Found no variable"))?;
+                        .ok_or(Error::Compiler("Variable does not exist in scope".to_string()))?;
 
                     let exp_type = &var.datatype;
 
-                    let expression_root = children.get(0).ok_or(anyhow!("Assign node has no right hand side child node"))?;
+                    let expression_root = children.get(0).ok_or(Error::Compiler("Assign node has no right hand side child node".to_string()))?;
                     let datatype = get_expression_type(*expression_root, VecDeque::new(), helper, dict, ast)?;
 
                     if *exp_type != datatype {
-                        bail!(format!("Invalid assignment: Cannot assign type {:?} to a variable of type {:?}", datatype, exp_type));
+                        return Err(Error::User(
+                            *line,
+                            format!("Invalid assignment: Cannot assign type {:?} to a variable of type {:?}", datatype, exp_type)
+                        ));
                     }
                 } else {
-                    println!("HERE: {:?}", var_node);
-                    bail!("Attempted to assign to something other than a variable")
+                    return Err(Error::User(
+                        *line,
+                        format!("Attempted to assign a value to something other than a variable")
+                    ));
                 }
             }
             Node::Id(Id::If) => {
-                let cond_node_idx = children.last().ok_or(anyhow!("'If' node has no children"))?;
-                let cond_node = &ast.data[cond_node_idx.clone()];
+                let cond_node_idx = children.last().ok_or(Error::Compiler("'If' node has no children".to_string()))?;
 
                 let datatype = get_expression_type(*cond_node_idx, VecDeque::new(), helper, dict, ast)?;
 
                 if datatype != DataType::Bool {
-                    bail!("The if expression's condition expected type Bool but got type {:?} instead", datatype);
+                    return Err(Error::User(
+                        *line,
+                        format!("The if expression's condition expected type Bool but got type {:?} instead", datatype)
+                    ));
                 }
             }
             _ => {
-                preorder_traversal(dict, helper, child, ast, depth + 1)?;
+                preorder_traversal(dict, helper, child, ast, depth + 1, pbar.clone())?;
             }
         }
     }
@@ -200,7 +229,7 @@ pub fn preorder_traversal(dict: &mut Dict, helper: &mut Helper, node_idx: NodeIn
     Ok(())
 }
 
-pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, helper: &Helper, dict: &Dict, ast: &syntax::Tree) -> Result<DataType> {
+pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, helper: &Helper, dict: &Dict, ast: &syntax::Tree) -> Result<DataType, Error> {
     let children: Vec<_> = ast.data.neighbors(node).collect();
 
     for child in children.iter().rev() {
@@ -208,7 +237,7 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
         results.push_back(result);
     }
 
-    let node = &ast.data[node];
+    let (node, line) = &ast.data[node];
 
     match node {
         Node::Val(Token::Number(_)) => Ok(DataType::Int),
@@ -218,7 +247,7 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
             let mut datatype: Option<DataType> = None;
 
             for (scope, _) in helper.scope_stack.iter().rev() {
-                let variable = &dict.var.get(scope).ok_or(anyhow!("Scope not found"))?
+                let variable = &dict.var.get(scope).ok_or(Error::Compiler("Scope not found".to_string()))?
                     .get(name.as_str());
 
                 if let Some(variable) = variable {
@@ -227,15 +256,15 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
                 }
             }
 
-            Ok(datatype.ok_or(anyhow!("Variable not found"))?)
+            Ok(datatype.ok_or(Error::Compiler("Variable does not exist in scope".to_string()))?)
         }
         Node::Val(Token::Operator(op)) => {
             if results.len() != 2 {
-                bail!("Expected two values to operate")
+                return Err(Error::Compiler("Expected two values to operate".to_string()));
             }
 
-            let lhs = results.pop_front().ok_or(anyhow!("LHS value missing"))?;
-            let rhs = results.pop_front().ok_or(anyhow!("RHS value missing"))?;
+            let lhs = results.pop_front().ok_or(Error::Compiler("LHS value missing".to_string()))?;
+            let rhs = results.pop_front().ok_or(Error::Compiler("RHS value missing".to_string()))?;
 
             match (&lhs, op.as_str(), &rhs) {
                 // Arithmetic operations
@@ -284,43 +313,80 @@ pub fn get_expression_type(node: NodeIndex, mut results: VecDeque<DataType>, hel
                 (DataType::Bool, ">", DataType::Bool) |
                 (DataType::Bool, ">=", DataType::Bool) => Ok(DataType::Bool),
 
-                _ => bail!(format!("Invalid operation: {:?} {} {:?}", lhs, op, rhs))
+                _ => Err(Error::User(
+                    *line,
+                    format!("Invalid operation: {:?} {} {:?}", lhs, op, rhs)
+                ))
             }
         }
         Node::Val(Token::FuncCall(name)) => {
-            let func = dict.func.get(&Scope::Func(name.clone())).ok_or(anyhow!("Function not found"))?;
+            let func = dict.func.get(&Scope::Func(name.clone())).ok_or(Error::User(
+                *line,
+                format!("Function '{}' has not been defined", name)
+            ))?;
 
             if results.len() > func.parameters.len() {
-                bail!("Function received more arguments than required")
+                return Err(Error::User(
+                    *line,
+                    format!("Function '{}' takes {} arguments, but received {} instead", name, func.parameters.len(), results.len())
+                ))
             }
 
             for (i, (param_type, arg_type)) in func.parameters.iter().zip(results.clone()).enumerate() {
                 if *param_type != arg_type {
-                    bail!(format!("Parameter {} was expected to be of type {:?} but got {:?} as argument", i, param_type, arg_type));
+                    return Err(Error::User(
+                        *line,
+                        format!("Parameter {} of function '{}' was expected to be of type {:?} but got {:?} as argument", i + 1, name, param_type, arg_type)
+                    ));
                 }
             }
 
             if func.parameters.len() > results.len() {
-                println!("{:?}", func.parameters);
-                bail!(format!("Missing argument of type {:?}", func.parameters.get(results.len())));
+                return Err(Error::User(
+                    *line,
+                    format!("Function '{}' is missing an argument of type {:?}", name, func.parameters.get(results.len()).unwrap())
+                ));
             }
 
             results.clear();
 
-            Ok(func.returntype.clone().ok_or(anyhow!("Function has no return type"))?)
+            Ok(func.returntype.clone().ok_or(Error::Compiler(format!("Function '{}' has no return type", name)))?)
         }
-        _ => bail!(format!("Unexpected token: {:?}", node))
+        _ => Err(Error::Compiler(format!("Unexpected token: {:?}", node)))
     }
 }
 
-pub fn run_semantic_analysis(ast: syntax::Tree) -> Result<()> {
+pub fn run_semantic_analysis(ast: syntax::Tree) -> anyhow::Result<()> {
     let mut dict = Dict::new();
     let mut helper = Helper::new();
+
+    let pbar = Arc::new(ProgressBar::new(ast.data.node_count() as u64));
+    pbar.set_style(ProgressStyle::default_bar()
+        .template("Analyzing semantics {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})\n{msg:.magenta}")
+        .unwrap()
+        .progress_chars("#>-"));
+
+    let pbar_clone = Arc::clone(&pbar);
 
     // Find the tree root by looking for the node with no incoming edges
     let root = ast.data.node_indices().find(|&node| ast.data.neighbors_directed(node, petgraph::Direction::Incoming).count() == 0).unwrap();
 
-    preorder_traversal(&mut dict, &mut helper, root, &ast, 0)?;
+    match preorder_traversal(&mut dict, &mut helper, root, &ast, 0, pbar_clone) {
+        Err(e) => {
+            eprintln!("{}", "Semantic error found\n".red());
+
+            match e {
+                Error::User(..) => eprintln!("{}\n", e.to_string().red()),
+                Error::Compiler(_) => eprintln!("{}\n", e.to_string().red()),
+            }
+
+            eprintln!();
+            bail!("A semantic error occurred")
+        }
+        Ok(()) => {}
+    }
+
+    pbar.finish_with_message("Semantic analysis complete OwO!");
 
     Ok(())
 }

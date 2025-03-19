@@ -7,6 +7,8 @@ pub use std::{
     io::{ self, BufRead, Write },
     path::{ Path, PathBuf },
     collections::{ HashMap, HashSet, VecDeque },
+    sync::{ Arc, Mutex},
+    thread,
 };
 pub use anyhow::{ anyhow, bail };
 pub use once_cell::sync::Lazy;

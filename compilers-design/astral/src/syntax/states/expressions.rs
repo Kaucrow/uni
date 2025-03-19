@@ -133,7 +133,7 @@ fn precedence(op: &str) -> i32 {
     }
 }
 
-fn value(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn value(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
 
     if let Token::Number(_) | Token::Identifier(_) | Token::Boolean(_) = input {
@@ -145,7 +145,7 @@ fn value(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()
     Ok(())
 }
 
-fn operator(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn operator(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
     let operators = &mut helper.operators;
 
@@ -166,7 +166,7 @@ fn operator(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result
     Ok(())
 }
 
-fn lparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn lparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let operators = &mut helper.operators;
 
     if let Token::LParen = input {
@@ -178,7 +178,7 @@ fn lparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<(
     Ok(())
 }
 
-fn comma(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn comma(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
     let operators = &mut helper.operators;
     let arg_count = &mut helper.arg_count;
@@ -203,7 +203,7 @@ fn comma(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()
     Ok(())
 }
 
-fn func(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn func(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let operators = &mut helper.operators;
     let arg_count = &mut helper.arg_count;
 
@@ -218,7 +218,7 @@ fn func(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()>
 }
 
 // Right parenthesis triggers popping until left parenthesis is found
-fn rparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<()> {
+fn rparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
     let operators = &mut helper.operators;
     let arg_count = &mut helper.arg_count;
@@ -247,7 +247,7 @@ fn rparen(helper: &mut Box<ExprHelper>, input: &Token, _: &mut Tree) -> Result<(
     Ok(())
 }
 
-fn expression_end(helper: &mut Box<ExprHelper>, _: &Token, _: &mut Tree) -> Result<()> {
+fn expression_end(helper: &mut Box<ExprHelper>, _: &Token, _: &mut Tree, _: usize) -> Result<()> {
     let output = &mut helper.output;
     let operators = &mut helper.operators;
 
@@ -258,7 +258,7 @@ fn expression_end(helper: &mut Box<ExprHelper>, _: &Token, _: &mut Tree) -> Resu
     Ok(())
 }
 
-fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree) -> Result<()> {
+fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree, line: usize) -> Result<()> {
     let output = &helper.output;
 
     let mut tree: DiGraph<Token, ()> = DiGraph::new();
@@ -312,7 +312,7 @@ fn build_expr_tree(helper: &mut Box<ExprHelper>, _: &Token, ast: &mut Tree) -> R
 
     let mut index_map = Vec::new();
     for node in tree.node_indices() {
-        let new_index = ast.data.add_node(Node::Val(tree[node].clone()));
+        let new_index = ast.data.add_node((Node::Val(tree[node].clone()), line));
         index_map.push((node, new_index));
     }
 

@@ -18,7 +18,7 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
 
     let syntax_bar = ProgressBar::new(tokens_amt as u64);
     syntax_bar.set_style(ProgressStyle::default_bar()
-        .template("Analyzing syntax {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})\n{msg:.green}")
+        .template("Analyzing syntax {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})\n{msg:.magenta}")
         .unwrap()
         .progress_chars("#>-"));
 
@@ -28,7 +28,7 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
         while let Some(token) = line.next() {
             let next_token = line.peek();
 
-            pda.transition(&token, next_token, &mut ast).or_else(|err| {
+            pda.transition(&token, next_token, &mut ast, i + 1).or_else(|err| {
                 eprintln!("{} {}\n", "Syntax error found in line".red(), i + 1);
                 eprintln!("{}", "Automata status:".magenta());
                 eprintln!("{} {:?}", "- Mode: ".yellow(), pda.mode);
@@ -43,13 +43,13 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
         }
     }
 
-    syntax_bar.finish_with_message("Syntax analysis complete! :D");
+    syntax_bar.finish_with_message("Syntactical analysis complete! :D\n");
 
     println!("A browser window with the Abstract Syntactical Tree diagram should open now.\nIf it doesn't, copy and paste the following link in a browser to view it:");
 
     let ast_dot = format!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
     let encoded = encode(&ast_dot);
-    let url = format!("https://quickchart.io/graphviz?graph={}", encoded);
+    let url = format!("https://quickchart.io/graphviz?graph={}\n", encoded);
 
     println!("{}", url.green().bold());
 

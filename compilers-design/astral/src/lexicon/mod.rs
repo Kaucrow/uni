@@ -13,7 +13,7 @@ pub fn run_lexical_analysis(settings: &Settings) -> Result<Vec<Vec<Token>>> {
 
     let lex_bar = ProgressBar::new(file_lines);
     lex_bar.set_style(ProgressStyle::default_bar()
-        .template("Analyzing lexic {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})\n{msg:.green}")
+        .template("Analyzing lexic {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len} ({eta})\n{msg:.magenta}")
         .unwrap()
         .progress_chars("#>-"));
 
@@ -108,7 +108,7 @@ pub fn run_lexical_analysis(settings: &Settings) -> Result<Vec<Vec<Token>>> {
         lex_bar.inc(1);
     }
 
-    lex_bar.finish_with_message("Lexic analysis complete! :)");
+    lex_bar.finish_with_message("Lexical analysis complete! :)");
 
     Ok(tokens_list)
 }

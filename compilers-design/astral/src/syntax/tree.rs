@@ -33,7 +33,7 @@ pub enum TreeAction {
 
 pub struct Tree {
     pub curr_node: Option<NodeIndex>,
-    pub data: DiGraph<Node, ()>,
+    pub data: DiGraph<(Node, usize), ()>,
 }
 
 impl Tree {
@@ -44,18 +44,18 @@ impl Tree {
         }
     }
 
-    pub fn add_node(&mut self, value: Node) {
+    pub fn add_node(&mut self, value: Node, line: usize) {
         if let Some(parent) = self.curr_node {
-            self.curr_node = Some(self.data.add_node(value));
+            self.curr_node = Some(self.data.add_node((value, line)));
             self.data.add_edge(parent, self.curr_node.unwrap(), ());
         } else {
-            self.curr_node = Some(self.data.add_node(value));
+            self.curr_node = Some(self.data.add_node((value, line)));
         }
     }
 
-    pub fn append_child(&mut self, value: Node) -> Result<()> {
+    pub fn append_child(&mut self, value: Node, line: usize) -> Result<()> {
         if let Some(parent) = self.curr_node {
-            let child = self.data.add_node(value);
+            let child = self.data.add_node((value, line));
             self.data.add_edge(parent, child, ());
             Ok(())
         } else {
