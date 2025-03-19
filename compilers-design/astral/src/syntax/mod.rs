@@ -6,10 +6,11 @@ pub use automata::*;
 pub use tree::{ Tree, TreeAction, Node, Id };
 
 use crate::prelude::*;
+use crate::settings::Settings;
 use anyhow::Result;
 use std::process::Command;
 
-pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
+pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>, settings: &Settings) -> Result<Tree> {
     // Initialize the Syntax PDA and AST
     let mut pda = PDA::new();
     let mut ast = Tree::new();
@@ -45,15 +46,17 @@ pub fn run_syntactic_analysis(tokens_list: Vec<Vec<Token>>) -> Result<Tree> {
 
     syntax_bar.finish_with_message("Syntactical analysis complete! :D\n");
 
-    println!("A browser window with the Abstract Syntactical Tree diagram should open now.\nIf it doesn't, copy and paste the following link in a browser to view it:");
+    if settings.display_ast {
+        println!("A browser window with the Abstract Syntactical Tree diagram should open now.\nIf it doesn't, copy and paste the following link in a browser to view it:");
 
-    let ast_dot = format!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
-    let encoded = encode(&ast_dot);
-    let url = format!("https://quickchart.io/graphviz?graph={}\n", encoded);
+        let ast_dot = format!("{:?}", Dot::with_config(&ast.data, &[Config::EdgeNoLabel]));
+        let encoded = encode(&ast_dot);
+        let url = format!("https://quickchart.io/graphviz?graph={}\n", encoded);
 
-    println!("{}", url.green().bold());
+        println!("{}", url.green().bold());
 
-    open_in_browser(&url);
+        open_in_browser(&url);
+    }
 
     Ok(ast)
 }

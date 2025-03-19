@@ -12,6 +12,9 @@ begin
     sum := 3;
 end;
 
+var
+    w: integer;
+
 begin
     if 2 < sum(3, 2) then
         begin
@@ -20,7 +23,7 @@ begin
     else
         begin
 
-        x := 'a';
+        x := 3;
         end;
 
     x := sum(5, 10);  { Example call to the function }

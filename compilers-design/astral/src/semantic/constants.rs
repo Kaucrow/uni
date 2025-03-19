@@ -1,12 +1,7 @@
 use crate::prelude::*;
-use std::{
-    hash::{ Hash, Hasher },
-    borrow::Borrow,
-};
 pub use thiserror::Error;
 
-pub type VarDict = HashMap<Scope, HashSet<Variable>>;
-
+pub type VarDict = HashMap<Scope, HashMap<String, Variable>>;
 pub type FuncDict = HashMap<Scope, FuncDetails>;
 
 #[derive(Debug)]
@@ -24,41 +19,19 @@ impl FuncDetails {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Variable {
-    pub name: String,
     pub datatype: DataType,
-}
-
-// Implementing PartialEq to compare only by name
-impl PartialEq for Variable {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-    }
-}
-
-// Implementing Eq trait, required when implementing Hash
-impl Eq for Variable {}
-
-// Implementing Hash so HashSet can use the name for equality and hashing
-impl Hash for Variable {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.name.hash(state); // Only hash the `name` field
-    }
-}
-
-// Implement Borrow<str> so HashSet can look up variables by &str
-impl Borrow<str> for Variable {
-    fn borrow(&self) -> &str {
-        &self.name
-    }
+    pub decl_line: usize,
+    pub uninit: bool,
 }
 
 impl Variable {
-    pub fn new(name: String, datatype: DataType) -> Self {
+    pub fn new(datatype: DataType, decl_line: usize) -> Self {
         Self {
-            name,
             datatype,
+            decl_line,
+            uninit: true,
         }
     }
 }

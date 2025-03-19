@@ -34,8 +34,13 @@ impl Helper {
     }
 }
 
-pub fn preorder_traversal(
-    dict: &mut Dict, helper: &mut Helper, node_idx: NodeIndex, ast: &syntax::Tree, depth: i32, pbar: Arc<ProgressBar>
+pub fn preorder_traversal<'a> (
+    dict: &mut Dict,
+    helper: &mut Helper,
+    node_idx: NodeIndex,
+    ast: &syntax::Tree,
+    depth: i32,
+    pbar: Arc<ProgressBar>,
 ) -> Result<(), Error> {
     let act_stack = &mut helper.act_stack;
     let temp_var = &mut helper.temp_var;
@@ -87,9 +92,9 @@ pub fn preorder_traversal(
                             Id::Var => {
                                 let (scope, _) = helper.scope_stack.last().unwrap();
 
-                                let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
-                                let success = variables.insert(Variable::new(temp_var.clone(), data_type.clone()));
-                                if !success { return Err(Error::User(
+                                let variables = dict.var.entry(scope.clone()).or_insert_with(HashMap::new);
+                                let var_defined = variables.insert(temp_var.clone(), Variable::new(data_type.clone(), *line));
+                                if var_defined.is_some() { return Err(Error::User(
                                     *line,
                                     format!("Variable '{}' is already defined in scope {:?}", temp_var, scope)
                                 )); }
@@ -109,9 +114,9 @@ pub fn preorder_traversal(
                                     let func = dict.func.entry(scope.clone()).or_insert_with(FuncDetails::new);
                                     func.parameters.push(data_type.clone());
 
-                                    let variables = dict.var.entry(scope.clone()).or_insert_with(HashSet::new);
-                                    let success = variables.insert(Variable::new(temp_var.clone(), data_type.clone()));
-                                    if !success { return Err(Error::User(
+                                    let variables = dict.var.entry(scope.clone()).or_insert_with(HashMap::new);
+                                    let var_defined = variables.insert(temp_var.clone(), Variable::new(data_type.clone(), *line));
+                                    if var_defined.is_some() { return Err(Error::User(
                                         *line,
                                         format!("Variable '{}' is already defined in scope {:?}", temp_var, scope)
                                     )); }
@@ -183,11 +188,11 @@ pub fn preorder_traversal(
                 let var_node_idx = children.get(1).ok_or(Error::Compiler("Assign node has no left hand side child node".to_string()))?;
                 let (var_node, _) = &ast.data[var_node_idx.clone()];
 
-                if let Node::Val(Token::Identifier(name)) = var_node {
+                if let Node::Val(Token::Identifier(var_name)) = var_node {
                     let (scope, _) = helper.scope_stack.last().ok_or(Error::Compiler("No scope".to_string()))?;
 
                     let var = dict.var.get(scope).ok_or(Error::Compiler("Scope not found".to_string()))?
-                        .get(name.as_str())
+                        .get(var_name.as_str())
                         .ok_or(Error::Compiler("Variable does not exist in scope".to_string()))?;
 
                     let exp_type = &var.datatype;
@@ -201,6 +206,14 @@ pub fn preorder_traversal(
                             format!("Invalid assignment: Cannot assign type {:?} to a variable of type {:?}", datatype, exp_type)
                         ));
                     }
+
+                    // Remove the "variable uninitialized" warning
+                    dict.var
+                        .get_mut(scope)
+                        .ok_or(Error::Compiler("Scope not found".to_string()))?
+                        .get_mut(var_name)
+                        .ok_or(Error::Compiler("Variable does not exist in scope".to_string()))?
+                        .uninit = false;
                 } else {
                     return Err(Error::User(
                         *line,
@@ -391,7 +404,32 @@ pub fn run_semantic_analysis(ast: syntax::Tree) -> anyhow::Result<()> {
         Ok(()) => {}
     }
 
-    pbar.finish_with_message("Semantic analysis complete OwO!");
+    pbar.finish_with_message("Semantic analysis complete OwO!\n");
+
+    // If there are any warnings, display them
+    for (scope, variables) in dict.var.iter() {
+        for (var_name, var_data) in variables {
+            if !var_data.uninit {
+                continue;
+            }
+
+            let scope_message = match scope {
+                Scope::Global => &format!("global variable '{}'", var_name),
+                Scope::Main => &format!("variable '{}' in main", var_name),
+                Scope::Func(func_name) => &format!("variable '{}' in function '{}'", var_name, func_name),
+            };
+
+            eprintln!(
+                "{} {}{} {} has not been initialized",
+                "Warning: Line".yellow(),
+                var_data.decl_line.to_string().yellow(),
+                ":".yellow(),
+                scope_message
+            );
+
+            eprintln!();
+        }
+    }
 
     Ok(())
 }
