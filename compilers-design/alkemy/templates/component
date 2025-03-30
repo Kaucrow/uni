@@ -5,13 +5,15 @@ class {{ name }} extends HTMLElement {
 
         const template = document.createElement('template');
         template.innerHTML = `
-            style {
+            <style>
               {{ style }}
-            }
+            </style>
             {{ template }}
         `;
 
         shadow.appendChild(template.content.cloneNode(true));
+
+        {{ variables }}
     }
 }
 

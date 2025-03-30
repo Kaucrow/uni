@@ -11,6 +11,8 @@ pub struct WebComponent {
     pub name: String,
     pub style: Option<String>,
     pub template: Option<String>,
+    pub variables: Option<HashMap<String, String>>, // Var name, value
+    pub bindings: Option<HashMap<String, String>>,  // Var name, binding
 }
 
 impl WebComponent {
@@ -19,6 +21,8 @@ impl WebComponent {
             name,
             style: None,
             template: None,
+            variables: None,
+            bindings: None,
         }
     }
 }
@@ -31,6 +35,8 @@ pub enum Keyword {
     End,
     Style,
     Template,
+    Var,
+    Bind,
 }
 
 pub const AHOCOR_DICT: Lazy<Vec<(Keyword, Vec<&'static str>)>> = Lazy::new(|| vec![
@@ -38,4 +44,6 @@ pub const AHOCOR_DICT: Lazy<Vec<(Keyword, Vec<&'static str>)>> = Lazy::new(|| ve
     (Keyword::End, vec!["@end"]),
     (Keyword::Style, vec!["style"]),
     (Keyword::Template, vec!["template"]),
+    (Keyword::Var, vec!["var"]),
+    (Keyword::Bind, vec!["bind"]),
 ]);

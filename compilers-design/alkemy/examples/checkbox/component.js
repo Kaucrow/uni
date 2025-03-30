@@ -1,45 +1,37 @@
+var x = 32;
+
 class MyCheckbox extends HTMLElement {
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
+        const shadow = this.attachShadow({ mode: 'open' });
 
-        // Define template
         const template = document.createElement('template');
         template.innerHTML = `
             <style>
-                input {
-                    width: 20px;
-                    height: 20px;
-                    cursor: pointer;
-                }
+                      p {
+            color: red;
+            font-weight: bold;
+        }
+
             </style>
-            <input type="checkbox">
+                    <input type="checkbox">
+        <p>Checkbox 1</p>
+
         `;
 
-        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        shadow.appendChild(template.content.cloneNode(true));
 
-        // Bind elements
-        this.checkbox = this.shadowRoot.querySelector('input');
+        this.input = this.shadowRoot.querySelector('input');
 
-        // Define property with getter and setter
-        Object.defineProperty(this, 'check', {
-            get: () => this.checkbox.checked,
-            set: (value) => {
-                this.checkbox.checked = value;
-                this.handleChange();
-            }
-        });
-
-        // Event listener for change
-        this.checkbox.addEventListener('change', () => {
-            this.handleChange();
-        });
+Object.defineProperty(this, 'check', {
+    get: () => this.input.checked,
+    set: (value) => {
+        this.input.checked = value;
     }
-
-    handleChange() {
-        console.log("Checkbox state changed to:", this.check);
-        this.dispatchEvent(new Event('change'));
+});this.check = true;this.other = true;
     }
 }
 
 customElements.define('my-checkbox', MyCheckbox);
+
+var y = 42;

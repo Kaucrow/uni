@@ -95,18 +95,19 @@ fn parse_component(
     while let Some(line) = lines.next() {
         let line = line?;
 
-        if let (Some(parsing_directive), Some(count)) = (&parsing_directive, &mut lbracket_count) {
+        if let (Some(directive), Some(count)) = (&parsing_directive, &mut lbracket_count) {
             *count += &line.chars().filter(|&c| c.to_string() == "{").count();
             *count -= &line.chars().filter(|&c| c.to_string() == "}").count();
 
             // Exit
             if *count == 0 {
                 lbracket_count = None;
+                parsing_directive = None;
                 println!("Exit on: {}", line);
                 continue;
             }
 
-            match parsing_directive {
+            match directive {
                 Keyword::Style => {
                     component.style.get_or_insert_with(|| String::new());
 
@@ -122,17 +123,63 @@ fn parse_component(
                 _ => bail!("Unexpected keyword: {:?}", parsing_directive),
             }
         } else if !line.trim().is_empty() {
-            let (keyword, mat) = find_match(line.to_string(), ahocors).ok_or(anyhow!("Expected keyword"))?;
+            let (keyword, mat) = find_match(line.to_string(), ahocors).ok_or(anyhow!(format!(
+                "Expected keyword: {}", line
+            )))?;
 
             // If the component end is found, break. Otherwise, a directive block was found
-            if let Keyword::End = keyword {
-                break;
-            } else if &line[mat.end()..].trim() != &"{" {
-                bail!("Expected single left bracket");
-            }
+            match keyword {
+                Keyword::End => break,
+                Keyword::Var => {
+                    let split: Vec<&str> = (&line[mat.end()..]).trim().split_whitespace().collect();
+                    if split.len() != 3 {
+                        bail!("Syntax error on var directive")
+                    }
 
-            parsing_directive = Some(keyword);
-            lbracket_count = Some(1);
+                    let mut split = split.into_iter();
+
+                    let name = split.next().ok_or(anyhow!("Missing variable name"))?;
+                    let eq = split.next().ok_or(anyhow!("Missing equal"))?;
+                    if eq != "=" { bail!("Missing equal") }
+                    let value = split.next().ok_or(anyhow!("Missing value"))?;
+
+                    if component.variables.as_ref().and_then(|vars| vars.get(name)).is_some() {
+                        bail!("Variable already exists");
+                    }
+
+                    let variables = component.variables.get_or_insert_with(HashMap::new);
+                    variables.insert(name.into(), value.into());
+                }
+                Keyword::Bind => {
+                    let split: Vec<&str> = (&line[mat.end()..]).trim().split_whitespace().collect();
+                    if split.len() != 3 {
+                        bail!("Syntax error on bind directive")
+                    }
+
+                    let mut split = split.into_iter();
+
+                    let name = split.next().ok_or(anyhow!("Missing variable name"))?;
+                    let to = split.next().ok_or(anyhow!("Missing 'to'"))?;
+                    if to != "to" { bail!("Missing 'to'") }
+                    let binding = split.next().ok_or(anyhow!("Missing binding"))?;
+
+                    if component.variables.as_ref().map_or(true, |vars| vars.get(name).is_none()) {
+                        bail!("Variable has not been defined");
+                    }
+
+                    if component.bindings.as_ref().and_then(|vars| vars.get(name)).is_some() {
+                        bail!("Variable has already been bound");
+                    }
+
+                    let bindings = component.bindings.get_or_insert_with(HashMap::new);
+                    bindings.insert(name.into(), binding.into());
+                }
+                _ if &line[mat.end()..].trim() == &"{" => {
+                    lbracket_count = Some(1);
+                    parsing_directive = Some(keyword);
+                }
+                _ => bail!("Failed to parse the keyword")
+            }
         }
     }
 

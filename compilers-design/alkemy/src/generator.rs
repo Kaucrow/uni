@@ -25,12 +25,15 @@ fn pascal_to_kebab(name: &str) -> String {
 
 pub fn generate_js(parsed_file: ParsedFile) -> Result<String> {
     // Read the template file
-    let template_content = fs::read_to_string("./templates/component")?;
+    let component_tmpl_content = fs::read_to_string("./templates/component")?;
+    let reactive_tmpl_content = fs::read_to_string("./templates/reactive")?;
 
     let mut env = Environment::new();
 
-    env.add_template("component", &template_content).unwrap();
-    let tmpl = env.get_template("component").unwrap();
+    env.add_template("component", &component_tmpl_content).unwrap();
+    env.add_template("reactive", &reactive_tmpl_content).unwrap();
+    let component_tmpl = env.get_template("component").unwrap();
+    let reactive_tmpl = env.get_template("reactive").unwrap();
 
     let mut transpiled_code = String::new();
 
@@ -38,12 +41,33 @@ pub fn generate_js(parsed_file: ParsedFile) -> Result<String> {
         match block {
             CodeBlock::Javascript(code) => transpiled_code.push_str(&code),
             CodeBlock::Component(component) => {
+                let mut variables = String::new();
+
+                for (name, val) in component.variables.unwrap_or(HashMap::new()) {
+                    if let Some(ref bindings) = component.bindings {
+                        // If the variable has a binding, make a setter and getter to make it reactive
+                        if let Some(binding) = bindings.get(&name) {
+                            let element = &binding[0..binding.find(".").ok_or(anyhow!("The binding is invalid"))?];
+
+                            variables.push_str(format!("{}", reactive_tmpl.render(context!(
+                                element,
+                                name,
+                                binding,
+                            )).unwrap()).as_str())
+                        }
+                    }
+
+                    // Add the variable declaration
+                    variables.push_str(&format!("this.{} = {};", name, val));
+                }
+
                 let tagname = pascal_to_kebab(&component.name);
 
-                transpiled_code.push_str(format!("{}", tmpl.render(context!(
+                transpiled_code.push_str(format!("{}", component_tmpl.render(context!(
                     name => component.name,
                     style => component.style.unwrap_or("".to_string()),
                     template => component.template.unwrap_or("".to_string()),
+                    variables,
                     tagname,
                 )).unwrap()).as_str())
             }
