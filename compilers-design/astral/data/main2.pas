@@ -6,19 +6,22 @@ var
 function sum(x: integer; y: integer): integer;
 begin
     { sum := sum(sum(3, 2), 1) + true; }
-    x := 2;
+    x := 3;
     { sum := true <> false = true >= true; }
 
-    sum := 3;
+    sum := 2;
 end;
 
 var
     w: integer;
-
+    z : integer;
 begin
+    {z := 4;}
+
     if 2 < sum(3, 2) then
         begin
         x := 4;
+        z:='hola';
         end
     else
         begin

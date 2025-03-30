@@ -193,7 +193,10 @@ pub fn preorder_traversal<'a> (
 
                     let var = dict.var.get(scope).ok_or(Error::Compiler("Scope not found".to_string()))?
                         .get(var_name.as_str())
-                        .ok_or(Error::Compiler("Variable does not exist in scope".to_string()))?;
+                        .ok_or(Error::User(
+                            *line,
+                            format!("Variable '{}' does not exist in scope", var_name)
+                        ))?;
 
                     let exp_type = &var.datatype;
 
