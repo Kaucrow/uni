@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCheckbox Demo</title>
+    <script src="component.js" defer></script>
+</head>
+<body>
+    <h2>Custom Checkbox Component</h2>
+    
+    <my-checkbox id="customCheckbox"></my-checkbox>
+    <button onclick="toggleCheckbox()">Toggle Checkbox</button>
+
+    <script>
+        function toggleCheckbox() {
+            const checkbox = document.getElementById('customCheckbox');
+            checkbox.check = !checkbox.check;
+        }
+    </script>
+</body>
+</html>
