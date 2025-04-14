@@ -1,0 +1,22 @@
+class {{ name }} extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: 'open' });
+
+        const template = document.createElement('template');
+        template.innerHTML = `
+            <style>
+              {{ style }}
+            </style>
+            {{ template }}
+        `;
+
+        shadow.appendChild(template.content.cloneNode(true));
+
+        {{ variables }}
+
+        {{ callbacks }}
+    }
+}
+
+customElements.define('{{ tagname }}', {{ name }});

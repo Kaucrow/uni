@@ -1,0 +1,8 @@
+this.{{ element }} = this.shadowRoot.querySelector('{{ element }}');
+
+Object.defineProperty(this, '{{ name }}', {
+    get: () => this.{{ binding }},
+    set: (value) => {
+        this.{{ binding }} = value;
+    }
+});

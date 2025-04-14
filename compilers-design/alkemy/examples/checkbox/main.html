@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkbox Demo</title>
+    <script src="checkbox.js" defer></script>
+    <style>
+        /* Everforest Dark Theme */
+        :root {
+            --bg: #2d353b;
+            --bg-alt: #3a4248;
+            --fg: #d3c6aa;
+            --fg-alt: #9da9a0;
+            --primary: #a7c080;
+            --secondary: #7fbbb3;
+            --border: #4f585e;
+        }
+
+        /* General Styles */
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: "Fira Code", monospace;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            background: var(--bg-alt);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid var(--border);
+        }
+
+        /* Header */
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* Checkbox Label */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 18px;
+            color: var(--fg-alt);
+            cursor: pointer;
+        }
+
+        /* Custom Checkbox Styling */
+        my-checkbox {
+            transform: scale(1.5);
+            filter: hue-rotate(15deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Checkbox Component</h2>
+        
+        <label class="checkbox-label">
+            <my-checkbox></my-checkbox>
+            Enable Feature
+        </label>
+    </div>
+
+</body>
+</html>

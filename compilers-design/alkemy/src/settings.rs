@@ -9,9 +9,9 @@ pub struct Settings {
 impl Settings {
     pub fn new(matches: &ArgMatches) -> Result<Self> {
         let file_path_str = matches
-                .get_one::<String>("path")
-                .cloned()
-                .ok_or(anyhow!("Unexpected value for `path` argument"))?;
+            .get_one::<String>("path")
+            .cloned()
+            .ok_or(anyhow!("Unexpected value for `path` argument"))?;
 
         let file_path = PathBuf::try_from(file_path_str)?;
 
@@ -20,23 +20,25 @@ impl Settings {
         }
 
         Ok(Self {
-            file_path
+            file_path,
         })
     }
 }
 
 pub fn get_command() -> Command {
-    Command::new("Pascal Lexical Analyzer")
+    Command::new("Web Components Transpiler")
         .version("0.1.0")
         .author("Kaucrow")
-        .about("Lexical Analyzer for Pascal programs")
+        .about(r#"Transpiler which converts a made-up language called Alkemy
+into Javascript for building Web Components quickly and efficiently"#
+        )
         .arg(
             Arg::new("path")
                 .short('p')
                 .long("path")
                 .num_args(1)
                 .required(true)
-                .help("Pascal source code file path")
+                .help("Alkemy source code file path")
         )
 }
 
