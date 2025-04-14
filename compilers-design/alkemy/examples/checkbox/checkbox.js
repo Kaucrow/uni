@@ -8,27 +8,40 @@ class MyCheckbox extends HTMLElement {
         const template = document.createElement('template');
         template.innerHTML = `
             <style>
-                      p {
-            color: red;
-            font-weight: bold;
+            p {
+                color: red;
+                font-weight: bold;
+            }
+
+            input {
+                cursor: pointer;
+            }
         }
 
             </style>
                     <input type="checkbox">
-        <p>Checkbox 1</p>
 
         `;
 
         shadow.appendChild(template.content.cloneNode(true));
 
-        this.input = this.shadowRoot.querySelector('input');
+        this.other = true;this.input = this.shadowRoot.querySelector('input');
 
 Object.defineProperty(this, 'check', {
     get: () => this.input.checked,
     set: (value) => {
         this.input.checked = value;
     }
-});this.check = true;this.other = true;
+});this.check = false;
+
+        this.input.addEventListener('change', () => {
+            if (this.check) {
+            console.log('The feature was enabled');
+        } else {
+            console.log('The feature was disabled');
+        }
+
+});
     }
 }
 

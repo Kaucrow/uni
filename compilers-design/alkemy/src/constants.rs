@@ -7,12 +7,20 @@ pub enum CodeBlock {
 }
 
 #[derive(Debug)]
+pub struct Callback {
+    pub elem: String,
+    pub trigger: String,
+    pub action: String,
+}
+
+#[derive(Debug)]
 pub struct WebComponent {
     pub name: String,
     pub style: Option<String>,
     pub template: Option<String>,
     pub variables: Option<HashMap<String, String>>, // Var name, value
     pub bindings: Option<HashMap<String, String>>,  // Var name, binding
+    pub callbacks: Option<Vec<Callback>>,
 }
 
 impl WebComponent {
@@ -23,6 +31,7 @@ impl WebComponent {
             template: None,
             variables: None,
             bindings: None,
+            callbacks: None,
         }
     }
 }
@@ -37,6 +46,7 @@ pub enum Keyword {
     Template,
     Var,
     Bind,
+    Callback,
 }
 
 pub const AHOCOR_DICT: Lazy<Vec<(Keyword, Vec<&'static str>)>> = Lazy::new(|| vec![
@@ -46,4 +56,5 @@ pub const AHOCOR_DICT: Lazy<Vec<(Keyword, Vec<&'static str>)>> = Lazy::new(|| ve
     (Keyword::Template, vec!["template"]),
     (Keyword::Var, vec!["var"]),
     (Keyword::Bind, vec!["bind"]),
+    (Keyword::Callback, vec!["on"]),
 ]);

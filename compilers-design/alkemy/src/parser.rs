@@ -120,6 +120,17 @@ fn parse_component(
                     component.template.as_mut().unwrap().push_str(&line);
                     component.template.as_mut().unwrap().push('\n');
                 }
+                Keyword::Callback => {
+                    let err = "Attempted to process a callback directive, but the component has no callbacks";
+                    if let Some(callbacks) = &mut component.callbacks {
+                        let last = callbacks.last_mut().ok_or(anyhow!(err))?;
+
+                        last.action.push_str(&line);
+                        last.action.push('\n');
+                    } else {
+                        bail!(err);
+                    }
+                }
                 _ => bail!("Unexpected keyword: {:?}", parsing_directive),
             }
         } else if !line.trim().is_empty() {
@@ -173,6 +184,30 @@ fn parse_component(
 
                     let bindings = component.bindings.get_or_insert_with(HashMap::new);
                     bindings.insert(name.into(), binding.into());
+                }
+                Keyword::Callback => {
+                    let split: Vec<&str> = (&line[mat.end()..]).trim().split_whitespace().collect();
+                    if split.len() != 3 {
+                        bail!("Syntax error on callback directive")
+                    }
+
+                    let mut split = split.into_iter();
+
+                    let elem = split.next().ok_or(anyhow!("Missing callback element"))?.to_string();
+                    let trigger = split.next().ok_or(anyhow!("Missing callback trigger"))?.to_string();
+                    if split.next().ok_or(anyhow!("Missing lbracket"))? != "{" {
+                        bail!("Expected lbracket");
+                    }
+
+                    let callbacks = component.callbacks.get_or_insert_with(Vec::new);
+                    callbacks.push(Callback {
+                        elem,
+                        trigger,
+                        action: String::new(),
+                    });
+
+                    lbracket_count = Some(1);
+                    parsing_directive = Some(keyword);
                 }
                 _ if &line[mat.end()..].trim() == &"{" => {
                     lbracket_count = Some(1);

@@ -27,13 +27,16 @@ pub fn generate_js(parsed_file: ParsedFile) -> Result<String> {
     // Read the template file
     let component_tmpl_content = fs::read_to_string("./templates/component")?;
     let reactive_tmpl_content = fs::read_to_string("./templates/reactive")?;
+    let callback_tmpl_content = fs::read_to_string("./templates/callback")?;
 
     let mut env = Environment::new();
 
     env.add_template("component", &component_tmpl_content).unwrap();
     env.add_template("reactive", &reactive_tmpl_content).unwrap();
+    env.add_template("callback", &callback_tmpl_content).unwrap();
     let component_tmpl = env.get_template("component").unwrap();
     let reactive_tmpl = env.get_template("reactive").unwrap();
+    let callback_tmpl = env.get_template("callback").unwrap();
 
     let mut transpiled_code = String::new();
 
@@ -61,6 +64,16 @@ pub fn generate_js(parsed_file: ParsedFile) -> Result<String> {
                     variables.push_str(&format!("this.{} = {};", name, val));
                 }
 
+                let mut callbacks = String::new();
+
+                for callback in component.callbacks.unwrap_or(Vec::new()) {
+                    callbacks.push_str(format!("{}", callback_tmpl.render(context!(
+                        elem => callback.elem,
+                        trigger => callback.trigger,
+                        action => callback.action,
+                    )).unwrap()).as_str())
+                }
+
                 let tagname = pascal_to_kebab(&component.name);
 
                 transpiled_code.push_str(format!("{}", component_tmpl.render(context!(
@@ -68,6 +81,7 @@ pub fn generate_js(parsed_file: ParsedFile) -> Result<String> {
                     style => component.style.unwrap_or("".to_string()),
                     template => component.template.unwrap_or("".to_string()),
                     variables,
+                    callbacks,
                     tagname,
                 )).unwrap()).as_str())
             }
