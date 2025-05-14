@@ -1,0 +1,8 @@
+[package]
+name = "db-load-sim-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+postgres = "0.19.10"
+rand = "0.9.1"
