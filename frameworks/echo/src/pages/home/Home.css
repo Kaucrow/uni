@@ -1,0 +1,39 @@
+.home-logo-icon {
+  height: 30vh;
+  width: 30vw;
+}
+
+.home-logo-title {
+  line-height: 0.7;
+  margin-bottom: 0.3em;
+  font-family: var(--font-title);
+  text-align: center;
+  font-size: 17vh;
+  color: var(--darkgray);
+}
+
+.dark .home-logo-title {
+  color: var(--lightgray);
+}
+
+.home-logo-subtitle {
+  margin-bottom: 2em;
+  font-family: var(--font-normal);
+  font-size: 2.5vh;
+  color: var(--darkgray);
+}
+
+.dark .home-logo-subtitle {
+  color: var(--lightgray);
+}
+
+.home-description {
+  font-family: var(--font-normal);
+  font-style: italic;
+  font-size: 3.5vh;
+  color: var(--darkgray);
+}
+
+.dark .home-description {
+  color: var(--lightgray);
+}
