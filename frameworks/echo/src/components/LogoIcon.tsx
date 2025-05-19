@@ -9,8 +9,7 @@ const LogoIcon: React.FC<LogoIconProps> = ({
   className = '',
   color = "#f8d56b",
   width = 45,
-  height =
-  45
+  height = 45
 }) => {
   return (
     <svg 

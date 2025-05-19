@@ -4,9 +4,10 @@
 }
 
 .home-logo-title {
+  user-select: none;
   line-height: 0.7;
   margin-bottom: 0.3em;
-  font-family: var(--font-title);
+  font-family: 'Rodondo';
   text-align: center;
   font-size: 17vh;
   color: var(--darkgray);
@@ -17,6 +18,7 @@
 }
 
 .home-logo-subtitle {
+  user-select: none;
   margin-bottom: 2em;
   font-family: var(--font-normal);
   font-size: 2.5vh;
@@ -28,6 +30,7 @@
 }
 
 .home-description {
+  user-select: none;
   font-family: var(--font-normal);
   font-style: italic;
   font-size: 3.5vh;

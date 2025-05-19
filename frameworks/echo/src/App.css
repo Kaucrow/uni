@@ -19,8 +19,13 @@
 
   /* Colors */
   --lightgray: #e5e5e5;
+  --lightgray-hover: #a3a3a3;
   --mediumgray: #404040;
+  --mediumgray-hover: #1a1a1a;
   --darkgray: #171717;
+
+  --light-primary: #ffffff;
+  --dark-primary: #000000;
 }
 
 body {
