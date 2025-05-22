@@ -9,6 +9,7 @@ import Navbar from './layouts/Navbar';
 
 import NotFound from './pages/not-found/NotFound';
 import Home from './pages/home/Home';
+import Login from './pages/auth/login/Login';
 
 import "./App.css";
 
@@ -25,6 +26,10 @@ const App = () => {
           <Route
             path="/"
             element={ <Home /> }
+          />
+          <Route
+            path="/auth/login"
+            element={ <Login /> }
           />
           <Route
             path="/about"

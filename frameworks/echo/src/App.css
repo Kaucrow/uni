@@ -18,22 +18,27 @@
   --font-normal: 'Montserrat';
 
   /* Colors */
-  --lightgray: #e5e5e5;
+  --lightgray: #d9d9d9;
   --lightgray-hover: #a3a3a3;
   --mediumgray: #404040;
   --mediumgray-hover: #1a1a1a;
   --darkgray: #171717;
 
-  --light-primary: #ffffff;
+  --light-primary: #ebebeb;
   --dark-primary: #000000;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-darker: hsl(from var(--accent-primary) h s calc(l * 0.8));
+
+  --error: #ef4444;
 }
 
 body {
   margin: 0;
-  background-color: white;
+  background-color: var(--light-primary);
   transition: background-color 0.3s, color 0.3s;
 }
 
 .dark body {
-  background-color: black;
+  background-color: var(--dark-primary);
 }
