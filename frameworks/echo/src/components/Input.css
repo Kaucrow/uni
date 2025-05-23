@@ -17,7 +17,7 @@
 }
 
 .dark .input-field {
-  border-bottom-color: var(--mediumgray);
+  border-bottom-color: rgb(from var(--mediumgray) r g b / 50%);
   color: var(--lightgray);
 }
 

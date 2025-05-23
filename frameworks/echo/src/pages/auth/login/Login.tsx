@@ -2,6 +2,7 @@ import './Login.css';
 import Checkbox from '../../../components/Checkbox';
 import Input from '../../../components/Input';
 import type { CustomError } from '../../../utils/types';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 const Login = () => {
@@ -50,13 +51,14 @@ const Login = () => {
               setChecked={setRememberMe}
             />
 
-            <a href="#!" className="forgot-password">Forgot password?</a>
+            <Link to="#!" className="forgot-password">Forgot password?</Link>
           </div>
+
           {/* Login button */}
           <div className="text-center">
             <button type="submit" className="login-btn">Login</button>
             <p className="register-text">
-              New user? <a href="/auth/register" className="register-link">Register</a>
+              New user? <Link to="/auth/register" className="register-link">Register</Link>
             </p>
           </div>
         </form>

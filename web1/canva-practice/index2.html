@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="mycanvas" width="200" height="200"></canvas>
+  <script>
+    var c = document.getElementById("mycanvas");
+    var ctx = c.getContext("2d");
+
+    //x, y, r, x-end, y-end, r-end
+    var grd = ctx.createLinearGradient(0, 0, 200, 0);
+    
+    grd.addColorStop(0, "red");
+    grd.addColorStop(1, "white");
+    
+    ctx.fillStyle = grd;
+    ctx.fillRect(10, 10, 100, 100);
+  </script>
+</body>
+</html>

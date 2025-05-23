@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canva Practice</title>
+</head>
+<body>
+  <canvas id="mycanvas" width="200" height="200"></canvas>
+  <script>
+    var c = document.getElementById("mycanvas");
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = "blue";
+    ctx.fillRect(0, 0, 200, 200);
+
+    ctx.moveTo(0, 0);
+    ctx.lineTo(200, 200);
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(95, 50, 40, 0, 2*Math.PI);
+    ctx.stroke();
+    ctx.closePath();
+
+    </script>
+</body>
+</html>
