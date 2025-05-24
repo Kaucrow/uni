@@ -1,9 +1,7 @@
 /* Main container styles */
 .login-container {
   font-family: var(--font-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
   margin: 3rem 0;
 }
 

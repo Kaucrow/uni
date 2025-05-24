@@ -10,6 +10,7 @@
   background-color: var(--lightgray);
   transform: translateX(-100%);
   transition: transform 300ms ease-in-out, background-color 0.3s, color 0.3s;
+  will-change: transform;
 }
 
 /* Dark mode styles */

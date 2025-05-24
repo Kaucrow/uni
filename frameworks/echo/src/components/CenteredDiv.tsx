@@ -4,25 +4,28 @@ import './CenteredDiv.css';
 interface CenteredDivProps {
   children: ReactNode;
   className?: string;
-  maxWidth?: string;
   backgroundColor?: string;
+  height?: string;
   padding?: string;
+  paddingTop?: string;
 }
 
 const CenteredDiv: React.FC<CenteredDivProps> = ({ 
   children,
   className = '',
-  maxWidth = '800px',
   backgroundColor = 'transparent',
-  padding = '20px'
+  height = '100%',
+  padding = '0px',
+  paddingTop = '0px',
 }) => {
   return (
     <div 
       className='outer-container'
       style={{ 
-        '--max-width': maxWidth,
         '--bg-color': backgroundColor,
-        '--padding': padding
+        '--height': height,
+        '--padding': padding,
+        '--padding-top': paddingTop,
       } as React.CSSProperties}
     >
       <div className={`inner-container ${className}`}>

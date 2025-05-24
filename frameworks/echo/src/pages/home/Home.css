@@ -1,3 +1,12 @@
+.centered-div-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
 .home-logo-icon {
   height: 30vh;
   width: 30vw;
@@ -39,4 +48,41 @@
 
 .dark .home-description {
   color: var(--lightgray);
+}
+
+.about-badge {
+  font-family: var(--font-normal);
+  gap: 1rem;
+  color: var(--darkgray);
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  min-height: 60px;
+  border-radius: 0.5rem;
+  background-color: var(--lightgray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  user-select: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .about-badge {
+    /*max-width: 20%;*/
+  }
+}
+
+.dark .about-badge {
+  color: var(--lightgray);
+  background-color: var(--darkgray);
+}
+
+.about-github-icon {
+  width: 20px;
+  height: 20px;
 }

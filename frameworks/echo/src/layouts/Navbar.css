@@ -1,5 +1,6 @@
 /* Base styles */
 .header {
+  height: var(--navbar-height);
   background-color: var(--lightgray);
   padding-top: 0.3em;
   padding-bottom: 0.3em;
@@ -168,6 +169,7 @@
 .toggle-label {
   user-select: none;
   font-family: var(--font-normal);
+  font-weight: 500;
   display: flex;
   align-items: center;
   cursor: pointer;

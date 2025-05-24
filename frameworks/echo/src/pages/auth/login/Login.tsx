@@ -1,23 +1,56 @@
 import './Login.css';
 import Checkbox from '../../../components/Checkbox';
 import Input from '../../../components/Input';
+import CenteredDiv from '../../../components/CenteredDiv';
 import type { CustomError } from '../../../utils/types';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import { useState } from 'react'
+import { useAuth } from '../../../hooks/useAuth';
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth';
+import type { FormEvent } from 'react';
 
 const Login = () => {
-  let reqErr: CustomError[] = [];
-  let err = {email: '', notFound: ''};
+  const { userLoggedIn } = useAuth();
+
+  if (userLoggedIn) {
+    return <Navigate to={'/'} replace />
+  }
+
+  const [isSigningIn, setIsSigningIn] = useState(false);
   let [email, setEmail] = useState('');
   let [password, setPassword] = useState('');
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isSigningIn) {
+      try {
+        setIsSigningIn(true);
+        await doSignInWithEmailAndPassword(email, password);
+      } catch (err) {
+        console.log(err);
+        setIsSigningIn(false);
+      }
+    }
+  }
+
+  const onGoogleSignIn = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if(!isSigningIn) {
+      setIsSigningIn(true);
+      doSignInWithGoogle().catch(_ => {
+        setIsSigningIn(false)
+      });
+    }
+  }
+
+  let reqErr: CustomError[] = [];
+  let err = {email: '', notFound: ''};
   let [rememberMe, setRememberMe] = useState(false);
 
-  function submitForm() { console.log('Form submitted') }
-
   return (
-    <section className="login-container">
+    <CenteredDiv className="login-container">
       <div className="login-form-box">
-        <form onSubmit={submitForm} className="login-form">
+        <form onSubmit={onSubmit} className="login-form">
           {/* Sign in section */}
           <div className="signin-with">
             <p className="signin-with-text">Sign in with</p>
@@ -36,9 +69,21 @@ const Login = () => {
             <p className="separator-text">Or</p>
           </div>
 
-          <Input label="Email address" id="email-input" input={email} setInput={setEmail}/>
-          
-          <Input label="Password" id="password-input" input={password} setInput={setPassword}/>
+          <Input
+            required
+            label="Email address"
+            id="email-input"
+            input={email}
+            setInput={setEmail}
+          />
+
+          <Input
+            required
+            label="Password"
+            id="password-input"
+            input={password}
+            setInput={setPassword}
+          />
 
           {err.email && <p className="error-message">{err.email}</p>}
           {err.notFound && <p className="error-message">{err.notFound}</p>}
@@ -63,7 +108,7 @@ const Login = () => {
           </div>
         </form>
       </div>
-    </section>
+    </CenteredDiv>
   );
 };
 

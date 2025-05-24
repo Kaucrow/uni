@@ -13,6 +13,9 @@
 }
 
 :root {
+  /* Sizes */
+  --navbar-height: 75px;
+
   /* Fonts */
   --font-title: 'Rodondo';
   --font-normal: 'Montserrat';
@@ -35,6 +38,7 @@
 
 body {
   margin: 0;
+  padding: 0;
   background-color: var(--light-primary);
   transition: background-color 0.3s, color 0.3s;
 }

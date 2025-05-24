@@ -4,7 +4,7 @@ import invnotfound from '../../assets/invnotfound.png'
 
 const NotFound = () => {
   return (
-    <CenteredDiv className='not-found-container'>
+    <CenteredDiv className='not-found-container' paddingTop='10vh'>
       <div className='not-found'>
         <img src={invnotfound} className='not-found-img' />
         <p className='not-found-text'>404 Page Not Found!</p>
