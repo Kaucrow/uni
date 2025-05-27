@@ -14,9 +14,7 @@ import Home from './pages/home/Home';
 import Login from './pages/auth/login/Login';
 import Register from './pages/auth/register/Register';
 import Profile from './pages/profile/Profile';
-import NoteGrid from './pages/notes/NoteGrid';
-import GridFlipperTester from './pages/test/Test';
-import GridLayoutTester from './pages/test2/Test2';
+import Notes from './pages/notes/Notes';
 
 import "./App.css";
 
@@ -49,15 +47,7 @@ const App = () => {
             />
             <Route
               path="/notes"
-              element={ <NoteGrid /> }
-            />
-            <Route
-              path="/test"
-              element={ <GridFlipperTester /> }
-            />
-            <Route
-              path="/test2"
-              element={ <GridLayoutTester /> }
+              element={ <Notes /> }
             />
             <Route
               path="/about"

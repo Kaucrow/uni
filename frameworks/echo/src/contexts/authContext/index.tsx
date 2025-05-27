@@ -2,6 +2,7 @@ import React, { useEffect, useState, createContext, useContext } from "react";
 import { auth } from "../../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
+import { initializeUserDocument } from "../../firebase/database";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -35,6 +36,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (user) {
       setCurrentUser(user);
       setUserLoggedIn(true);
+
+      initializeUserDocument(
+        {
+          notes: []
+        }
+      ).catch(console.error);
     } else {
       setCurrentUser(null);
       setUserLoggedIn(false);

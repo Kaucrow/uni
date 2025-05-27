@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Flipper, Flipped } from 'react-flip-toolkit';
+import FloatingDropdown from '../../components/FloatingDropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faNoteSticky } from '@fortawesome/free-solid-svg-icons';
+import { createNote } from '../../firebase/database';
 
-const GridLayoutTester = () => {
+const Notes = () => {
   const [items] = useState([
     { id: 1, color: 'bg-red-500' },
     { id: 2, color: 'bg-blue-500' },
@@ -31,8 +35,27 @@ const GridLayoutTester = () => {
     setLayoutIndex((prevIndex) => (prevIndex + 1) % layouts.length);
   };
 
+  const handleCreateNote = async () => {
+    await createNote();
+    console.log('Note created');
+  }
+
+  const dropdownOptions = [
+    {
+      id: 'create',
+      label: 'Create Note',
+      icon: <FontAwesomeIcon icon={faNoteSticky} />,
+      onClick: handleCreateNote
+    }
+  ]
+
   return (
     <div className="p-8 max-w-7xl mx-auto relative min-h-screen">
+      <FloatingDropdown
+        triggerContent={<div></div>}
+        options={dropdownOptions}
+        position="top-left"
+      />
       <h1 className="text-2xl font-bold mb-6">Grid Layout Animation Tester</h1>
       
       <div className="mb-6">
@@ -73,4 +96,4 @@ const GridLayoutTester = () => {
   );
 };
 
-export default GridLayoutTester;
+export default Notes;

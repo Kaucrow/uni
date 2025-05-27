@@ -10,7 +10,7 @@ const Home = () => {
 
   return (
     <div className="centered-div-container">
-      <CenteredDiv className='home-content' paddingTop='10vh'>
+      <CenteredDiv className='home-content' paddingTop='7vh'>
         <LogoIcon className='home-logo-icon'/>
         <div className='home-logo-title'>Echoes</div>
         <div className='home-logo-subtitle'>— To what destination do these memories reach? —</div>

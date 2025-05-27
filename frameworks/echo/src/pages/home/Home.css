@@ -31,6 +31,7 @@
   margin-bottom: 2em;
   font-family: var(--font-normal);
   font-size: 2.5vh;
+  text-align: center;
   color: var(--darkgray);
 }
 
@@ -43,6 +44,7 @@
   font-family: var(--font-normal);
   font-style: italic;
   font-size: 3.5vh;
+  text-align: center;
   color: var(--darkgray);
 }
 
