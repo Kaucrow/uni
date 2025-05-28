@@ -36,7 +36,7 @@ impl Settings {
     pub fn load(matches: &ArgMatches) -> Result<Self> {
         let config_path = "./config/config.toml";
 
-        let file_settings= Config::builder()
+        let file_settings = Config::builder()
             .add_source(File::with_name(config_path))
             .build()?
             .try_deserialize()?;
