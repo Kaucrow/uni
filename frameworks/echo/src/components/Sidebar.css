@@ -1,0 +1,138 @@
+/* Sidebar container */
+.sidebar {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 16rem;
+  border-right: 6px solid rgb(from var(--mediumgray) r g b / 20%);
+  background-color: var(--lightgray);
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out, background-color 0.3s, color 0.3s;
+  will-change: transform;
+}
+
+/* Dark mode styles */
+.dark .sidebar {
+  border-right-color: rgb(from var(--mediumgray) r g b / 30%);
+  background-color: var(--darkgray);
+}
+
+/* Open state */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Sidebar content */
+.sidebar-content {
+  padding: 1rem;
+}
+
+/* Header section */
+.sidebar-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo link */
+.sidebar-logo-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Logo text */
+.sidebar-logo-text {
+  color: var(--darkgray);
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+.dark .sidebar-logo-text {
+  color: var(--lightgray);
+}
+
+/* Close button */
+.close-button {
+  color: var(--mediumgray);
+  position: relative;
+  cursor: pointer;
+}
+
+.dark .close-button {
+  color: var(--lightgray);
+}
+
+.close-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.close-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: var(--mediumgray);
+  opacity: 0.25;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 200ms;
+}
+
+.close-button:hover .close-effect {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* Navigation */
+.nav {
+  margin-top: 1.5rem;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: var(--mediumgray);
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  transition: color 200ms;
+}
+
+.nav-link:hover {
+  color: var(--mediumgray-hover);
+}
+
+.dark .nav-link {
+  color: var(--lightgray);
+}
+
+.dark .nav-link:hover {
+  color: var(--lightgray-hover);
+}
+
+.nav-icon {
+  width: 1.4375rem;
+  height: 1.4375rem;
+  fill: var(--mediumgray);
+  transition: fill 200ms;
+}
+
+.nav-link:hover .nav-icon {
+  fill: var(--mediumgray-hover);
+}
+
+.dark .nav-icon {
+  fill: var(--lightgray);
+}
+
+.dark .nav-link:hover .nav-icon {
+  fill: var(--lightgray-hover);
+}

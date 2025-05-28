@@ -1,0 +1,48 @@
+@font-face {
+  font-family: 'Rodondo';
+  src: url('./fonts/Rodondo/Rodondo.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Optional: improves performance */
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('./fonts/Montserrat/Montserrat-VariableFont_wght.ttf');
+  font-display: swap; /* Optional: improves performance */
+}
+
+:root {
+  /* Sizes */
+  --navbar-height: 75px;
+
+  /* Fonts */
+  --font-title: 'Rodondo';
+  --font-normal: 'Montserrat';
+
+  /* Colors */
+  --lightgray: #d9d9d9;
+  --lightgray-hover: #a3a3a3;
+  --mediumgray: #404040;
+  --mediumgray-hover: #1a1a1a;
+  --darkgray: #171717;
+
+  --light-primary: #ebebeb;
+  --dark-primary: #000000;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-darker: hsl(from var(--accent-primary) h s calc(l * 0.8));
+
+  --error: #ef4444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--light-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-color: var(--dark-primary);
+}

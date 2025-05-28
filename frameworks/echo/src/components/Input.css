@@ -1,0 +1,73 @@
+.input-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.input-field {
+  display: block;
+  min-height: auto;
+  width: 100%;
+  border-bottom: 2px solid var(--lightgray-hover);
+  background-color: transparent;
+  padding: 0.32rem 0.75rem;
+  line-height: 2.15;
+  outline: none;
+  transition: all 0.2s ease-linear;
+  color: var(--darkgray);
+}
+
+.dark .input-field {
+  border-bottom-color: rgb(from var(--mediumgray) r g b / 50%);
+  color: var(--lightgray);
+}
+
+.input-field:focus {
+  border-bottom-color: var(--accent-primary);
+}
+
+.input-field:focus + .input-label {
+  transform: translateY(-1.15rem) scale(0.8);
+}
+
+.input-field:not(:focus) + .input-label {
+  transform: none;
+}
+
+.input-field:focus + .input-label {
+  color: var(--accent-primary);
+}
+
+.input-field:not(:focus):not(:placeholder-shown) + .input-label {
+  transform: translateY(-1.15rem) scale(0.8);
+  color: transparent;
+}
+
+.input-field::placeholder {
+  opacity: 0;
+}
+
+.input-error {
+  border-bottom-color: var(--error) !important;
+}
+
+.input-label {
+  pointer-events: none;
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  margin-bottom: 0;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.37rem;
+  line-height: 2.15;
+  color: var(--mediumgray);
+  background-color: transparent;
+  transition: all 0.2s ease-out;
+  transform-origin: 0 0;
+}
+
+.dark .input-label {
+  color: rgb(from var(--lightgray-hover) r g b / 40%);
+}

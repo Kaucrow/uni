@@ -1,0 +1,157 @@
+/* Main container styles */
+.register-container {
+  font-family: var(--font-normal);
+  width: 100%;
+  margin: 3rem 0;
+}
+
+/* Form box styles */
+.register-form-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 2rem;
+  border-radius: 1rem;
+  background-color: var(--lightgray);
+  width: 100%;
+  max-width: 66.666667%;
+}
+
+@media (min-width: 768px) {
+  .register-form-box {
+    max-width: 66.666667%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .register-form-box {
+    max-width: 33.333333%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.dark .register-form-box {
+  background-color: var(--darkgray);
+}
+
+/* Form styles */
+.register-form {
+  max-width: 20rem;
+  width: 100%;
+}
+
+.register-title-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  user-select: none;
+}
+
+.register-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--mediumgray);
+}
+
+.dark .register-title {
+  color: var(--lightgray);
+}
+
+/* Error messages */
+.error-message {
+  color: var(--error);
+  max-width: 18rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  word-wrap: break-word;
+}
+
+/* Remember me section */
+.remember-me {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.forgot-password {
+  color: var(--mediumgray);
+  position: relative;
+  bottom: 0.2rem;
+  font-size: 0.875rem;
+  margin-right: 1.5rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dark .forgot-password {
+  color: var(--lightgray);
+}
+
+.forgot-password:hover {
+  color: var(--accent-primary);
+}
+
+/* register button */
+.register-btn {
+  display: inline-block;
+  width: 100%;
+  border-radius: 1rem;
+  background-color: var(--accent-primary);
+  padding: 0.5rem 1.75rem 0.25rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  color: var(--lightgray);
+  font-weight: 700;
+  transition: background-color 0.15s ease-in-out;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .register-btn {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.register-btn:hover {
+  background-color: var(--accent-primary-darker);
+}
+
+/* Register link */
+.register-text {
+  color: var(--mediumgray);
+  margin-bottom: 0;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  user-select: none;
+}
+
+.dark .register-text {
+  color: var(--lightgray);
+}
+
+.register-link {
+  color: var(--accent-primary-darker);
+  transition: color 0.15s ease-in-out;
+  text-decoration: none;
+}
+
+.dark .register-link {
+  color: var(--accent-primary);
+}
+
+.register-link:hover {
+  color: hsl(from var(--accent-primary-darker) h s calc(l * 0.8));
+}
+
+.dark .register-link:hover {
+  color: var(--accent-primary-darker);
+}

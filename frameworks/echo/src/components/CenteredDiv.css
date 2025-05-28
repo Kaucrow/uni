@@ -1,0 +1,18 @@
+.outer-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-color);
+  height: var(--height);
+  padding: var(--padding);
+  padding-top: var(--padding-top);
+}
+
+.inner-container {
+  min-height: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background-color 0.3s;
+}
