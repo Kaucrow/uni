@@ -1,0 +1,30 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #fcfefc;
+}
+
+canvas {
+  background-color: #fcfefc;
+}
+
+#audioToggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+}
+
+#audioToggle svg {
+  width: 44px;
+  height: 44px;
+  stroke: black;
+  fill: #fcfefc;
+}
