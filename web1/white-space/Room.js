@@ -1,12 +1,7 @@
-import { Player } from "./player.js";
+import { Player } from "./Player.js";
 import { Rect } from "./Rect.js";
-import { Mewo } from "./mewo.js";
-import { Lightbulb } from "./Lightbulb.js";
-import { LightbulbShadow } from "./Shadow.js";
-import { Laptop } from "./Laptop.js";
-import { Sketchbook } from "./Sketchbook.js";
-import { Tissuebox } from "./Tissuebox.js";
-import { Door } from "./Door.js";
+import { GameObject } from "./GameObject.js";
+import { Animator } from "./Animator.js";
 import { ctx, canvas } from "./canvas.js";
 
 export class Room {
@@ -22,20 +17,116 @@ export class Room {
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
 
+    const lightbulb = new GameObject({
+      x: lightbulbX,
+      y: lightbulbY,
+      z: 10,
+      spriteSheet: './assets/sprites/lightbulb_dim.png',
+
+      actions: {
+        idle: { animates: true },
+      },
+
+      animator: {
+        animations: {
+          idle: {
+            frames: 3,
+            defaultFrame: 1,
+            y: 0,
+            direction: Animator.ANIMATION_DIRS.PINGPONG
+          }
+        },
+        frameDuration: 0.6
+      },
+    });
+
+    const mewo = new GameObject({
+      x: rectX,
+      y: rectY + 96,
+      z: 0,
+      spriteSheet: './assets/sprites/mewo_asleep.png',
+
+      actions: {
+        idle: { animates: true },
+      },
+
+      animator: {
+        animations: {
+          idle: {
+            frames: 3,
+            defaultFrame: 1,
+            y: 0,
+            direction: Animator.ANIMATION_DIRS.PINGPONG
+          }
+        },
+        frameDuration: 1
+      }
+    });
+
+    const laptop = new GameObject({
+      x: rectX + 32,
+      y: rectY,
+      z: 0,
+      spriteSheet: './assets/sprites/laptop_static.png',
+      
+      actions: {
+        idle: { animates: true },
+      },
+
+      animator: {
+        animations: {
+          idle: {
+            frames: 3,
+            defaultFrame: 1,
+            y: 0,
+            direction: Animator.ANIMATION_DIRS.PINGPONG
+          }
+        },
+        frameDuration: 0.8
+      }
+    });
+
+    const sketchbook = new GameObject({
+      x: rectX + 96,
+      y: rectY,
+      z: 0,
+      spriteSheet: './assets/sprites/sketchbook.png',
+    });
+
+    const tissuebox = new GameObject({
+      x: rectX + 96,
+      y: rectY + 64,
+      z: 0,
+      spriteSheet: './assets/sprites/tissuebox.png',
+    });
+
+    const door = new GameObject({
+      x: rectX,
+      y: rectY - 96,
+      z: 0,
+      spriteSheet: './assets/sprites/door.png',
+    });
+
+    const lightbulbShadow = new GameObject({
+      x: lightbulb.x,
+      y: lightbulb.y + 32,
+      z: 0,
+      spriteSheet: './assets/sprites/shadow_lightbulb.png',
+    });
+
     this.objects = [
-      this.rect = new Rect(rectX, rectY, 128, 96),
-      this.sketchbook = new Sketchbook(rectX + 96, rectY),
-      this.tissuebox = new Tissuebox(rectX + 96, rectY + 64),
-      this.door = new Door(rectX, rectY - 96),
-      this.lightbulbShadow = new LightbulbShadow(lightbulbX, lightbulbY + 32)
+      this.rect = new Rect(rectX, rectY, -1, 128, 96),
+      this.sketchbook = sketchbook,
+      this.tissuebox = tissuebox,
+      this.door = door,
+      this.lightbulbShadow = lightbulbShadow,
+      this.lightbulb = lightbulb,
+      this.mewo = mewo,
+      this.laptop = laptop,
+      this.player = new Player(rectX + 64, rectY + 32, 5),
     ];
 
-    this.animatedObjects = [
-      this.player = new Player(rectX + 64, rectY + 32),
-      this.mewo = new Mewo(rectX, rectY + 96),
-      this.lightbulb = new Lightbulb(lightbulbX, lightbulbY),
-      this.laptop = new Laptop(rectX + 32, rectY),
-    ];
+    this.objects.sort((a, b) => a.z - b.z);
 
     this.bgMusic = {
       url: 'assets/music/bg_white_space.mp3',
@@ -46,27 +137,10 @@ export class Room {
   update(deltaTime) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    this.rect.draw();
-
-    this.lightbulbShadow.draw(ctx);
-
-    this.door.draw(ctx);
-  
-    this.mewo.update(deltaTime);
-    this.mewo.draw(ctx);
-
-    this.laptop.update(deltaTime);
-    this.laptop.draw(ctx);
-
-    this.sketchbook.draw(ctx);
-
-    this.tissuebox.draw(ctx);
-  
-    this.player.update(deltaTime);
-    this.player.draw(ctx);
-
-    this.lightbulb.update(deltaTime);
-    this.lightbulb.draw(ctx);
+    this.objects.forEach(obj => {
+      obj.update(deltaTime);
+      obj.draw(ctx); 
+    });
 
     ctx.beginPath();
     ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y + 2);

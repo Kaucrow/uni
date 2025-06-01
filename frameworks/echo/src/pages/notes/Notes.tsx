@@ -56,8 +56,6 @@ const Notes = () => {
         options={dropdownOptions}
         position="top-left"
       />
-      <h1 className="text-2xl font-bold mb-6">Grid Layout Animation Tester</h1>
-      
       <div className="mb-6">
         <p className="text-gray-600">
           Current layout: {currentLayout.cols} columns
@@ -87,11 +85,6 @@ const Notes = () => {
         </svg>
         <span className="ml-2">Change Layout</span>
       </button>
-
-      <div className="mt-8 text-gray-600">
-        <p className="mb-2">Click the floating button to see FLIP animations as the layout changes.</p>
-        <p>Uses <code>react-flip-toolkit</code> for smooth animations.</p>
-      </div>
     </div>
   );
 };

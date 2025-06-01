@@ -1,4 +1,4 @@
-export class Controller {
+export class Input {
   constructor(config) {
     this.keys = {
       ArrowDown: false,
