@@ -158,10 +158,6 @@ export class Room {
       obj.x += widthDiff / 2;
       obj.y += heightDiff / 2;
     }
-    for (const obj of this.animatedObjects) {
-      obj.x += widthDiff / 2;
-      obj.y += heightDiff / 2;
-    }
 
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
