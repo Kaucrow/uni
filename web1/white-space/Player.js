@@ -1,13 +1,13 @@
 import { GameObject } from "./GameObject.js";
 import { Animator } from "./Animator.js";
-import { canvas } from "./canvas.js";
+import { Vector2 } from "./Vector.js";
 
 // Sprite sheet
 //const walkSheet = new Image();
 //walkSheet.src = './assets/sprites/omori_walk.png';
 
 export class Player extends GameObject {
-  constructor(x, y, z) {
+  constructor(x, y, z, collisionSystem) {
     super({
       x: x,
       y: y,
@@ -68,7 +68,21 @@ export class Player extends GameObject {
             }
           }
         },
-      }
+      },
+
+      collisionSystem,
+      colliders: [
+        {
+          draw: {},
+          edges: [
+            new Vector2([0, 0], [32, 0]),
+            new Vector2([32, 0], [32, 32]),
+            new Vector2([32, 32], [0, 32]),
+            new Vector2([0, 32], [0, 0]),
+          ]
+        }
+      ],
+
     })
   }
 

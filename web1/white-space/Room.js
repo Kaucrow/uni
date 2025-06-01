@@ -2,10 +2,14 @@ import { Player } from "./Player.js";
 import { Rect } from "./Rect.js";
 import { GameObject } from "./GameObject.js";
 import { Animator } from "./Animator.js";
+import { Vector2 } from "./Vector.js";
+import { CollisionSystem } from "./CollisionSystem.js";
 import { ctx, canvas } from "./canvas.js";
 
 export class Room {
   constructor() {
+    const collisionSystem = new CollisionSystem();
+
     const rectWidth = 128;
     const rectHeight = 96;
     const rectX = canvas.width / 2 - rectWidth / 2;
@@ -60,7 +64,20 @@ export class Room {
           }
         },
         frameDuration: 1
-      }
+      },
+
+      collisionSystem,
+      colliders: [
+        {
+          draw: {},
+          edges: [
+            new Vector2([0, 0], [32, 0]),
+            new Vector2([32, 0], [32, 32]),
+            new Vector2([32, 32], [0, 32]),
+            new Vector2([0, 32], [0, 0]),
+          ]
+        }
+      ],
     });
 
     const laptop = new GameObject({
@@ -123,7 +140,7 @@ export class Room {
       this.lightbulb = lightbulb,
       this.mewo = mewo,
       this.laptop = laptop,
-      this.player = new Player(rectX + 64, rectY + 32, 5),
+      this.player = new Player(rectX + 64, rectY + 32, 5, collisionSystem),
     ];
 
     this.objects.sort((a, b) => a.z - b.z);

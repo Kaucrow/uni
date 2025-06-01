@@ -1,5 +1,6 @@
-import { Input } from "./Input.js";
 import { Animator } from "./Animator.js";
+import { Input } from "./Input.js";
+import { Collider } from "./Collider.js";
 
 export class GameObject {
   constructor(config) {
@@ -24,11 +25,22 @@ export class GameObject {
     };
     this.currentAction = config.defaultAction || 'idle';
 
+    // Animator
+    this.animator = config.animator ? new Animator(config.animator) : null;
+
     // Input
     this.input = config.input ? new Input(config.input) : null;
 
-    // Animator
-    this.animator = config.animator ? new Animator(config.animator) : null;
+    // Collisions
+    this.collisionSystem = config.collisionSystem || null;
+    this.colliders = [];
+    if (config.colliders) {
+      config.colliders.forEach(collider => {
+        const colliderObj = new Collider(collider, this);
+        this.collisionSystem.register(colliderObj);
+        this.colliders.push(colliderObj);
+      });
+    }
 
     // Custom properties
     this.customProperties = config.customProperties || {};
@@ -96,6 +108,12 @@ export class GameObject {
         this.height 
       )
     }
+
+    if (this.colliders) {
+      this.colliders.forEach((collider) => {
+        if (collider.drawProps) { collider.draw(ctx) }
+      })
+    }
   }
 
   setAction(action) {
@@ -114,5 +132,7 @@ export class GameObject {
     */
     this.x += Math.round(dx * this.speed * deltaTime);
     this.y += Math.round(dy * this.speed * deltaTime);
+
+    this.collisionSystem.checkCollisions(this);
   }
 }
