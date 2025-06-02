@@ -73,13 +73,24 @@ export class Player extends GameObject {
       collisionSystem,
       colliders: [
         {
-          draw: {},
+          group: 'player',
+          interactions: [
+            {
+              group: 'any',
+              onCollide: (source) => {
+                source.x = source.oldX;
+                source.y = source.oldY;
+                source.animator.frameX = 1;
+                source.animator.animationTimer = 0;
+              }
+            },
+          ],
           edges: [
-            new Vector2([0, 0], [32, 0]),
-            new Vector2([32, 0], [32, 32]),
-            new Vector2([32, 32], [0, 32]),
-            new Vector2([0, 32], [0, 0]),
-          ]
+            new Vector2([4, 2], [28, 2]),
+            new Vector2([28, 2], [28, 32]),
+            new Vector2([28, 32], [4, 32]),
+            new Vector2([4, 32], [4, 2]),
+          ],
         }
       ],
 

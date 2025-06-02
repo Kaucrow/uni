@@ -69,12 +69,12 @@ export class Room {
       collisionSystem,
       colliders: [
         {
-          draw: {},
+          group: 'npc',
           edges: [
-            new Vector2([0, 0], [32, 0]),
-            new Vector2([32, 0], [32, 32]),
-            new Vector2([32, 32], [0, 32]),
-            new Vector2([0, 32], [0, 0]),
+            new Vector2([4, 4], [30, 4]),
+            new Vector2([30, 4], [30, 16]),
+            new Vector2([30, 16], [4, 16]),
+            new Vector2([4, 16], [4, 4]),
           ]
         }
       ],
@@ -100,7 +100,20 @@ export class Room {
           }
         },
         frameDuration: 0.8
-      }
+      },
+
+      collisionSystem,
+      colliders: [
+        {
+          group: 'object',
+          edges: [
+            new Vector2([5, 4], [28, 4]),
+            new Vector2([28, 4], [28, 20]),
+            new Vector2([28, 20], [5, 20]),
+            new Vector2([5, 20], [5, 4]),
+          ]
+        }
+      ]
     });
 
     const sketchbook = new GameObject({
@@ -108,6 +121,19 @@ export class Room {
       y: rectY,
       z: 0,
       spriteSheet: './assets/sprites/sketchbook.png',
+
+      collisionSystem,
+      colliders: [
+        {
+          group: 'object',
+          edges: [
+            new Vector2([5, 4], [28, 4]),
+            new Vector2([28, 4], [28, 16]),
+            new Vector2([28, 16], [5, 16]),
+            new Vector2([5, 16], [5, 4]),
+          ]
+        }
+      ],
     });
 
     const tissuebox = new GameObject({
@@ -115,6 +141,19 @@ export class Room {
       y: rectY + 64,
       z: 0,
       spriteSheet: './assets/sprites/tissuebox.png',
+
+      collisionSystem,
+      colliders: [
+        {
+          group: 'object',
+          edges: [
+            new Vector2([5, 6], [28, 6]),
+            new Vector2([28, 6], [28, 18]),
+            new Vector2([28, 18], [5, 18]),
+            new Vector2([5, 18], [5, 6]),
+          ]
+        }
+      ],
     });
 
     const door = new GameObject({
@@ -122,6 +161,19 @@ export class Room {
       y: rectY - 96,
       z: 0,
       spriteSheet: './assets/sprites/door.png',
+
+      collisionSystem,
+      colliders: [
+        {
+          group: 'object',
+          edges: [
+            new Vector2([5, 0], [28, 0]),
+            new Vector2([28, 0], [28, 22]),
+            new Vector2([28, 22], [5, 22]),
+            new Vector2([5, 22], [5, 0]),
+          ]
+        }
+      ],
     });
 
     const lightbulbShadow = new GameObject({

@@ -8,6 +8,8 @@ export class GameObject {
     this.x = config.x || 0;
     this.y = config.y || 0;
     this.z = config.z || 0;
+    this.oldX = this.x;
+    this.oldY = this.y;
     this._preciseX = this.x;
     this._preciseY = this.y;
     this.width = config.width || 32;
@@ -123,6 +125,9 @@ export class GameObject {
   }
 
   move(dx, dy, deltaTime) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+
     /*
     this._preciseX += dx * this.speed * deltaTime;
     this._preciseY += dy * this.speed * deltaTime;
@@ -130,6 +135,7 @@ export class GameObject {
     this.x = Math.floor(this._preciseX + 0.5);
     this.y = Math.floor(this._preciseY + 0.5);
     */
+
     this.x += Math.round(dx * this.speed * deltaTime);
     this.y += Math.round(dy * this.speed * deltaTime);
 

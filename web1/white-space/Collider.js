@@ -19,6 +19,13 @@ export class Collider {
       throw Error("Missing collider edges");
     }
 
+    if (config.group) {
+      this.group = config.group;
+    } else {
+      throw Error("Missing collider group");
+    }
+    this.interactions = config.interactions
+
     // Draw properties
     this.drawProps = null;
     if (config.draw) {

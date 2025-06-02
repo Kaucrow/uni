@@ -11,15 +11,13 @@ export class CollisionSystem {
   }
 
   checkCollisions(source) {
-    console.log('Checking for collisions...');
     let collisions = [];
     for (const other of this.colliders) {
       if (other.parent === source || collisions.includes(other.parent)) continue;
-
+      
       if (this.#checkCollision(source, other)) {
-        console.log('Collision!');
+
         collisions.push(other.parent)
-        //source.parent.onCollision(other.parent);
       }
     }
   }
@@ -30,6 +28,18 @@ export class CollisionSystem {
 
     // Check all colliders on the source object against the other object
     for (const collider of source.colliders) {
+      // Skip collision check if the colliders do not interact
+      let groupNames = [];
+
+      if (collider.interactions.some(item => item.group === other.group)) {
+        groupNames.push(other.group);
+      }
+      if (collider.interactions.some(item => item.group === 'any')) {
+        groupNames.push('any');
+      }
+
+      if (groupNames.length === 0) continue;
+
       const sourceEdgeNormals = collider.uniqueEdgeNormals;
       const otherEdgeNormals = other.uniqueEdgeNormals;
 
@@ -74,11 +84,24 @@ export class CollisionSystem {
       }
 
       // If no separating axis was found, the shapes collide
-      if (collision) return true;
+      if (collision) {
+        groupNames.forEach((groupName) => {
+          let onCollide = this.#getOnCollide(groupName, collider);
+          onCollide(source, other);
+        })
+        return true;
+      }
     }
 
     // No collisions found
     return false;
+  }
+
+  #getOnCollide(groupName, collider) {
+    const interaction = collider.interactions.find(item => item.group === groupName);
+    if (interaction?.onCollide) {
+      return interaction.onCollide;
+    }
   }
 
   #mergeUniqueEdgeNormals(sourceEdgeNormals, otherEdgeNormals) {
