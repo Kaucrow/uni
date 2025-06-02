@@ -49,6 +49,10 @@ export class GameObject {
   }
 
   update(deltaTime) {
+    if (this.input) {
+      this.updateFromInput(deltaTime);
+    }
+
     if (this.actions[this.currentAction]?.animates) {
       if (this.animator) {
         this.animator.updateAnimation(deltaTime);
