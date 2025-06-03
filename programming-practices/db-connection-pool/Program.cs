@@ -1,53 +1,62 @@
 ﻿using Npgsql;
+using Spectre.Console;
 
 class Program
 {
     static async Task Main(string[] args)
     {
         string connectionString = string.Format(
-            "Host={0};Username={1};Password={2};Database={3};Pooling=false",
+            "Host={0};Username={1};Password={2};Database={3}",
             Configuration.Database.Host,
             Configuration.Database.User,
             Configuration.Database.Password,
             Configuration.Database.Name
         );
 
-        Pool.Initialize(connectionString, Configuration.Pool.StartupSize, Configuration.Pool.MaxSize, Configuration.Pool.SizeIncrement);
+        await Pool.Initialize(connectionString, Configuration.Pool.StartupSize, Configuration.Pool.MaxSize, Configuration.Pool.SizeIncrement);
         var pool = Pool.Instance;
         var successCount = 0;
         var failureCount = 0;
-        var tasks = new Task[1000];
+        var tasks = new Task[Configuration.Database.TestUsers];
 
-        // Simulate 1000 concurrent users
-        for (int i = 0; i < 1000; i++)
+        // Simulate concurrent users
+        for (int i = 0; i < Configuration.Database.TestUsers; i++)
         {
+            int userId = i;
             tasks[i] = Task.Run(async () =>
             {
                 using var poolManager = new PoolManager(pool);
                 try
                 {
                     // Get connection with 5 second timeout
-                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    using var connection = await poolManager.GetConnectionAsync(timeoutCts.Token);
+                    // using var timeoutCts = new CancellationTokenSource();
+                    using var connection = await poolManager.GetConnectionAsync();
 
                     // Execute test query
-                    using var cmd = new NpgsqlCommand("SELECT 1", connection.DbConnection);
+                    using var cmd = new NpgsqlCommand(
+                        string.Format(
+                            (string)Configuration.GetQueries().main,
+                            "*",
+                            Configuration.Database.Table.ToString()
+                        ),
+                        connection.DbConnection
+                    );
                     await cmd.ExecuteScalarAsync();
 
                     Interlocked.Increment(ref successCount);
-                    Console.WriteLine($"User {Task.CurrentId}: Query succeeded");
+                    AnsiConsole.MarkupLine($"[yellow]User {userId}:[/] [green]Query succeeded[/]");
                 }
                 catch (Exception ex)
                 {
                     Interlocked.Increment(ref failureCount);
-                    Console.WriteLine($"User {Task.CurrentId}: Failed - {ex.Message}");
+                    AnsiConsole.MarkupLine($"[yellow]User {userId}:[/] [red]Failed - {ex.Message}[/]");
                 }
             });
         }
 
         await Task.WhenAll(tasks);
         
-        Console.WriteLine($"\nResults: {successCount} succeeded, {failureCount} failed");
-        pool.Dispose(); // Clean up pool
+        AnsiConsole.MarkupLine($"[magenta]\nResults:[/] [green]{successCount}[/] succeeded, [red]{failureCount}[/] failed");
+        pool.Dispose();
     }
 }

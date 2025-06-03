@@ -35,7 +35,6 @@ public sealed class PoolManager : IDisposable
     {
         if (_connection == null || _isDisposed) return;
 
-        _sharedPool.ReturnConnection(_connection);
         _connection = null;
     }
 

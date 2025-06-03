@@ -6,9 +6,9 @@ public sealed class Pool : IDisposable
 {
     private static readonly Lazy<Pool> _instance = new Lazy<Pool>(() => new Pool());
     private readonly ConcurrentBag<Connection> _availableConnections;
-    private readonly ConcurrentQueue<TaskCompletionSource<Connection>> _waitingQueue;
     private readonly CancellationTokenSource _disposeTokenSource = new();
     private SemaphoreSlim _semaphore = null!;
+    private readonly SemaphoreSlim _creationSemaphore;
     private int _activeConnections;
     private string _connectionString = null!;
     private int _maxConnections;
@@ -20,7 +20,7 @@ public sealed class Pool : IDisposable
         _instance.Value :
         throw new Exception("Pool has not been initialized. Call Initialize() first");
 
-    public static void Initialize(
+    public static async Task Initialize(
         string connectionString,
         int startupConnections = 10,
         int maxConnections = 100,
@@ -32,7 +32,7 @@ public sealed class Pool : IDisposable
 
         _isInitialized = true;
 
-        Instance._connectionString = connectionString;
+        Instance._connectionString = connectionString + ";Pooling=false;SSL Mode=Disable;TCP Keepalive=true;Keepalive=60;No Reset On Close=true";
         Instance._maxConnections = maxConnections;
         Instance._connectionIncrement = connectionIncrement;
         Instance._semaphore = new SemaphoreSlim(maxConnections, maxConnections);
@@ -40,19 +40,19 @@ public sealed class Pool : IDisposable
         // Create startup connections
         for (int i = 0; i < startupConnections; i++)
         {
-            Instance._availableConnections.Add(Instance.CreateNewConnection());
+            Connection conn = await Instance.CreateNewConnectionAsync();
+            Instance._availableConnections.Add(conn);
         }
     }
 
     private Pool()
     {
         _availableConnections = new ConcurrentBag<Connection>();
-        _waitingQueue = new ConcurrentQueue<TaskCompletionSource<Connection>>();
+        _creationSemaphore = new SemaphoreSlim(1, 1);
     }
 
     public async Task<Connection> GetConnectionAsync(CancellationToken cancellationToken = default)
     {
-        // Combine the pool's disposal token with the provided cancellation token
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             _disposeTokenSource.Token,
             cancellationToken
@@ -60,45 +60,57 @@ public sealed class Pool : IDisposable
 
         try
         {
-            // Wait for a connection to become available
             await _semaphore.WaitAsync(linkedCts.Token);
 
-            // Try to get an existing connection
+            for (int i = 0; i < 3; i++)
             {
                 if (_availableConnections.TryTake(out var connection))
                 {
-                    Interlocked.Increment(ref _activeConnections);
-                    return connection;
+                    if (await ValidateConnection(connection))
+                    {
+                        Interlocked.Increment(ref _activeConnections);
+                        return connection;
+                    }
+                    connection.Close();
                 }
             }
 
-            // If no connections available but we have capacity, create new ones
-            if (_activeConnections < _maxConnections)
+            // No available connections - create new ones if under capacity
+            await _creationSemaphore.WaitAsync(cancellationToken);
+            try
             {
-                int connectionsToCreate = Math.Min(
-                    _connectionIncrement, 
-                    _maxConnections - _availableConnections.Count
-                );
-
-                for (int i = 0; i < connectionsToCreate; i++)
-                {
-                    _availableConnections.Add(CreateNewConnection());
-                }
-
+                // Double-check after getting creation lock
                 if (_availableConnections.TryTake(out var connection))
                 {
-                    Interlocked.Increment(ref _activeConnections);
-                    return connection;
+                    if (await ValidateConnection(connection))
+                    {
+                        Interlocked.Increment(ref _activeConnections);
+                        return connection;
+                    }
+                    connection.Close();
                 }
-                else
-                {
-                    // Shouldn't get here due to connections being created previously
-                    throw new Exception("Failed to return a newly created connection");
-                }
-            }
 
-            // Shouldn't get here due to semaphore
-            throw new InvalidOperationException("No connections available");
+                var remainingCapacity = _maxConnections - Volatile.Read(ref _activeConnections);
+                if (remainingCapacity <= 0)
+                    throw new InvalidOperationException("Pool exhausted");
+
+                int newConnectionsToCreate = Math.Min(_connectionIncrement, remainingCapacity);
+
+                var newConnections = new List<Connection>();
+                for (int i = 0; i < newConnectionsToCreate; i++)
+                {
+                    var newConn = await CreateNewConnectionAsync();
+                    newConnections.Add(newConn);
+
+                    if (i != 0) _availableConnections.Add(newConn);
+                }
+
+                Interlocked.Increment(ref _activeConnections);
+                return newConnections[0];
+            }
+            finally {
+                _creationSemaphore.Release();
+            }
         }
         catch (OperationCanceledException)
         {
@@ -106,41 +118,40 @@ public sealed class Pool : IDisposable
         }
     }
 
+    private async Task<bool> ValidateConnection(Connection conn)
+    {
+        try
+        {
+            using var cmd = new NpgsqlCommand("SELECT 1", conn.DbConnection);
+            await cmd.ExecuteScalarAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public void ReturnConnection(Connection connection)
     {
         if (connection == null) throw new ArgumentNullException(nameof(connection));
 
-        // Check if anyone is waiting for a connection
-        if (_waitingQueue.TryDequeue(out var tcs))
-        {
-            if (!tcs.TrySetResult(connection))
-            {
-                // If the waiting task was canceled, return to available pool
-                _availableConnections.Add(connection);
-                _semaphore.Release();
-            }
-        }
-        else
-        {
-            // No waiters, return to available pool
-            _availableConnections.Add(connection);
-            _semaphore.Release();
-        }
-
+        _availableConnections.Add(connection);
+        _semaphore.Release();
         Interlocked.Decrement(ref _activeConnections);
     }
 
-    private Connection CreateNewConnection()
+    private async Task<Connection> CreateNewConnectionAsync()
     {
-        var npgsqlConnection = new NpgsqlConnection(_connectionString);
-        npgsqlConnection.Open();
-        return new Connection(npgsqlConnection);
+        var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        return new Connection(conn);
     }
 
     public void Dispose()
     {
         _disposeTokenSource.Cancel();
-        
+
         // Clean up all connections
         while (_availableConnections.TryTake(out var connection))
         {
