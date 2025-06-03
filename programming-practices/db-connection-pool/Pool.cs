@@ -1,6 +1,5 @@
 using Npgsql;
 using System.Collections.Concurrent;
-using System.Threading;
 
 public sealed class Pool : IDisposable
 {
