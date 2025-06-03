@@ -20,7 +20,8 @@ public static class Configuration
                 user: (string)dbTable["user"],
                 password: (string)dbTable["password"],
                 name: (string)dbTable["name"],
-                table: (string)dbTable["table"]
+                table: (string)dbTable["table"],
+                testUsers: (int)(long)dbTable["test-users"]
             );
         }
 
@@ -61,7 +62,8 @@ public static class Configuration
             string user,
             string password,
             string name,
-            string table
+            string table,
+            int testUsers
         )
         {
             Host = host;
@@ -70,6 +72,7 @@ public static class Configuration
             Password = password;
             Name = name;
             Table = table;
+            TestUsers = testUsers;
         }
 
         public string Host { get; }
@@ -78,6 +81,7 @@ public static class Configuration
         public string Password { get; }
         public string Name { get; }
         public string Table { get; }
+        public int TestUsers { get; }
     }
 
     public readonly struct PoolConfig

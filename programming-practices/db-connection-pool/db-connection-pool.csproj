@@ -11,20 +11,8 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="npgsql" Version="9.0.3" />
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
     <PackageReference Include="Tomlyn" Version="0.19.0" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <PropertyGroup>
-      <BuildOutputDir>C:\Users\Javier\Desktop\Javier\Code\uni\programming-practices\db-connection-pool\build\</BuildOutputDir>
-    </PropertyGroup>
-  
-    <MakeDir Directories="$(BuildOutputDir)" Condition="!Exists('$(BuildOutputDir)')" />
-  
-    <Copy SourceFiles="$(TargetDir)$(TargetName).exe" DestinationFolder="$(BuildOutputDir)" SkipUnchangedFiles="true" />
-
-    <Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFolder="$(BuildOutputDir)" SkipUnchangedFiles="true" />
-
-    <Copy SourceFiles="$(TargetDir)$(TargetName).runtimeconfig.json" DestinationFolder="$(BuildOutputDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(TargetName).runtimeconfig.json')" />
-  </Target>
 </Project>
