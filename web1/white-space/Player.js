@@ -2,10 +2,6 @@ import { GameObject } from "./GameObject.js";
 import { Animator } from "./Animator.js";
 import { Vector2 } from "./Vector.js";
 
-// Sprite sheet
-//const walkSheet = new Image();
-//walkSheet.src = './assets/sprites/omori_walk.png';
-
 export class Player extends GameObject {
   constructor(x, y, z, collisionSystem) {
     super({
@@ -95,10 +91,5 @@ export class Player extends GameObject {
       ],
 
     })
-  }
-
-  update(deltaTime) {
-    this.updateFromInput(deltaTime);
-    super.update(deltaTime);
   }
 }

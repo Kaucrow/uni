@@ -1,0 +1,12 @@
+[database]
+host = "localhost"
+port = "5432"
+user = "postgres"
+password = "postgrespass"
+name = "test"
+table = "mockdata"
+
+[pool]
+default-size = 20
+max-size = 100
+size-increment = 5
