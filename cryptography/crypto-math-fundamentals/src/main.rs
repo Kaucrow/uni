@@ -16,9 +16,13 @@ fn main() -> Result<()> {
         &ci // If string is shorter than 6 chars, return whole string
     };
 
-    let a: BigInt = last_six[0..2].parse()?;
-    let m: BigInt = last_six[2..4].parse()?;
-    let n: BigInt = last_six[4..6].parse()?;
+    let mut a: BigInt = last_six[0..2].parse()?;
+    let mut m: BigInt = last_six[2..4].parse()?;
+    let mut n: BigInt = last_six[4..6].parse()?;
+
+    if a < BigInt::from(3) { a += 13 }
+    if m < BigInt::from(3) { m += 13 }
+    if n < BigInt::from(3) { n += 13 }
 
     println!("{}", "——— Variables ———".cyan());
     println!("{} {}", "a:".yellow(), a.to_string());
