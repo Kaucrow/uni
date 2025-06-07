@@ -1,9 +1,10 @@
 .floating-dropdown {
+  font-family: var(--font-normal);
   position: fixed;
-  z-index: 1000;
+  z-index: 50;
+  transition: all 0.2s;
 }
 
-/* Position variants */
 .top-left {
   top: 20px;
   left: 20px;
@@ -25,8 +26,8 @@
 }
 
 .dropdown-trigger {
-  background: #ffffff;
-  border: 2px solid #e2e8f0;
+  background: var(--lightgray);
+  border: 2px solid var(--mediumgray);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -38,47 +39,50 @@
   transition: all 0.2s;
 }
 
+.dark .dropdown-trigger {
+  border-color: var(--mediumgray);
+  background: var(--darkgray);
+}
+
 .dropdown-trigger:hover {
-  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+.dropdown-trigger:hover .floating-dropdown-trigger-icon {
   transform: scale(1.05);
 }
 
 .dropdown-menu {
   position: absolute;
-  background: white;
+  background: var(--lightgray);
   border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   min-width: 200px;
-  overflow: hidden;
+  overflow: visible;
   z-index: 1001;
 }
 
-/* Default expands down */
-.expands-down {
-  top: calc(100% + 10px);
+/* Position adjustments */
+.top-left .dropdown-menu {
+  left: 0;
 }
 
-/* Expands up when needed */
-.expands-up {
+.top-right .dropdown-menu {
+  right: 0;
+}
+
+.bottom-left .dropdown-menu {
+  left: 0;
   bottom: calc(100% + 10px);
 }
 
-/* Position adjustments for different corners */
-.bottom-right .expands-down {
+.bottom-right .dropdown-menu {
   right: 0;
-}
-
-.bottom-right .expands-up {
-  right: 0;
-}
-
-.top-right .expands-down {
-  right: 0;
-}
-
-.top-right .expands-up {
   bottom: calc(100% + 10px);
-  right: 0;
+}
+
+.dropdown-item-container {
+  position: relative;
 }
 
 .dropdown-item {
@@ -92,12 +96,48 @@
   align-items: center;
   gap: 10px;
   color: #334155;
+  justify-content: space-between;
 }
 
 .dropdown-item:hover {
+  border-radius: 8px;
   background: #f1f5f9;
+}
+
+.dropdown-item.active {
+  background: #e2e8f0;
 }
 
 .item-icon {
   display: inline-flex;
+}
+
+.submenu-arrow {
+  margin-left: auto;
+  font-size: 1.2em;
+}
+
+/* Submenu styles */
+.submenu {
+  position: absolute;
+  background: var(--lightgray);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 1002;
+  display: block;
+}
+
+/* Left-aligned submenus (for top-left and bottom-left) */
+.top-left .submenu,
+.bottom-left .submenu {
+  left: 100%;
+  top: 0;
+}
+
+/* Right-aligned submenus (for top-right and bottom-right) */
+.top-right .submenu,
+.bottom-right .submenu {
+  right: 100%;
+  top: 0;
 }

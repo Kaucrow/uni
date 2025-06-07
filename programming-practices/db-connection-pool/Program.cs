@@ -19,6 +19,8 @@ class Program
         var failureCount = 0;
         var tasks = new Task[Configuration.Database.TestUsers];
 
+        var startTime = DateTime.Now;
+
         // Simulate concurrent users
         for (int i = 0; i < Configuration.Database.TestUsers; i++)
         {
@@ -35,7 +37,7 @@ class Program
                     // Execute test query
                     using var cmd = new NpgsqlCommand(
                         string.Format(
-                            (string)Configuration.GetQueries().main,
+                            (string)Configuration.GetQueries().testQuery,
                             "*",
                             Configuration.Database.Table.ToString()
                         ),
@@ -55,8 +57,13 @@ class Program
         }
 
         await Task.WhenAll(tasks);
-        
-        AnsiConsole.MarkupLine($"[magenta]\nResults:[/] [green]{successCount}[/] succeeded, [red]{failureCount}[/] failed");
+
+        var endTime = DateTime.Now;
+        var elapsedTime = endTime - startTime;
+
+        AnsiConsole.MarkupLine(
+            $"[magenta]\nResults:[/] [green]{successCount}[/] succeeded,[red]{failureCount}[/] failed, [yellow]time elapsed:[/] {elapsedTime.Hours:F2}:{elapsedTime.Minutes:F2}:{elapsedTime.Seconds:F2}"
+        );
         pool.Dispose();
     }
 }

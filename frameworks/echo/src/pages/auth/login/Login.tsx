@@ -2,7 +2,6 @@ import './Login.css';
 import Checkbox from '../../../components/Checkbox';
 import Input from '../../../components/Input';
 import CenteredDiv from '../../../components/CenteredDiv';
-import type { CustomError } from '../../../utils/types';
 import { Link, Navigate } from 'react-router-dom';
 import { useState } from 'react'
 import { useAuth } from '../../../hooks/useAuth';
@@ -43,7 +42,6 @@ const Login = () => {
     }
   }
 
-  let reqErr: CustomError[] = [];
   let err = {email: '', notFound: ''};
   let [rememberMe, setRememberMe] = useState(false);
 

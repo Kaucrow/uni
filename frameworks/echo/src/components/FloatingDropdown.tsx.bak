@@ -10,6 +10,7 @@ type DropdownOption = {
 };
 
 interface FloatingDropdownProps {
+  className?: string,
   triggerContent: React.ReactNode;
   options: DropdownOption[];
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -103,7 +104,7 @@ const FloatingDropdown: React.FC<FloatingDropdownProps> = ({
   const handleOptionMouseLeave = () => {
     submenuTimeoutRef.current = setTimeout(() => {
       setActiveSubmenu(null);
-    }, 1000);
+    }, 300);
   };
 
   const getSubmenu = (optionId: string) => {

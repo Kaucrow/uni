@@ -5,7 +5,7 @@ user = "postgres"
 password = "postgrespass"
 name = "test"
 table = "mockdata"
-test-users = 10000
+test-users = 1000
 
 [pool]
 default-size = 20

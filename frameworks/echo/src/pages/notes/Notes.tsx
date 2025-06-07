@@ -1,75 +1,130 @@
-import { useState } from 'react';
+import './Notes.css';
+import { useEffect, useState } from 'react';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import FloatingDropdown from '../../components/FloatingDropdown';
+import Note from '../../components/Note';
+import type { NoteType } from '../../firebase/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNoteSticky } from '@fortawesome/free-solid-svg-icons';
-import { createNote } from '../../firebase/database';
+import { faPencil } from '@fortawesome/free-solid-svg-icons';
+import { createNote, getNotes } from '../../firebase/database';
 
 const Notes = () => {
-  const [items] = useState([
-    { id: 1, color: 'bg-red-500' },
-    { id: 2, color: 'bg-blue-500' },
-    { id: 3, color: 'bg-green-500' },
-    { id: 4, color: 'bg-yellow-500' },
-    { id: 5, color: 'bg-purple-500' },
-    { id: 6, color: 'bg-pink-500' },
-    { id: 7, color: 'bg-indigo-500' },
-    { id: 8, color: 'bg-orange-500' },
-    { id: 9, color: 'bg-teal-500' },
-    { id: 10, color: 'bg-gray-500' },
-    { id: 11, color: 'bg-red-400' },
-    { id: 12, color: 'bg-blue-400' },
-  ]);
+  const [notes, setNotes] = useState<NoteType[]>([]);
 
+  const fetchNotes = async () => {
+    try {
+      const fetchedNotes = await getNotes();
+      setNotes(fetchedNotes);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+  
   const [layoutIndex, setLayoutIndex] = useState(0);
   const layouts = [
-    { cols: 6, class: 'grid-cols-6' },
     { cols: 4, class: 'grid-cols-4' },
     { cols: 3, class: 'grid-cols-3' },
+    { cols: 2, class: 'grid-cols-2' },
     { cols: 1, class: 'grid-cols-1' },
   ];
 
   const currentLayout = layouts[layoutIndex];
 
+  const [expandedNoteId, setExpandedNoteId] = useState<number | null>(null);
+
+  const handleNoteClick = (id: number) => {
+    setExpandedNoteId(id === expandedNoteId ? null : id);
+  };
+
   const changeLayout = () => {
     setLayoutIndex((prevIndex) => (prevIndex + 1) % layouts.length);
   };
 
-  const handleCreateNote = async () => {
-    await createNote();
-    console.log('Note created');
+  const getNoteColor = (color: string): string => {
+    const colorMap: Record<string, string> = {
+      red: "#e67e80",
+      green: "#a7c080",
+      blue: "#7fbbb3",
+      yellow: "#dbbc7f"
+    };
+
+    return colorMap[color.toLowerCase()] || '#ffffff';
+  }
+
+  const handleCreateNote = async (color: string) => {
+    try {
+      await createNote(color);
+      await fetchNotes();
+      console.log('Note created')
+    } catch (err) {
+      console.error(`Error on note creation ${err}`);
+    }
+  }
+
+  const handleDeleteNote = async () => {
+    try {
+      await fetchNotes();
+    } catch (err) {
+      console.error(`Error on note deletion ${err}`);
+    }
   }
 
   const dropdownOptions = [
-    {
-      id: 'create',
-      label: 'Create Note',
-      icon: <FontAwesomeIcon icon={faNoteSticky} />,
-      onClick: handleCreateNote
-    }
-  ]
+  {
+    id: 'create-note',
+    label: 'Create Note',
+    icon: <FontAwesomeIcon icon={faNoteSticky} />,
+    subOptions: [
+      {
+        id: 'create-red',
+        label: 'Red Note',
+        onClick: () => handleCreateNote('red')
+      },
+      {
+        id: 'create-green',
+        label: 'Green Note',
+        onClick: () => handleCreateNote('green')
+      },
+      {
+        id: 'create-blue',
+        label: 'Blue Note',
+        onClick: () => handleCreateNote('blue')
+      },
+      {
+        id: 'create-yellow',
+        label: 'Yellow Note',
+        onClick: () => handleCreateNote('yellow')
+      }
+    ]
+  }];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto relative min-h-screen">
+    <div className="container">
       <FloatingDropdown
-        triggerContent={<div></div>}
+        triggerContent={<FontAwesomeIcon icon={faPencil} className="dropdown-trigger-icon"/>}
         options={dropdownOptions}
         position="top-left"
       />
-      <div className="mb-6">
-        <p className="text-gray-600">
-          Current layout: {currentLayout.cols} columns
-        </p>
-      </div>
 
       <Flipper flipKey={currentLayout.class}>
-        <div className={`grid ${currentLayout.class} gap-4`}>
-          {items.map(item => (
-            <Flipped key={item.id} flipId={item.id}>
-              <div 
-                className={`${item.color} h-32 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md`}
-              >
-                {item.id}
+        <div className={`grid-container ${currentLayout.class}`}>
+          {notes.map(note => (
+            <Flipped key={note.id} flipId={note.id}>
+              <div>
+                <Note
+                  id={note.id}
+                  color={getNoteColor(note.color)}
+                  title={note.title}
+                  content={note.content}
+                  isExpanded={expandedNoteId === note.id}
+                  onClick={() => handleNoteClick(note.id)}
+                  onDelete={() => handleDeleteNote()}
+                />
               </div>
             </Flipped>
           ))}
@@ -78,12 +133,12 @@ const Notes = () => {
 
       <button 
         onClick={changeLayout}
-        className="fixed bottom-6 right-6 px-6 py-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition shadow-lg flex items-center justify-center"
+        className="layout-button"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="button-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-        <span className="ml-2">Change Layout</span>
+        <span className="button-text">Change Layout</span>
       </button>
     </div>
   );

@@ -1,0 +1,81 @@
+.grid-container {
+  display: grid;
+  gap: 16px;
+}
+
+.floating-dropdown {
+  margin-top: 5em;
+}
+
+.container {
+  padding: 2rem;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  min-height: 100vh;
+}
+
+.dropdown-trigger-icon {
+  transform: all 0.2s;
+  color: var(--mediumgray);
+}
+
+.dark .dropdown-trigger-icon {
+  color: var(--lightgray-hover);
+}
+
+.grid-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-container.list {
+  grid-template-columns: 1fr;
+}
+
+.grid-container.grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.layout-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--lightgray);
+  color: var(--mediumgray);
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.layout-button:hover {
+  transform: scale(1.025);
+}
+
+.dark .layout-button {
+  color: var(--lightgray);
+  background-color: var(--darkgray);
+}
+
+.layout-button:hover {
+  background-color: var(--lightgray-hover);
+}
+
+.dark .layout-button:hover {
+  background-color: var(--mediumgray-hover);
+}
+
+.button-icon {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.button-text {
+  margin-left: 0.5rem;
+}
