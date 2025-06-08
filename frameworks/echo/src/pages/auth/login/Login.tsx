@@ -12,7 +12,7 @@ const Login = () => {
   const { userLoggedIn } = useAuth();
 
   if (userLoggedIn) {
-    return <Navigate to={'/'} replace />
+    return <Navigate to={'/notes'} replace />
   }
 
   const [isSigningIn, setIsSigningIn] = useState(false);

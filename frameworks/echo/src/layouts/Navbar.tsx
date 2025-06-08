@@ -4,8 +4,11 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import LogoIcon from '../components/LogoIcon';
 import Sidebar from '../components/Sidebar';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const Navbar = () => {
+  const { userLoggedIn } = useAuth();
+
   useDarkMode();
 
   let [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,10 +42,14 @@ const Navbar = () => {
           {/* <!-- Large screen navbar --> */}
           <nav className='main-nav'>
             <Link to='/' className='nav-link'>Home</Link>
-            <Link to='/auth/login' className='nav-link'>Login</Link>
-            <Link to='/auth/register' className='nav-link'>Register</Link>
+            {userLoggedIn && <div>
+              <Link to='/notes' className='nav-link'>Notes</Link>
+            </div>}
+            {!userLoggedIn && <div>
+              <Link to='/auth/login' className='nav-link'>Login</Link>
+              <Link to='/auth/register' className='nav-link'>Register</Link>
+            </div>}
             <Link to='#!' className='nav-link'>About</Link>
-            <Link to='#!' className='nav-link'>Contact</Link>
           </nav>
         </div>
 

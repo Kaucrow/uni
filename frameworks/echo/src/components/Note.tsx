@@ -67,7 +67,7 @@ const Note = ({ id, color, title, content, isExpanded, onClick, onDelete }: Note
 
   const handleGoBack = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onClick(); // Will trigger the reset in useEffect
+    onClick();
   };
 
   const handleTitleClick = (e: React.MouseEvent) => {

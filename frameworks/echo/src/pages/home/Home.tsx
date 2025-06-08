@@ -21,10 +21,6 @@ const Home = () => {
       <a href="https://github.com/Kaucrow/uni/tree/dev/frameworks/echo" className="about-badge">
         <FontAwesomeIcon className='about-github-icon' icon={faGithub} />
         <p className='about-text'>Kaucrow - 2025</p>
-        { userLoggedIn ? 
-          <p>You are logged in</p> :
-          <p>You are not logged in</p>
-        }
       </a>
     </div>
   )

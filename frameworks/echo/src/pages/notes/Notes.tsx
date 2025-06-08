@@ -1,5 +1,6 @@
 import './Notes.css';
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import FloatingDropdown from '../../components/FloatingDropdown';
 import Note from '../../components/Note';
@@ -8,9 +9,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 import { faPencil } from '@fortawesome/free-solid-svg-icons';
 import { createNote, getNotes } from '../../firebase/database';
+import { useAuth } from '../../hooks/useAuth';
 
 const Notes = () => {
   const [notes, setNotes] = useState<NoteType[]>([]);
+  const { userLoggedIn } = useAuth();
+
+  if (!userLoggedIn) {
+    return <Navigate to={'/'} replace />
+  }
 
   const fetchNotes = async () => {
     try {

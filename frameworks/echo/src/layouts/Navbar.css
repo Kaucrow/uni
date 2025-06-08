@@ -89,7 +89,6 @@
   display: flex;
   position: relative;
   top: 2px;
-  gap: 1rem;
   margin-left: 1.5rem;
 }
 
@@ -99,14 +98,15 @@
   color: #404040;
   text-decoration: none;
   transition: color 0.3s;
+  margin-left: 1em;
 }
 
 .dark .nav-link {
-  color: #e5e5e5;
+  color: var(--lightgray);
 }
 
 .dark .nav-link:hover {
-  color: #a3a3a3;
+  color: var(--lightgray-hover);
 }
 
 /* Responsive styles */

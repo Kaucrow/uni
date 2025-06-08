@@ -10,6 +10,7 @@ import {
 import { EmailAuthProvider } from 'firebase/auth';
 import CenteredDiv from '../../components/CenteredDiv';
 import Input from '../../components/Input';
+import { Navigate } from 'react-router-dom';
 
 const Profile = () => {
   const { currentUser, userLoggedIn } = useAuth();
@@ -64,7 +65,8 @@ const Profile = () => {
   };
 
   if (!userLoggedIn) {
-    return <div className="profile-container">Please log in to view this page.</div>;
+    //return <div className="profile-container">Please log in to view this page.</div>;
+    return <Navigate to={'/'} replace />
   }
 
   return (

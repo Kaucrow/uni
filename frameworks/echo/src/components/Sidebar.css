@@ -98,6 +98,12 @@
   gap: 1.5rem;
 }
 
+.nav-conditional {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .nav-link {
   color: var(--mediumgray);
   display: inline-flex;
