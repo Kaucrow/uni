@@ -11,7 +11,7 @@ export class Player extends GameObject {
       width: 32,
       height: 32,
       spriteSheet: './assets/sprites/omori_walk.png',
-      speed: 32,
+      speed: 232,
 
       actions: {
         idle: { animates: false },

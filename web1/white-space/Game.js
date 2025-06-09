@@ -1,5 +1,5 @@
 import { adjustCanvas } from "./canvas.js";
-import { Room } from "./Room.js";
+import { WhiteSpace } from "./rooms/WhiteSpace.js";
 
 adjustCanvas();
 
@@ -57,7 +57,7 @@ async function loadAndLoopSound(data) {
   };
 }
 
-const room = new Room();
+const room = new WhiteSpace();
 let lastTime = 0;
 
 async function gameLoop() {
