@@ -5,49 +5,88 @@ import { Vector2 } from "./Vector.js";
 export class Player extends GameObject {
   constructor(x, y, z, collisionSystem) {
     super({
+      id: 'player',
       x: x,
       y: y,
       z: z,
       width: 32,
       height: 32,
-      spriteSheet: './assets/sprites/omori_walk.png',
-      speed: 232,
 
       actions: {
-        idle: { animates: false },
-        walk: { animates: true }
+        idle: {
+          animates: false,
+          spriteSheet: './assets/sprites/omori_walk.png',
+        },
+        walk: {
+          animates: true,
+          spriteSheet: './assets/sprites/omori_walk.png',
+        },
+        run: {
+          animates: true,
+          spriteSheet: './assets/sprites/omori_run.png',
+        }
       },
       defaultAction: 'idle',
 
       animator: {
         animations: {
-          down: {
+          walkDown: {
             frames: 3,
+            frameDuration: 0.30,
             defaultFrame: 1,
             y: 0,
             direction: Animator.ANIMATION_DIRS.PINGPONG
           },
-          left: {
+          walkLeft: {
             frames: 3,
+            frameDuration: 0.30,
             defaultFrame: 1,
             y: 1,
             direction: Animator.ANIMATION_DIRS.PINGPONG
           },
-          right: {
+          walkRight: {
             frames: 3,
+            frameDuration: 0.30,
             defaultFrame: 1,
             y: 2,
             direction: Animator.ANIMATION_DIRS.PINGPONG
           },
-          up: {
+          walkUp: {
             frames: 3,
+            frameDuration: 0.30,
             defaultFrame: 1,
             y: 3,
             direction: Animator.ANIMATION_DIRS.PINGPONG
-          }
+          },
+          runDown: {
+            frames: 8,
+            frameDuration: 0.10,
+            defaultFrame: 1,
+            y: 0,
+            direction: Animator.ANIMATION_DIRS.LOOP
+          },
+          runLeft: {
+            frames: 8,
+            frameDuration: 0.10,
+            defaultFrame: 1,
+            y: 1,
+            direction: Animator.ANIMATION_DIRS.LOOP
+          },
+          runRight: {
+            frames: 8,
+            frameDuration: 0.10,
+            defaultFrame: 1,
+            y: 2,
+            direction: Animator.ANIMATION_DIRS.LOOP
+          },
+          runUp: {
+            frames: 8,
+            frameDuration: 0.10,
+            defaultFrame: 1,
+            y: 3,
+            direction: Animator.ANIMATION_DIRS.LOOP
+          },
         },
-        defaultAnimation: 'down',
-        frameDuration: 0.30,
         animationDirection: 'forward',
       },
 
@@ -55,15 +94,17 @@ export class Player extends GameObject {
         animationMappings: {
           movement: {
             x: {
-              1: 'right',
-              [-1]: 'left'
+              1: 'Right',
+              [-1]: 'Left'
             },
             y: {
-              1: 'down',
-              [-1]: 'up'
+              1: 'Down',
+              [-1]: 'Up'
             }
           }
         },
+        walkSpeed: 96,
+        runSpeed: 224,
       },
 
       collisionSystem,
@@ -76,6 +117,8 @@ export class Player extends GameObject {
               onCollide: (source) => {
                 source.x = source.oldX;
                 source.y = source.oldY;
+                source.setAction('idle');
+                source.animator.setAnimation(source.animator.currentAnimation.replace("run", "walk"));
                 source.animator.frameX = 1;
                 source.animator.animationTimer = 0;
               }

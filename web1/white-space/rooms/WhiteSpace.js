@@ -29,10 +29,12 @@ export class WhiteSpace extends Room {
       x: lightbulbX,
       y: lightbulbY,
       z: 10,
-      spriteSheet: './assets/sprites/lightbulb_dim.png',
 
       actions: {
-        idle: { animates: true },
+        idle: {
+          animates: true,
+          spriteSheet: './assets/sprites/lightbulb_dim.png'
+        },
       },
 
       animator: {
@@ -52,10 +54,12 @@ export class WhiteSpace extends Room {
       x: rectX,
       y: rectY + 96,
       z: 0,
-      spriteSheet: './assets/sprites/mewo_asleep.png',
 
       actions: {
-        idle: { animates: true },
+        idle: {
+          animates: true,
+          spriteSheet: './assets/sprites/mewo_asleep.png'
+        },
       },
 
       animator: {
@@ -88,10 +92,12 @@ export class WhiteSpace extends Room {
       x: rectX + 32,
       y: rectY,
       z: 0,
-      spriteSheet: './assets/sprites/laptop_static.png',
       
       actions: {
-        idle: { animates: true },
+        idle: {
+          animates: true,
+          spriteSheet: './assets/sprites/laptop_static.png'
+        },
       },
 
       animator: {

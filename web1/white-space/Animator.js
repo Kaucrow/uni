@@ -8,9 +8,19 @@ export class Animator {
     this.animations = config.animations || {};
     this.currentAnimation = config.defaultAnimation || Object.keys(this.animations)[0];
     this.frameX = this.animations[this.currentAnimation].defaultFrame || 0;
-    this.frameDuration = config.frameDuration || 0.1; // Seconds per frame
+    this._frameDuration = config.frameDuration || null; // Seconds per frame
     this.animationTimer = 0;
     this.animationDirection = 'forward';
+  }
+
+  get frameDuration() {
+    if (this._frameDuration) return this._frameDuration;
+
+    return this.animations[this.currentAnimation].frameDuration;
+  }
+
+  set frameDuration(val) {
+    this._frameDuration = val;
   }
 
   updateAnimation(deltaTime) {

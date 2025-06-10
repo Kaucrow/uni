@@ -5,27 +5,41 @@ import { Collider } from "./Collider.js";
 export class GameObject {
   constructor(config) {
     // Base properties
+    this.id = config.id || null;
     this.x = config.x || 0;
     this.y = config.y || 0;
     this.z = config.z || 0;
     this.oldX = this.x;
     this.oldY = this.y;
-    this._preciseX = this.x;
-    this._preciseY = this.y;
+    this._preciseX = config.x || 0;
+    this._preciseY = config.y || 0;
     this.width = config.width || 32;
     this.height = config.height || 32;
-    this.spriteSheet = null;
-    if (config.spriteSheet) {
-      this.spriteSheet = new Image();
-      this.spriteSheet.src = config.spriteSheet;
-    }
-    this.speed = config.speed || 50; // Pixels per second
 
     // Action system
     this.actions = config.actions || {
       idle: { animates: false }
     };
     this.currentAction = config.defaultAction || 'idle';
+
+    // Spritesheet
+    this.spriteSheet = null;
+    this.spriteSheets = null;
+    if (config.spriteSheet) {
+      this.spriteSheet = new Image();
+      this.spriteSheet.src = config.spriteSheet;
+    } else if (this.actions) {
+      const spriteSheets = new Map(
+        Object.entries(this.actions).map(([actionName, config]) => {
+          const img = new Image();
+          img.src = config.spriteSheet;
+          return [actionName, img];
+        })
+      );
+
+      this.spriteSheets = spriteSheets;
+    }
+    this.speed = config.speed || null;
 
     // Animator
     this.animator = config.animator ? new Animator(config.animator) : null;
@@ -43,6 +57,7 @@ export class GameObject {
         this.colliders.push(colliderObj);
       });
     }
+    this.collisionCallbacks = []; // When a collision triggers, the callbacks get stored here for execution
 
     // Custom properties
     this.customProperties = config.customProperties || {};
@@ -52,6 +67,9 @@ export class GameObject {
     if (this.input) {
       this.updateFromInput(deltaTime);
     }
+
+    this.collisionCallbacks.forEach((callback) => callback(this));
+    this.collisionCallbacks = [];
 
     if (this.actions[this.currentAction]?.animates) {
       if (this.animator) {
@@ -69,7 +87,12 @@ export class GameObject {
 
     if (movement.y !== 0 || movement.x !== 0) {
       this.move(movement.x, movement.y, deltaTime);
-      this.setAction('walk');
+
+      if (this.input.isKeyPressed('Shift')) {
+        this.setAction('run');
+      } else {
+        this.setAction('walk');
+      }
 
       if (this.animator) {
         const movementAnimation = this.input.getCurrentMovementAnimation(movement);
@@ -85,13 +108,19 @@ export class GameObject {
   }
 
   draw(ctx) {
-    if (!this.spriteSheet) return;
+    let spriteSheet = null;
+
+    if (this.spriteSheet) {
+      spriteSheet = this.spriteSheet;
+    } else {
+      spriteSheet = this.spriteSheets.get(this.currentAction);
+    };
 
     if (this.animator) {
       const animation = this.animator.animations[this.animator.currentAnimation];
 
       ctx.drawImage(
-        this.spriteSheet,
+        spriteSheet,
         this.animator.frameX * this.width + this.animator.frameX,
         animation.y * this.height + animation.y,
         this.width - 1,
@@ -103,7 +132,7 @@ export class GameObject {
       );
     } else {
       ctx.drawImage(
-        this.spriteSheet,
+        spriteSheet,
         0,
         0,
         this.width - 1,
@@ -132,16 +161,29 @@ export class GameObject {
     this.oldX = this.x;
     this.oldY = this.y;
 
-    /*
-    this._preciseX += dx * this.speed * deltaTime;
-    this._preciseY += dy * this.speed * deltaTime;
+    let speed = null;
 
-    this.x = Math.floor(this._preciseX + 0.5);
-    this.y = Math.floor(this._preciseY + 0.5);
+    if (this.speed) {
+      speed = this.speed;
+    } else {
+      if (!this.input) return;
+
+      if (this.input.isKeyPressed('Shift')) {
+        speed = this.input.runSpeed;
+      } else {
+        speed = this.input.walkSpeed;
+      }
+    }
+
+    /*this._preciseX += dx * speed * deltaTime;
+    this._preciseY += dy * speed * deltaTime;
+
+    this.x = Math.round(this._preciseX);
+    this.y = Math.round(this._preciseY);
     */
 
-    this.x += Math.round(dx * this.speed * deltaTime);
-    this.y += Math.round(dy * this.speed * deltaTime);
+    this.x += Math.round(dx * speed * deltaTime);
+    this.y += Math.round(dy * speed * deltaTime);
 
     this.collisionSystem.checkCollisions(this);
   }

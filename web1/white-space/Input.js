@@ -4,10 +4,13 @@ export class Input {
       ArrowDown: false,
       ArrowLeft: false,
       ArrowRight: false,
-      ArrowUp: false
+      ArrowUp: false,
+      Shift: false,
     };
 
     this.animationMappings = config.animationMappings || null;
+    this.walkSpeed = config.walkSpeed || null;
+    this.runSpeed = config.runSpeed || null;
 
     this.cardinalMovement = config.cardinalMovement || true;
     this.lastHorizontalKeyPress = 0;
@@ -70,12 +73,24 @@ export class Input {
   }
 
   getCurrentMovementAnimation(movement) {
+    let direction = null;
+
     if (movement.x !== 0) {
-      return this.animationMappings.movement.x[movement.x];
+      direction = this.animationMappings.movement.x[movement.x];
     }
+
     if (movement.y !== 0) {
-      return this.animationMappings.movement.y[movement.y];
+      direction = this.animationMappings.movement.y[movement.y];
     }
+
+    if (direction) {
+      if (this.isKeyPressed('Shift')) {
+        return ('run' + direction);
+      } else {
+        return ('walk' + direction);
+      }
+    }
+
     return null;
   }
 }

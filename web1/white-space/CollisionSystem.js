@@ -86,8 +86,8 @@ export class CollisionSystem {
       // If no separating axis was found, the shapes collide
       if (collision) {
         groupNames.forEach((groupName) => {
-          let onCollide = this.#getOnCollide(groupName, collider);
-          onCollide(source, other);
+          const onCollide = this.#getOnCollide(groupName, collider);
+          source.collisionCallbacks.push(onCollide);
         })
         return true;
       }

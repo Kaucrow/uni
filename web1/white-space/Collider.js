@@ -181,9 +181,7 @@ export class ColliderDrawProps {
   constructor(config) {
     this.strokeStyle = config.strokeStyle || 'red';
     this.fillStyle = 'transparent';
-    console.log(config);
     if (config.fill) {
-      console.log('here');
       this.fillStyle = this.#reduceOpacity(this.strokeStyle);
     }
     this.lineWidth = config.lineWidth || 1;
