@@ -1,4 +1,5 @@
 import { Player } from "../Player.js";
+import { RedHand } from "../RedHand.js";
 import { Rect } from "../Rect.js";
 import { GameObject } from "../GameObject.js";
 import { GameCamera } from "../GameCamera.js";
@@ -10,14 +11,14 @@ import { Room } from "../Room.js";
 export class WhiteSpace extends Room {
   constructor() {
     super({
-      width: 2000,
-      height: 2000
+      width: 3000,
+      height: 3000
     });
 
     const rectWidth = 128;
     const rectHeight = 96;
-    const rectX = canvas.width / 2 - rectWidth / 2;
-    const rectY = canvas.height / 2 - rectHeight / 2;
+    const rectX = this.width / 2;
+    const rectY = this.height / 2;
 
     const lightbulbX = rectX + 64;
     const lightbulbY = rectY - 72;
@@ -25,16 +26,49 @@ export class WhiteSpace extends Room {
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
 
+    const redHandCount = Math.round(Math.random() * 4) + 8;
+    this.redHands = [];
+    for (let i = 0; i < redHandCount; i++) {
+      // Allow x-axis alignment
+      if (Math.random() < 0.5) {
+        const randomX = Math.random() < 0.5 
+          ? Math.round(Math.random() * (this.width / 2 - 1000) + 500) 
+          : Math.round(Math.random() * (this.width / 2 - 1000) + this.width / 2 + 500);
+
+        const randomY = Math.round(Math.random() * (this.height - 1000) + 500);
+
+        console.log(`X: ${randomX}`);
+        console.log(`Y: ${randomY}`);
+
+        const redHand = new RedHand(randomX, randomY, this.collisionSystem);
+        this.redHands.push(redHand);
+      // Allow y-axis alignment
+      } else {
+        const randomX = Math.round(Math.random() * (this.width - 1000) + 500);
+
+        const randomY = Math.random() < 0.5 
+          ? Math.round(Math.random() * (this.height/2 - 1000) + 500) 
+          : Math.round(Math.random() * (this.height/2 - 1000) + this.height /2 + 500);
+
+        console.log(`X: ${randomX}`);
+        console.log(`Y: ${randomY}`);
+
+        const redHand = new RedHand(randomX, randomY, this.collisionSystem);
+        this.redHands.push(redHand);
+      }
+    }
+
     const lightbulb = new GameObject({
       x: lightbulbX,
       y: lightbulbY,
       z: 10,
 
+      spriteSheets: {
+        idle: './assets/sprites/lightbulb_dim.png'
+      },
+
       actions: {
-        idle: {
-          animates: true,
-          spriteSheet: './assets/sprites/lightbulb_dim.png'
-        },
+        idle: { animates: true },
       },
 
       animator: {
@@ -55,11 +89,12 @@ export class WhiteSpace extends Room {
       y: rectY + 96,
       z: 0,
 
+      spriteSheets: {
+        idle: './assets/sprites/mewo_asleep.png'
+      },
+
       actions: {
-        idle: {
-          animates: true,
-          spriteSheet: './assets/sprites/mewo_asleep.png'
-        },
+        idle: { animates: true },
       },
 
       animator: {
@@ -93,11 +128,12 @@ export class WhiteSpace extends Room {
       y: rectY,
       z: 0,
       
+      spriteSheets: {
+        idle: './assets/sprites/laptop_static.png'
+      },
+
       actions: {
-        idle: {
-          animates: true,
-          spriteSheet: './assets/sprites/laptop_static.png'
-        },
+        idle: { animates: true },
       },
 
       animator: {
@@ -194,7 +230,7 @@ export class WhiteSpace extends Room {
     });
 
     this.objects = [
-      this.rect = new Rect(rectX, rectY, -1, 128, 96),
+      this.rect = new Rect(rectX, rectY, -1, rectWidth, rectHeight),
       this.sketchbook = sketchbook,
       this.tissuebox = tissuebox,
       this.door = door,
@@ -203,6 +239,7 @@ export class WhiteSpace extends Room {
       this.mewo = mewo,
       this.laptop = laptop,
       this.player = new Player(rectX + 64, rectY + 32, 5, this.collisionSystem),
+      ...this.redHands
     ];
 
     this.objects.sort((a, b) => a.z - b.z);
@@ -220,14 +257,29 @@ export class WhiteSpace extends Room {
 
     this.#draw(deltaTime);
 
-    if (this.camera.x <= -this.width / 2) {
-      this.player.x += this.width;
-    } else if (this.camera.x >= this.width / 2) {
-      this.player.x -= this.width;
-    } else if (this.camera.y <= -this.height / 2) {
-      this.player.y += this.height;
-    } else if (this.camera.y >= this.height / 2) {
-      this.player.y -= this.height;
+    // Camera wrapping logic
+    const halfViewportWidth = this.camera.viewportWidth / 2;
+    const halfViewportHeight = this.camera.viewportHeight / 2;
+
+    // Left edge wrap
+    if (this.camera.x <= -halfViewportWidth) {
+        this.player.x += this.width;
+        this.camera.x += this.width;
+    } 
+    // Right edge wrap
+    else if (this.camera.x >= this.width - halfViewportWidth) {
+        this.player.x -= this.width;
+        this.camera.x -= this.width;
+    }
+    // Top edge wrap
+    else if (this.camera.y <= -halfViewportHeight) {
+        this.player.y += this.height;
+        this.camera.y += this.height;
+    }
+    // Bottom edge wrap
+    else if (this.camera.y >= this.height - halfViewportHeight) {
+        this.player.y -= this.height;
+        this.camera.y -= this.height;
     }
 
     this.camera.resetTransform(ctx);
@@ -245,35 +297,35 @@ export class WhiteSpace extends Room {
 
     ctx.beginPath();
     ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y + 2);
-    ctx.lineTo(this.lightbulb.x + 17, -128);
+    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
     ctx.strokeStyle = '#000000ff';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, -128);
-    ctx.lineTo(this.lightbulb.x + 17, -160);
+    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
+    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
     ctx.strokeStyle = '#000000cc';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, -160);
-    ctx.lineTo(this.lightbulb.x + 17, -192);
+    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
+    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
     ctx.strokeStyle = '#00000099';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, -192);
-    ctx.lineTo(this.lightbulb.x + 17, -224);
+    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
+    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
     ctx.strokeStyle = '#00000066';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, -224);
-    ctx.lineTo(this.lightbulb.x + 17, -256);
+    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
+    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 256);
     ctx.strokeStyle = '#00000033';
     ctx.lineWidth = 1;
     ctx.stroke();

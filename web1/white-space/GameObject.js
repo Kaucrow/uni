@@ -1,4 +1,5 @@
 import { Animator } from "./Animator.js";
+import { MovementAnimator } from "./MovementAnimator.js";
 import { Input } from "./Input.js";
 import { Collider } from "./Collider.js";
 
@@ -25,14 +26,17 @@ export class GameObject {
     // Spritesheet
     this.spriteSheet = null;
     this.spriteSheets = null;
+    if (config.spriteSheet && config.spriteSheets) {
+      throw new Exception("Can't have both a 'spriteSheet' and 'spriteSheets' definition");
+    }
     if (config.spriteSheet) {
       this.spriteSheet = new Image();
       this.spriteSheet.src = config.spriteSheet;
-    } else if (this.actions) {
+    } else if (config.spriteSheets) {
       const spriteSheets = new Map(
-        Object.entries(this.actions).map(([actionName, config]) => {
+        Object.entries(config.spriteSheets).map(([actionName, src]) => {
           const img = new Image();
-          img.src = config.spriteSheet;
+          img.src = src;
           return [actionName, img];
         })
       );
@@ -43,6 +47,7 @@ export class GameObject {
 
     // Animator
     this.animator = config.animator ? new Animator(config.animator) : null;
+    this.movementAnimator = config.movementAnimator ? new MovementAnimator(this, config.movementAnimator) : null;
 
     // Input
     this.input = config.input ? new Input(config.input) : null;
@@ -66,6 +71,10 @@ export class GameObject {
   update(deltaTime) {
     if (this.input) {
       this.updateFromInput(deltaTime);
+    }
+
+    if (this.movementAnimator) {
+      this.movementAnimator.update(deltaTime);
     }
 
     this.collisionCallbacks.forEach((callback) => callback(this));
@@ -93,11 +102,6 @@ export class GameObject {
       } else {
         this.setAction('walk');
       }
-
-      if (this.animator) {
-        const movementAnimation = this.input.getCurrentMovementAnimation(movement);
-        this.animator.setAnimation(movementAnimation);
-      }
     } else {
       this.setAction('idle');
 
@@ -108,11 +112,11 @@ export class GameObject {
   }
 
   draw(ctx) {
-    let spriteSheet = null;
+    let spriteSheet = undefined;
 
     if (this.spriteSheet) {
       spriteSheet = this.spriteSheet;
-    } else {
+    } else if (this.spriteSheets) {
       spriteSheet = this.spriteSheets.get(this.currentAction);
     };
 
@@ -130,7 +134,7 @@ export class GameObject {
         this.width,
         this.height
       );
-    } else {
+    } else if (spriteSheet) {
       ctx.drawImage(
         spriteSheet,
         0,

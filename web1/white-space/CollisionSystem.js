@@ -1,6 +1,17 @@
 import { Collider } from "./Collider.js";
 
 export class CollisionSystem {
+  static FUNCS = {
+    STOP: (source) => {
+      source.x = source.oldX;
+      source.y = source.oldY;
+      source.setAction('idle');
+      source.animator.setAnimation(source.animator.currentAnimation.replace("run", "walk"));
+      source.animator.frameX = 1;
+      source.animator.animationTimer = 0;
+    }    
+  };
+
   constructor() {
     this.colliders = [];
   }

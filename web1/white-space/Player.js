@@ -1,30 +1,28 @@
 import { GameObject } from "./GameObject.js";
 import { Animator } from "./Animator.js";
+import { CollisionSystem } from "./CollisionSystem.js";
 import { Vector2 } from "./Vector.js";
 
 export class Player extends GameObject {
   constructor(x, y, z, collisionSystem) {
     super({
       id: 'player',
-      x: x,
-      y: y,
-      z: z,
+      x,
+      y,
+      z,
       width: 32,
       height: 32,
 
+      spriteSheets: {
+        idle: './assets/sprites/omori_walk.png',
+        walk: './assets/sprites/omori_walk.png',
+        run: './assets/sprites/omori_run.png',
+      },
+
       actions: {
-        idle: {
-          animates: false,
-          spriteSheet: './assets/sprites/omori_walk.png',
-        },
-        walk: {
-          animates: true,
-          spriteSheet: './assets/sprites/omori_walk.png',
-        },
-        run: {
-          animates: true,
-          spriteSheet: './assets/sprites/omori_run.png',
-        }
+        idle: { animates: false },
+        walk: { animates: true },
+        run: { animates: true },
       },
       defaultAction: 'idle',
 
@@ -89,20 +87,13 @@ export class Player extends GameObject {
         },
         animationDirection: 'forward',
       },
+      movementAnimator: {
+        getAnimationPrefix: () => {
+          return this.currentAction === 'run' ? 'run' : 'walk'
+        }
+      },
 
       input: {
-        animationMappings: {
-          movement: {
-            x: {
-              1: 'Right',
-              [-1]: 'Left'
-            },
-            y: {
-              1: 'Down',
-              [-1]: 'Up'
-            }
-          }
-        },
         walkSpeed: 96,
         runSpeed: 224,
       },
@@ -114,14 +105,7 @@ export class Player extends GameObject {
           interactions: [
             {
               group: 'any',
-              onCollide: (source) => {
-                source.x = source.oldX;
-                source.y = source.oldY;
-                source.setAction('idle');
-                source.animator.setAnimation(source.animator.currentAnimation.replace("run", "walk"));
-                source.animator.frameX = 1;
-                source.animator.animationTimer = 0;
-              }
+              onCollide: (source) => CollisionSystem.FUNCS.STOP(source) 
             },
           ],
           edges: [
@@ -132,7 +116,6 @@ export class Player extends GameObject {
           ],
         }
       ],
-
     })
   }
 }

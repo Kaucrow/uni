@@ -24,7 +24,7 @@ export class Collider {
     } else {
       throw Error("Missing collider group");
     }
-    this.interactions = config.interactions
+    this.interactions = config.interactions || [];
 
     // Draw properties
     this.drawProps = null;
