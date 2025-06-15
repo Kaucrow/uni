@@ -1,4 +1,5 @@
 import { Collider } from "./Collider.js";
+import { Trigger } from "./Trigger.js";
 
 export class CollisionSystem {
   static FUNCS = {
@@ -25,9 +26,8 @@ export class CollisionSystem {
     let collisions = [];
     for (const other of this.colliders) {
       if (other.parent === source || collisions.includes(other.parent)) continue;
-      
-      if (this.#checkCollision(source, other)) {
 
+      if (this.#checkCollision(source, other)) {
         collisions.push(other.parent)
       }
     }
@@ -96,11 +96,23 @@ export class CollisionSystem {
 
       // If no separating axis was found, the shapes collide
       if (collision) {
-        groupNames.forEach((groupName) => {
-          const onCollide = this.#getOnCollide(groupName, collider);
-          source.collisionCallbacks.push(onCollide);
-        })
+        if (!(other.isTrigger)) {
+          groupNames.forEach((groupName) => {
+            const onCollide = this.#getOnCollide(groupName, collider);
+            source.collisionCallbacks.push(onCollide);
+          })
+        } else if (other.isTrigger) {
+          if (source.tags.includes(other.interactsWith)) {
+            other.update(source, true);
+          }
+        }
+
         return true;
+      // If the collider is a trigger, update it
+      } else if (other.isTrigger) {
+        if (source.tags.includes(other.interactsWith)) {
+          other.update(source, false);
+        }
       }
     }
 

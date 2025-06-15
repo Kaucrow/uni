@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'omori-normal';
+  src: url('./assets/fonts/omori_normal.ttf') format('truetype');
+  font: swap;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -13,8 +19,8 @@ canvas {
 
 #audioToggle {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  top: 20px;
+  right: 20px;
   padding: 8px;
   background: transparent;
   border: none;

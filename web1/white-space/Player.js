@@ -7,6 +7,7 @@ export class Player extends GameObject {
   constructor(x, y, z, collisionSystem) {
     super({
       id: 'player',
+      tags: ['player'],
       x,
       y,
       z,
@@ -101,12 +102,17 @@ export class Player extends GameObject {
       collisionSystem,
       colliders: [
         {
-          group: 'player',
+          group: 'solid',
           interactions: [
             {
-              group: 'any',
+              
+              group: 'solid',
               onCollide: (source) => CollisionSystem.FUNCS.STOP(source) 
             },
+            {
+              group: 'dialogue',
+              onCollide: () => {},
+            }
           ],
           edges: [
             new Vector2([4, 2], [28, 2]),

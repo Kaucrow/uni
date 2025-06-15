@@ -7,6 +7,7 @@ import { Animator } from "../Animator.js";
 import { Vector2 } from "../Vector.js";
 import { ctx, canvas } from "../canvas.js";
 import { Room } from "../Room.js";
+import { DialogueBox } from "../DialogueBox.js";
 
 export class WhiteSpace extends Room {
   constructor() {
@@ -37,9 +38,6 @@ export class WhiteSpace extends Room {
 
         const randomY = Math.round(Math.random() * (this.height - 1000) + 500);
 
-        console.log(`X: ${randomX}`);
-        console.log(`Y: ${randomY}`);
-
         const redHand = new RedHand(randomX, randomY, this.collisionSystem);
         this.redHands.push(redHand);
       // Allow y-axis alignment
@@ -49,9 +47,6 @@ export class WhiteSpace extends Room {
         const randomY = Math.random() < 0.5 
           ? Math.round(Math.random() * (this.height/2 - 1000) + 500) 
           : Math.round(Math.random() * (this.height/2 - 1000) + this.height /2 + 500);
-
-        console.log(`X: ${randomX}`);
-        console.log(`Y: ${randomY}`);
 
         const redHand = new RedHand(randomX, randomY, this.collisionSystem);
         this.redHands.push(redHand);
@@ -112,13 +107,28 @@ export class WhiteSpace extends Room {
       collisionSystem: this.collisionSystem,
       colliders: [
         {
-          group: 'npc',
+          group: 'solid',
           edges: [
             new Vector2([4, 4], [30, 4]),
             new Vector2([30, 4], [30, 16]),
             new Vector2([30, 16], [4, 16]),
             new Vector2([4, 16], [4, 4]),
           ]
+        }
+      ],
+
+      triggers: [
+        {
+          draw: {},
+          group: 'dialogue',
+          interactsWith: 'player',
+          edges: [
+            new Vector2([4, 32], [30, 32]),
+            new Vector2([30, 32], [30, 52]),
+            new Vector2([30, 52], [4, 52]),
+            new Vector2([4, 52], [4, 32]),
+          ],
+          onEnter: (source) => { console.log(source) },
         }
       ],
     });
@@ -151,7 +161,7 @@ export class WhiteSpace extends Room {
       collisionSystem: this.collisionSystem,
       colliders: [
         {
-          group: 'object',
+          group: 'solid',
           edges: [
             new Vector2([5, 4], [28, 4]),
             new Vector2([28, 4], [28, 20]),
@@ -171,7 +181,7 @@ export class WhiteSpace extends Room {
       collisionSystem: this.collisionSystem,
       colliders: [
         {
-          group: 'object',
+          group: 'solid',
           edges: [
             new Vector2([5, 4], [28, 4]),
             new Vector2([28, 4], [28, 16]),
@@ -191,7 +201,7 @@ export class WhiteSpace extends Room {
       collisionSystem: this.collisionSystem,
       colliders: [
         {
-          group: 'object',
+          group: 'solid',
           edges: [
             new Vector2([5, 6], [28, 6]),
             new Vector2([28, 6], [28, 18]),
@@ -211,7 +221,7 @@ export class WhiteSpace extends Room {
       collisionSystem: this.collisionSystem,
       colliders: [
         {
-          group: 'object',
+          group: 'solid',
           edges: [
             new Vector2([5, 0], [28, 0]),
             new Vector2([28, 0], [28, 22]),
@@ -329,18 +339,15 @@ export class WhiteSpace extends Room {
     ctx.strokeStyle = '#00000033';
     ctx.lineWidth = 1;
     ctx.stroke();
+
+    this.camera.resetTransform(ctx);
+    super.draw(ctx, deltaTime);
   }
 
   adjustCanvas() {
-    let widthDiff = canvas.width - this.canvasWidth;
-    let heightDiff = canvas.height - this.canvasHeight;
-
-    for (const obj of this.objects) {
-      obj.x += widthDiff / 2;
-      obj.y += heightDiff / 2;
-    }
-
-    this.canvasWidth = canvas.width;
-    this.canvasHeight = canvas.height;
+    this.camera.viewportWidth = canvas.width;
+    this.camera.viewportHeight = canvas.height;
+    this.camera.offsetX = canvas.width / 2;
+    this.camera.offsetY = canvas.height / 2;
   }
 }

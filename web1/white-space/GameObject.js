@@ -2,11 +2,13 @@ import { Animator } from "./Animator.js";
 import { MovementAnimator } from "./MovementAnimator.js";
 import { Input } from "./Input.js";
 import { Collider } from "./Collider.js";
+import { Trigger } from './Trigger.js';
 
 export class GameObject {
   constructor(config) {
     // Base properties
     this.id = config.id || null;
+    this.tags = config.tags;
     this.x = config.x || 0;
     this.y = config.y || 0;
     this.z = config.z || 0;
@@ -27,7 +29,7 @@ export class GameObject {
     this.spriteSheet = null;
     this.spriteSheets = null;
     if (config.spriteSheet && config.spriteSheets) {
-      throw new Exception("Can't have both a 'spriteSheet' and 'spriteSheets' definition");
+      throw new Error("Can't have both a 'spriteSheet' and 'spriteSheets' definition");
     }
     if (config.spriteSheet) {
       this.spriteSheet = new Image();
@@ -63,6 +65,16 @@ export class GameObject {
       });
     }
     this.collisionCallbacks = []; // When a collision triggers, the callbacks get stored here for execution
+
+    // Triggers
+    this.triggers = [];
+    if (config.triggers) {
+      config.triggers.forEach(trigger => {
+        const triggerObj = new Trigger(trigger, this);
+        this.collisionSystem.register(triggerObj);
+        this.triggers.push(triggerObj);
+      })
+    }
 
     // Custom properties
     this.customProperties = config.customProperties || {};
@@ -151,6 +163,12 @@ export class GameObject {
     if (this.colliders) {
       this.colliders.forEach((collider) => {
         if (collider.drawProps) { collider.draw(ctx) }
+      })
+    }
+
+    if (this.triggers) {
+      this.triggers.forEach((trigger) => {
+        if (trigger.drawProps) { trigger.draw(ctx) }
       })
     }
   }

@@ -23,4 +23,7 @@ export function adjustCanvas() {
   ctx.scale(dpr, dpr);
 
   ctx.imageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
 }

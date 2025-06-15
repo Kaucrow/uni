@@ -6,6 +6,7 @@ export class Input {
       ArrowRight: false,
       ArrowUp: false,
       Shift: false,
+      Z: false,
     };
 
     this.animationMappings = config.animationMappings || null;
@@ -34,11 +35,15 @@ export class Input {
       }
 
       this.keys[e.key] = true;
+    } else if (this.keys.hasOwnProperty(e.key.toUpperCase())) {
+      this.keys[e.key] = true;
     }
   }
 
   handleKeyUp(e) {
     if (this.keys.hasOwnProperty(e.key)) {
+      this.keys[e.key] = false;
+    } else if (this.keys.hasOwnProperty(e.key.toUpperCase())) {
       this.keys[e.key] = false;
     }
   }

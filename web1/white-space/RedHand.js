@@ -54,10 +54,10 @@ export class RedHand extends GameObject {
       collisionSystem,
       colliders: [
         {
-          group: 'redhand',
+          group: 'solid',
           interactions: [
             {
-              group: 'any',
+              group: 'solid',
               onCollide: (source) => CollisionSystem.FUNCS.STOP(source) 
             },
           ],
