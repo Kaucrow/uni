@@ -7,14 +7,14 @@ export class Room {
     this.width = config.width;
     this.height = config.height;
     this.camera = config.camera || undefined;
-    this.dialogueBox = new DialogueBox();
-    this.dialogueBox.isActive = true;
-    this.dialogueBox.text = "el atla";
+    this.dialogueBox = new DialogueBox(this);
+    this.dialogues = config.dialogues || null;
   }
 
   draw(ctx, deltaTime) {
     if (this.dialogueBox.isActive) {
-      this.dialogueBox.draw(ctx, this.camera.viewportWidth, this.camera.viewportHeight);
+      this.dialogueBox.update(deltaTime);
+      this.dialogueBox.draw(ctx, this.camera.viewportWidth, this.camera.viewportHeight, deltaTime);
     }
   }
 }

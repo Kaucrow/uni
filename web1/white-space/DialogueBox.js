@@ -1,23 +1,28 @@
+import { Dialogue } from "./Dialogue.js";
+
 export class DialogueBox {
-  constructor(options = {}) {
-    this._fullText = null;
-    this._displayText = null;
+  constructor(room, options = {}) {
     this.options = {
-      fontSize: 24,
+      fontSize: 26,
       fontFamily: 'omori-normal',
-      lineHeight: 1.25,
+      lineHeight: 1.15,
       padding: 15,
       textColor: 'white',
-      speed: 1, // characters per frame (default)
       ...options
     };
-    
-    this.isActive = false;
-    this.currentIndex = 0;
-    this.isAnimating = false;
-    this.isComplete = false;
-    this.animationFrameId = null;
-    this.lastUpdateTime = 0;
+
+    this.room = room;
+
+    this._dialogue = null;
+    this._fullText = null;
+    this._displayText = null;
+
+    this._isActive = false;
+    this._dialogueIndex = 0;
+    this._textIndex = 0;
+    this._isAnimating = false;
+    this._animationTimer = 0;
+    this._speed = null;
   }
 
   set text(val) {
@@ -29,73 +34,63 @@ export class DialogueBox {
     this._displayText = "";
   }
 
-  // Start or resume the text animation
-  startAnimation(ctx, vw, vh, deltaTime, onComplete = () => {}) {
-    if (this.animationFrameId) {
-      console.log('cancelling');
-      cancelAnimationFrame(this.animationFrameId);
-    }
-
-    console.log('started');
-
-    this.isAnimating = true;
-    this.isComplete = false;
-    let accumulatedTime = 0;
-    const frameDuration = 16.67;
-    
-    const animate = (timestamp) => {
-        // Update text based on the passed deltaTime
-        /*accumulatedTime += deltaTime;
-
-        // Only update when we've accumulated enough time for a frame
-        while (accumulatedTime >= frameDuration && !this.isComplete) {
-            this.updateText();
-            accumulatedTime -= frameDuration;
-        }
-        
-        // Always draw every frame for smooth rendering
-        this.draw(ctx, vw, vh);
-        
-        if (this.isComplete) {
-            onComplete();
-            return;
-        }
-        
-        */
-      this.draw(ctx, vw, vh);
-      this.animationFrameId = requestAnimationFrame(animate);
-    };
-    
-    this.animationFrameId = requestAnimationFrame(animate)
+  get isActive() {
+    return this._isActive;
   }
 
-  // Skip to complete text immediately
-  completeAnimation() {
-    this._displayText = this.fullText;
-    this.currentIndex = this.fullText.length;
-    this.isComplete = true;
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
+  get completed() {
+    return !this._isAnimating;
+  }
+
+  enable(obj) {
+    const dialogue = this.#getDialogue(obj);
+
+    if (!Array.isArray(dialogue) || !dialogue.every(item => item instanceof Dialogue)) throw new Error("dialogue must be an array of instances of Dialogue");
+
+    this._dialogue = dialogue;
+    this._isActive = true;
+    this._isAnimating = true;
+    this._fullText = dialogue[0].text;
+    this._displayText = "";
+    this._speed = dialogue[0].speed;
+  }
+
+  advanceDialogue() {
+    if (this._dialogueIndex === this._dialogue.length - 1) {
+      this._dialogue = null;
+      this._dialogueIndex = 0;
+      this._isActive = false;
+      this._fullText = null;
+      this._textIndex = null;
+      this._animationTimer = 0;
+      this._displayText = null;
+      this._speed = null;
+    } else {
+      this._dialogueIndex++;
+      this._textIndex = 0;
+      this._animationTimer = 0;
+      this._fullText = this._dialogue[this._dialogueIndex].text;
+      this._displayText = "";
+      this._speed = this._dialogue[this._dialogueIndex].speed;
+      this._isAnimating = true;
     }
   }
 
-  // Update the displayed text portion
-  updateText() {
-    if (this.isComplete) return;
-    
-    const charsToAdd = Math.ceil(this.options.speed);
-    this.currentIndex = Math.min(
-      this.currentIndex + charsToAdd,
-      this.fullText.length
-    );
-    
-    this._displayText = this.fullText.substring(0, this.currentIndex);
-    this.isComplete = this.currentIndex >= this.fullText.length;
+  speedUpDialogue() {
+    this._textIndex = this._fullText.length;
+  }
+
+  update(deltaTime) {
+    this._animationTimer += deltaTime * this._speed;
+
+    if (this._animationTimer >= 10) {
+      this._animationTimer -= 10;
+      this.#updateText();
+    }
   }
 
   draw(ctx, vw, vh) {
-    if (!this.isActive) return;
+    if (!this._isActive) return;
 
     if (!ctx) throw new Error("No canvas context provided");
 
@@ -133,11 +128,19 @@ export class DialogueBox {
     ctx.textBaseline = 'top';
 
     // Wrap and draw the current display text
-    const lines = this.wrapText(ctx, this._displayText, effectiveWidth);
-    this.drawTextLines(ctx, lines, textX, textY, effectiveHeight);
+    const lines = this.#wrapText(ctx, this._displayText, effectiveWidth);
+    this.#drawTextLines(ctx, lines, textX, textY, effectiveHeight);
   }
 
-    wrapText(ctx, text, maxWidth) {
+  #getDialogue(obj) {
+    const dialogue = this.room.dialogues[obj.id];
+
+    if (!dialogue) throw new Error(`No dialogue was found for object with id: '${obj.id}'`)
+
+    return dialogue;
+  }
+
+  #wrapText(ctx, text, maxWidth) {
     const words = text.split(' ');
     const lines = [];
     let currentLine = words[0];
@@ -158,7 +161,7 @@ export class DialogueBox {
     return lines;
   }
 
-  drawTextLines(ctx, lines, x, y, maxHeight) {
+  #drawTextLines(ctx, lines, x, y, maxHeight) {
     const lineHeight = this.options.fontSize * this.options.lineHeight;
     const maxLines = Math.floor(maxHeight / lineHeight);
 
@@ -171,10 +174,24 @@ export class DialogueBox {
     });
   }
 
-  // Clean up animation frame when done
-  destroy() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
+  // Update the displayed text portion
+  #updateText() {
+    if (!this._isAnimating) return;
+
+    const charsToAdd = 1;
+    this._textIndex = Math.min(
+      this._textIndex + charsToAdd,
+      this._fullText.length
+    );
+
+    while (this._fullText[this._textIndex] === ' ') {
+      this._textIndex = Math.min(
+        this._textIndex + charsToAdd,
+        this._fullText.length
+      );
     }
+    
+    this._displayText = this._fullText.substring(0, this._textIndex);
+    this._isAnimating = this._textIndex < this._fullText.length;
   }
 }

@@ -7,8 +7,8 @@ import { Trigger } from './Trigger.js';
 export class GameObject {
   constructor(config) {
     // Base properties
-    this.id = config.id || null;
-    this.tags = config.tags;
+    this.id = config.id ?? (() => { throw new Error("Missing id"); } )();
+    this.tags = config.tags || [];
     this.x = config.x || 0;
     this.y = config.y || 0;
     this.z = config.z || 0;
@@ -18,6 +18,7 @@ export class GameObject {
     this._preciseY = config.y || 0;
     this.width = config.width || 32;
     this.height = config.height || 32;
+    this.room = config.room || undefined;
 
     // Action system
     this.actions = config.actions || {
@@ -52,7 +53,7 @@ export class GameObject {
     this.movementAnimator = config.movementAnimator ? new MovementAnimator(this, config.movementAnimator) : null;
 
     // Input
-    this.input = config.input ? new Input(config.input) : null;
+    this.input = config.input ? new Input(this, config.input) : null;
 
     // Collisions
     this.collisionSystem = config.collisionSystem || null;
@@ -75,14 +76,15 @@ export class GameObject {
         this.triggers.push(triggerObj);
       })
     }
+    this.inTriggers = [];
 
     // Custom properties
     this.customProperties = config.customProperties || {};
   }
 
   update(deltaTime) {
-    if (this.input) {
-      this.updateFromInput(deltaTime);
+    if (this.input && this.room && !this.room.dialogueBox.isActive) {
+      this.updateMovementFromInput(deltaTime);
     }
 
     if (this.movementAnimator) {
@@ -101,7 +103,7 @@ export class GameObject {
     }
   }
 
-  updateFromInput(deltaTime) {
+  updateMovementFromInput(deltaTime) {
     if (!this.input) return;
 
     const movement = this.input.getMovementVector();

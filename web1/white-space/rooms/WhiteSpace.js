@@ -7,13 +7,33 @@ import { Animator } from "../Animator.js";
 import { Vector2 } from "../Vector.js";
 import { ctx, canvas } from "../canvas.js";
 import { Room } from "../Room.js";
-import { DialogueBox } from "../DialogueBox.js";
+import { Dialogue } from "../Dialogue.js";
+import { Trigger } from "../Trigger.js";
 
 export class WhiteSpace extends Room {
   constructor() {
     super({
       width: 3000,
-      height: 3000
+      height: 3000,
+      dialogues: {
+        'mewo': [
+          new Dialogue('Meow? (duerman frameworks)', Dialogue.SPEED.NORMAL),
+          new Dialogue('. . .', Dialogue.SPEED.ULTRASLOW),
+          new Dialogue('Duermanlo ya por favor', Dialogue.SPEED.FAST),
+        ],
+        'laptop': [
+          new Dialogue("It's a laptop.", Dialogue.SPEED.NORMAL),
+        ],
+        'sketchbook': [
+          new Dialogue("Your sketchbook.", Dialogue.SPEED.NORMAL),
+        ],
+        'tissuebox': [
+          new Dialogue("A tissuebox.", Dialogue.SPEED.NORMAL),
+        ],
+        'door': [
+          new Dialogue("This white door casts a faint shadow.", Dialogue.SPEED.NORMAL),
+        ]
+      }
     });
 
     const rectWidth = 128;
@@ -54,6 +74,7 @@ export class WhiteSpace extends Room {
     }
 
     const lightbulb = new GameObject({
+      id: 'lightbulb',
       x: lightbulbX,
       y: lightbulbY,
       z: 10,
@@ -80,6 +101,7 @@ export class WhiteSpace extends Room {
     });
 
     const mewo = new GameObject({
+      id: 'mewo',
       x: rectX,
       y: rectY + 96,
       z: 0,
@@ -118,22 +140,15 @@ export class WhiteSpace extends Room {
       ],
 
       triggers: [
-        {
-          draw: {},
-          group: 'dialogue',
-          interactsWith: 'player',
-          edges: [
-            new Vector2([4, 32], [30, 32]),
-            new Vector2([30, 32], [30, 52]),
-            new Vector2([30, 52], [4, 52]),
-            new Vector2([4, 52], [4, 32]),
-          ],
-          onEnter: (source) => { console.log(source) },
-        }
+        Trigger.newDownDialogue(),
+        Trigger.newRightDialogue(),
+        Trigger.newLeftDialogue(),
+        Trigger.newUpDialogue(),
       ],
     });
 
     const laptop = new GameObject({
+      id: 'laptop',
       x: rectX + 32,
       y: rectY,
       z: 0,
@@ -169,10 +184,18 @@ export class WhiteSpace extends Room {
             new Vector2([5, 20], [5, 4]),
           ]
         }
-      ]
+      ],
+
+      triggers: [
+        Trigger.newDownDialogue(),
+        Trigger.newRightDialogue(),
+        Trigger.newLeftDialogue(),
+        Trigger.newUpDialogue(),
+      ],
     });
 
     const sketchbook = new GameObject({
+      id: 'sketchbook',
       x: rectX + 96,
       y: rectY,
       z: 0,
@@ -190,9 +213,17 @@ export class WhiteSpace extends Room {
           ]
         }
       ],
+
+      triggers: [
+        Trigger.newDownDialogue(),
+        Trigger.newRightDialogue(),
+        Trigger.newLeftDialogue(),
+        Trigger.newUpDialogue(),
+      ],
     });
 
     const tissuebox = new GameObject({
+      id: 'tissuebox',
       x: rectX + 96,
       y: rectY + 64,
       z: 0,
@@ -210,9 +241,17 @@ export class WhiteSpace extends Room {
           ]
         }
       ],
+
+      triggers: [
+        Trigger.newDownDialogue(),
+        Trigger.newRightDialogue(),
+        Trigger.newLeftDialogue(),
+        Trigger.newUpDialogue(),
+      ],
     });
 
     const door = new GameObject({
+      id: 'door',
       x: rectX,
       y: rectY - 96,
       z: 0,
@@ -230,9 +269,17 @@ export class WhiteSpace extends Room {
           ]
         }
       ],
+
+      triggers: [
+        Trigger.newDownDialogue(),
+        Trigger.newRightDialogue(),
+        Trigger.newLeftDialogue(),
+        Trigger.newUpDialogue(),
+      ],
     });
 
     const lightbulbShadow = new GameObject({
+      id: 'lighbulbShadow',
       x: lightbulb.x,
       y: lightbulb.y + 32,
       z: 0,
@@ -248,7 +295,7 @@ export class WhiteSpace extends Room {
       this.lightbulb = lightbulb,
       this.mewo = mewo,
       this.laptop = laptop,
-      this.player = new Player(rectX + 64, rectY + 32, 5, this.collisionSystem),
+      this.player = new Player(rectX + 64, rectY + 32, 5, this),
       ...this.redHands
     ];
 

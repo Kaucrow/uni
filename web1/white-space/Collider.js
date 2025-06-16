@@ -24,7 +24,11 @@ export class Collider {
     } else {
       throw Error("Missing collider group");
     }
-    this.interactions = config.interactions || [];
+
+    this.interactions = (config.interactions || []).map(interaction => ({
+      group: interaction.group,
+      onCollide: interaction.onCollide || (() => {}),
+    }));
 
     // Draw properties
     this.drawProps = null;

@@ -1,15 +1,16 @@
 export class Input {
-  constructor(config) {
+  constructor(object, config) {
+    this.object = object;
+
     this.keys = {
       ArrowDown: false,
       ArrowLeft: false,
       ArrowRight: false,
       ArrowUp: false,
       Shift: false,
-      Z: false,
+      z: false,
     };
 
-    this.animationMappings = config.animationMappings || null;
     this.walkSpeed = config.walkSpeed || null;
     this.runSpeed = config.runSpeed || null;
 
@@ -17,12 +18,19 @@ export class Input {
     this.lastHorizontalKeyPress = 0;
     this.lastVerticalKeyPress = 0;
 
-    this.setupEventListeners();
+    this.onKeyUp = [];
+    this.onKeyDown = [];
+    this.onKeyPress = [];
+
+    this.#setupEventListeners();
   }
 
-  setupEventListeners() {
-    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-    document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+  addOnKeyDown(event) {
+    this.onKeyDown.push(event);
+  }
+
+  addOnKeyUp(event) {
+    this.onKeyUp.push(event);
   }
 
   handleKeyDown(e) {
@@ -34,17 +42,27 @@ export class Input {
         this.lastVerticalKeyPress = now;
       }
 
-      this.keys[e.key] = true;
-    } else if (this.keys.hasOwnProperty(e.key.toUpperCase())) {
-      this.keys[e.key] = true;
+      const keyPressed = this.keys[e.key];
+
+      if (!keyPressed) {
+        this.keys[e.key] = true;
+        this.onKeyDown.forEach(event => {
+          if (event.key === e.key && event.enabled) {
+            event.callback(this.object);
+          }
+        })
+      }
     }
   }
 
   handleKeyUp(e) {
     if (this.keys.hasOwnProperty(e.key)) {
       this.keys[e.key] = false;
-    } else if (this.keys.hasOwnProperty(e.key.toUpperCase())) {
-      this.keys[e.key] = false;
+      this.onKeyUp.forEach(event => {
+        if (event.key === e.key && event.enabled) {
+          event.callback(this.object);
+        }
+      })
     }
   }
 
@@ -77,25 +95,8 @@ export class Input {
     }
   }
 
-  getCurrentMovementAnimation(movement) {
-    let direction = null;
-
-    if (movement.x !== 0) {
-      direction = this.animationMappings.movement.x[movement.x];
-    }
-
-    if (movement.y !== 0) {
-      direction = this.animationMappings.movement.y[movement.y];
-    }
-
-    if (direction) {
-      if (this.isKeyPressed('Shift')) {
-        return ('run' + direction);
-      } else {
-        return ('walk' + direction);
-      }
-    }
-
-    return null;
+  #setupEventListeners() {
+    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    document.addEventListener('keyup', (e) => this.handleKeyUp(e));
   }
 }

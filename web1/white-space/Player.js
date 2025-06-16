@@ -2,9 +2,10 @@ import { GameObject } from "./GameObject.js";
 import { Animator } from "./Animator.js";
 import { CollisionSystem } from "./CollisionSystem.js";
 import { Vector2 } from "./Vector.js";
+import { KeyEvent } from "./KeyEvent.js";
 
 export class Player extends GameObject {
-  constructor(x, y, z, collisionSystem) {
+  constructor(x, y, z, room) {
     super({
       id: 'player',
       tags: ['player'],
@@ -13,6 +14,7 @@ export class Player extends GameObject {
       z,
       width: 32,
       height: 32,
+      room,
 
       spriteSheets: {
         idle: './assets/sprites/omori_walk.png',
@@ -99,7 +101,7 @@ export class Player extends GameObject {
         runSpeed: 224,
       },
 
-      collisionSystem,
+      collisionSystem: room.collisionSystem,
       colliders: [
         {
           group: 'solid',
@@ -111,7 +113,6 @@ export class Player extends GameObject {
             },
             {
               group: 'dialogue',
-              onCollide: () => {},
             }
           ],
           edges: [
@@ -123,5 +124,27 @@ export class Player extends GameObject {
         }
       ],
     })
+
+    this.input.addOnKeyDown(new KeyEvent('z', (player) => {
+      let foundDialogueTrigger = false;
+      for (const trigger of player.inTriggers) {
+        if (foundDialogueTrigger === true) continue;
+
+        if (trigger.group === 'dialogue') {
+          foundDialogueTrigger = true;
+
+          if (!player.room.dialogueBox.isActive)
+            player.room.dialogueBox.enable(trigger.parent);
+          else if (player.room.dialogueBox.completed)
+            player.room.dialogueBox.advanceDialogue();
+          else
+            player.room.dialogueBox.speedUpDialogue();
+        }
+      }
+    }));
+  }
+
+  update(deltaTime) {
+    super.update(deltaTime);
   }
 }

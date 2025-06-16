@@ -24,11 +24,36 @@ export class CollisionSystem {
 
   checkCollisions(source) {
     let collisions = [];
-    for (const other of this.colliders) {
-      if (other.parent === source || collisions.includes(other.parent)) continue;
+    {
+      for (const otherCollider of this.colliders) {
+        if (otherCollider.parent === source) continue;
 
-      if (this.#checkCollision(source, other)) {
-        collisions.push(other.parent)
+        if (this.#checkCollision(source, otherCollider)) {
+          collisions.push(otherCollider)
+        }
+      }
+    }
+
+    for (const otherCollider of collisions) {
+      for (const collider of source.colliders) {
+        if (!collider.isTrigger) {
+          let groupNames = [];
+
+          if (collider.interactions.some(item => item.group === otherCollider.group)) {
+            groupNames.push(otherCollider.group);
+          }
+          if (collider.interactions.some(item => item.group === 'any')) {
+            groupNames.push('any');
+          }
+
+          groupNames.forEach((groupName) => {
+            const onCollide = this.#getOnCollide(groupName, collider);
+            source.collisionCallbacks.push(onCollide);
+          })
+        // If the collider is a trigger
+        } else {
+
+        }
       }
     }
   }
@@ -36,6 +61,8 @@ export class CollisionSystem {
   // Uses Separating Axis Theorem to check for collisions
   #checkCollision(source, other) {
     if (!source.colliders) throw Error("Attempted to check for collisions but no colliders were found on source object");
+
+    let foundCollision = false;
 
     // Check all colliders on the source object against the other object
     for (const collider of source.colliders) {
@@ -96,28 +123,18 @@ export class CollisionSystem {
 
       // If no separating axis was found, the shapes collide
       if (collision) {
-        if (!(other.isTrigger)) {
-          groupNames.forEach((groupName) => {
-            const onCollide = this.#getOnCollide(groupName, collider);
-            source.collisionCallbacks.push(onCollide);
-          })
-        } else if (other.isTrigger) {
-          if (source.tags.includes(other.interactsWith)) {
-            other.update(source, true);
-          }
-        }
-
-        return true;
-      // If the collider is a trigger, update it
-      } else if (other.isTrigger) {
-        if (source.tags.includes(other.interactsWith)) {
-          other.update(source, false);
-        }
+        foundCollision = true;
+        break;
       }
     }
 
-    // No collisions found
-    return false;
+    if (other.isTrigger) {
+      if (source.tags.includes(other.interactsWith)) {
+        other.update(source, foundCollision);
+      }
+    }
+
+    return foundCollision;
   }
 
   #getOnCollide(groupName, collider) {
