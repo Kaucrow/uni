@@ -1,5 +1,6 @@
 import { Player } from "../Player.js";
 import { RedHand } from "../RedHand.js";
+import { Something } from "../Something.js";
 import { Rect } from "../Rect.js";
 import { GameObject } from "../GameObject.js";
 import { GameCamera } from "../GameCamera.js";
@@ -9,6 +10,7 @@ import { ctx, canvas } from "../canvas.js";
 import { Room } from "../Room.js";
 import { Dialogue } from "../Dialogue.js";
 import { Trigger } from "../Trigger.js";
+import { Vignette } from "../Vignette.js";
 
 export class WhiteSpace extends Room {
   constructor() {
@@ -286,6 +288,11 @@ export class WhiteSpace extends Room {
       spriteSheet: './assets/sprites/shadow_lightbulb.png',
     });
 
+    const player = new Player(rectX + 64, rectY + 32, 5, this);
+
+    const something = new Something(rectX, rectY, this);
+    something.follow(player);
+
     this.objects = [
       this.rect = new Rect(rectX, rectY, -1, rectWidth, rectHeight),
       this.sketchbook = sketchbook,
@@ -295,7 +302,8 @@ export class WhiteSpace extends Room {
       this.lightbulb = lightbulb,
       this.mewo = mewo,
       this.laptop = laptop,
-      this.player = new Player(rectX + 64, rectY + 32, 5, this),
+      this.player = player,
+      this.something = something,
       ...this.redHands
     ];
 
@@ -307,10 +315,12 @@ export class WhiteSpace extends Room {
     };
 
     this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height);
+    this.vignette = new Vignette(canvas.width, canvas.height, true);
   }
 
   update(deltaTime) {
-    this.camera.update();
+    this.camera.update(deltaTime);
+    this.vignette.update(deltaTime);
 
     this.#draw(deltaTime);
 
@@ -388,6 +398,7 @@ export class WhiteSpace extends Room {
     ctx.stroke();
 
     this.camera.resetTransform(ctx);
+    this.vignette.draw(ctx);
     super.draw(ctx, deltaTime);
   }
 
@@ -396,5 +407,10 @@ export class WhiteSpace extends Room {
     this.camera.viewportHeight = canvas.height;
     this.camera.offsetX = canvas.width / 2;
     this.camera.offsetY = canvas.height / 2;
+
+    this.vignette.width = canvas.width;
+    this.vignette.height = canvas.height;
+    this.vignette.centerX = canvas.width / 2;
+    this.vignette.centerY = canvas.height / 2;
   }
 }

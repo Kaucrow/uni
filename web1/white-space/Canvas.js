@@ -7,10 +7,10 @@ export function adjustCanvas() {
   canvas.height = window.innerHeight;
 
   if (canvas.width % 2 === 0) {
-    canvas.width -= 1;
+    canvas.width += 1;
   }
   if (canvas.height % 2 === 0) {
-    canvas.height -= 1;
+    canvas.height += 1;
   }
 
   const displayWidth = canvas.clientWidth;
