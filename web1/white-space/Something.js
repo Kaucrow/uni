@@ -35,7 +35,7 @@ export class Something extends GameObject {
                 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
                 try {
-                  player.room.whiteFlash.fadeIn(1);
+                  player.room.blackFlash.fadeIn(1);
                   await wait(2000);
 
                   something.x = 0;
@@ -58,8 +58,6 @@ export class Something extends GameObject {
                   await wait(2000);
 
                   player.lives.decrement();
-                  player.lives.decrement();
-                  player.lives.decrement();
                   await wait(1000);
 
                   player.lives.fadeOut(2);
@@ -68,7 +66,7 @@ export class Something extends GameObject {
                   player.room.isGameOver = player.lives.isGameOver();
 
                   if (!player.room.isGameOver) {
-                    player.room.whiteFlash.fadeOut(1);
+                    player.room.blackFlash.fadeOut(1);
                     await wait (1000);
                   }
                 } finally {

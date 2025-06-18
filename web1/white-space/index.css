@@ -1,13 +1,13 @@
 @font-face {
   font-family: 'omori-normal';
   src: url('./assets/fonts/omori_normal.ttf') format('truetype');
-  font: swap;
+  font-display: swap; /* Fixed property name */
 }
 
 @font-face {
   font-family: 'omori-blackspace';
   src: url('./assets/fonts/omori_blackspace.ttf') format('truetype');
-  font: swap;
+  font-display: swap; /* Fixed property name */
 }
 
 body {
@@ -17,10 +17,15 @@ body {
   height: 100vh;
   margin: 0;
   background-color: #fcfefc;
+  overflow: hidden; /* Prevent scrollbars */
 }
 
 canvas {
   background-color: #fcfefc;
+  display: block; /* Remove inline spacing */
+  position: absolute; /* Precise positioning */
+  top: 0;
+  left: 0;
 }
 
 #audioToggle {

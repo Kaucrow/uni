@@ -30,7 +30,11 @@ export class WhiteSpace extends Room {
           new Dialogue("It's a laptop.", Dialogue.SPEED.NORMAL),
         ],
         'sketchbook': [
-          new Dialogue("Your sketchbook.", Dialogue.SPEED.NORMAL),
+          new Dialogue("Your sketchbook.", Dialogue.SPEED.NORMAL, (room) => {
+            if (!room.something) {
+              room.spawnSomething = true;
+            }
+          }),
         ],
         'tissuebox': [
           new Dialogue("A tissuebox.", Dialogue.SPEED.NORMAL),
@@ -304,9 +308,6 @@ export class WhiteSpace extends Room {
       }
     });
 
-    const something = new Something(rectX, rectY, this);
-    something.follow(player);
-
     this.objects = [
       this.rect = new Rect(rectX, rectY, -1, rectWidth, rectHeight),
       this.sketchbook = sketchbook,
@@ -317,7 +318,6 @@ export class WhiteSpace extends Room {
       this.mewo = mewo,
       this.laptop = laptop,
       this.player = player,
-      this.something = something,
       ...this.redHands
     ];
 
@@ -328,21 +328,31 @@ export class WhiteSpace extends Room {
       loopEnd: 27.9
     };
 
-    this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height);
-    this.vignette = new Vignette(canvas.width, canvas.height);
-    this.whiteFlash = new Flash(canvas.width, canvas.height);
+    this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height, false);
+    this.vignette = new Vignette(canvas.width, canvas.height, false, 0);
+    this.blackFlash = new Flash(canvas.width, canvas.height);
     this.endText = new TextFade();
 
     this.isGameOver = false;
     this.isGameWon = false;
+    this.spawnSomething = false;
     this.isEndTextActive = false;
   }
 
   update(deltaTime) {
+    console.log(this.blackFlash.isActive);
     this.camera.update(deltaTime);
     this.vignette.update(deltaTime);
-    this.whiteFlash.update(deltaTime);
+    this.blackFlash.update(deltaTime);
     if (this.player.lives) this.player.lives.update(deltaTime);
+
+    if (this.spawnSomething) {
+      this.spawnSomething = false;
+      const something = new Something(0, 0, this);
+      something.follow(this.player);
+      this.something = something;
+      this.objects.push(this.something);
+    }
 
     if (!this.isGameOver) {
       this.objects.forEach(obj => {
@@ -432,7 +442,7 @@ export class WhiteSpace extends Room {
 
     this.camera.resetTransform(ctx);
     this.vignette.draw(ctx);
-    this.whiteFlash.draw(ctx);
+    this.blackFlash.draw(ctx);
     if (this.player.lives) {
       this.player.lives.draw(ctx);
     }
@@ -450,5 +460,13 @@ export class WhiteSpace extends Room {
     this.vignette.height = canvas.height;
     this.vignette.centerX = canvas.width / 2;
     this.vignette.centerY = canvas.height / 2;
+
+    this.blackFlash.width = canvas.width;
+    this.blackFlash.height = canvas.height;
+
+    if (this.player.lives) {
+      this.player.lives.x = canvas.width / 2 - 24;
+      this.player.lives.y = canvas.height / 2 - 32;
+    }
   }
 }

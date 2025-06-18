@@ -6,13 +6,6 @@ export function adjustCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  if (canvas.width % 2 === 0) {
-    canvas.width += 1;
-  }
-  if (canvas.height % 2 === 0) {
-    canvas.height += 1;
-  }
-
   const displayWidth = canvas.clientWidth;
   const displayHeight = canvas.clientHeight;
 

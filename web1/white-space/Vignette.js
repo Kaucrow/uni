@@ -2,8 +2,8 @@ export class Vignette {
   constructor(width, height, flicker = false, intensity = 0.8, radius = 0.4) {
     this.height = height;
     this.width = width;
-    this.centerX = width / 2;
-    this.centerY = height / 2;
+    this.centerX = this.width / 2;
+    this.centerY = this.height / 2;
     this.flicker = flicker;
     this.intensity = intensity;
     this.radius = radius;

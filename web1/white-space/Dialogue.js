@@ -7,10 +7,11 @@ export class Dialogue {
     ULTRASLOW: 25,
   };
 
-  constructor(text, speed) {
+  constructor(text, speed, callback = () => {}) {
     if (typeof text !== 'string') throw new Error('Type of dialogue text must be `string` you dummy');
 
     this.text = text;
     this.speed = speed;
+    this.callback = callback;
   }
 }

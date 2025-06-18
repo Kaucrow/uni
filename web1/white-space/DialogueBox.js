@@ -56,6 +56,13 @@ export class DialogueBox {
   }
 
   advanceDialogue() {
+    const currDialogue = this._dialogue[this._dialogueIndex];
+
+    if (currDialogue.callback) {
+      currDialogue.callback(this.room);
+    }
+
+    // If the dialogue reached its end
     if (this._dialogueIndex === this._dialogue.length - 1) {
       this._dialogue = null;
       this._dialogueIndex = 0;
@@ -65,6 +72,7 @@ export class DialogueBox {
       this._animationTimer = 0;
       this._displayText = null;
       this._speed = null;
+    // If there's still more dialogue left
     } else {
       this._dialogueIndex++;
       this._textIndex = 0;
