@@ -4,6 +4,12 @@
   font: swap;
 }
 
+@font-face {
+  font-family: 'omori-blackspace';
+  src: url('./assets/fonts/omori_blackspace.ttf') format('truetype');
+  font: swap;
+}
+
 body {
   display: flex;
   justify-content: center;

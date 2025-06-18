@@ -104,16 +104,30 @@ export class Player extends GameObject {
       collisionSystem: room.collisionSystem,
       colliders: [
         {
-          draw: {},
           group: 'solid',
           interactions: [
             {
-              
               group: 'solid',
               onCollide: (source) => CollisionSystem.FUNCS.STOP(source) 
             },
             {
               group: 'dialogue',
+            },
+          ],
+          edges: [
+            new Vector2([4, 2], [28, 2]),
+            new Vector2([28, 2], [28, 32]),
+            new Vector2([28, 32], [4, 32]),
+            new Vector2([4, 32], [4, 2]),
+          ],
+        },
+        {
+          group: 'player',
+          interactions: [
+            {
+              group: 'something',
+              onCollide: (source) => {
+              }
             }
           ],
           edges: [

@@ -83,7 +83,7 @@ export class GameObject {
   }
 
   update(deltaTime) {
-    if (this.input && this.room && !this.room.dialogueBox.isActive) {
+    if (this.input && this.room && !this.room.dialogueBox.isActive && !this.room.isCutsceneActive) {
       this.updateMovementFromInput(deltaTime);
     }
 
@@ -91,7 +91,7 @@ export class GameObject {
       this.movementAnimator.update(deltaTime);
     }
 
-    this.collisionCallbacks.forEach((callback) => callback(this));
+    this.collisionCallbacks.forEach(([callback, collided]) => callback(this, collided));
     this.collisionCallbacks = [];
 
     if (this.actions[this.currentAction]?.animates) {

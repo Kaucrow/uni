@@ -11,6 +11,9 @@ import { Room } from "../Room.js";
 import { Dialogue } from "../Dialogue.js";
 import { Trigger } from "../Trigger.js";
 import { Vignette } from "../Vignette.js";
+import { Flash } from "../Flash.js";
+import { Lives } from "../Lives.js";
+import { TextFade } from "../FadeText.js";
 
 export class WhiteSpace extends Room {
   constructor() {
@@ -289,6 +292,17 @@ export class WhiteSpace extends Room {
     });
 
     const player = new Player(rectX + 64, rectY + 32, 5, this);
+    player.lives = new Lives({
+      x: canvas.width / 2 - 24,
+      y: canvas.height / 2 - 32,
+      scale: 2,
+      spriteSheets: {
+        '3lives': './assets/sprites/lives/lives_3.png',
+        '2lives': './assets/sprites/lives/lives_2.png',
+        '1lives': './assets/sprites/lives/lives_1.png',
+        '0lives': './assets/sprites/lives/lives_0.png',
+      }
+    });
 
     const something = new Something(rectX, rectY, this);
     something.follow(player);
@@ -315,13 +329,33 @@ export class WhiteSpace extends Room {
     };
 
     this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height);
-    this.vignette = new Vignette(canvas.width, canvas.height, true);
+    this.vignette = new Vignette(canvas.width, canvas.height);
+    this.whiteFlash = new Flash(canvas.width, canvas.height);
+    this.endText = new TextFade();
+
+    this.isGameOver = false;
+    this.isGameWon = false;
+    this.isEndTextActive = false;
   }
 
   update(deltaTime) {
     this.camera.update(deltaTime);
     this.vignette.update(deltaTime);
+    this.whiteFlash.update(deltaTime);
+    if (this.player.lives) this.player.lives.update(deltaTime);
 
+    if (!this.isGameOver) {
+      this.objects.forEach(obj => {
+        obj.update(deltaTime);
+      });
+    } else {
+      if (!this.isEndTextActive) {
+        this.endText.configure("Te acoplaron", canvas.width / 2, canvas.height / 2).fadeIn(2);
+      }
+      this.endText.update(deltaTime);
+      this.isEndTextActive = true;
+    }
+    
     this.#draw(deltaTime);
 
     // Camera wrapping logic
@@ -358,7 +392,6 @@ export class WhiteSpace extends Room {
     this.camera.applyTransform(ctx);
 
     this.objects.forEach(obj => {
-      obj.update(deltaTime);
       obj.draw(ctx); 
     });
 
@@ -399,6 +432,11 @@ export class WhiteSpace extends Room {
 
     this.camera.resetTransform(ctx);
     this.vignette.draw(ctx);
+    this.whiteFlash.draw(ctx);
+    if (this.player.lives) {
+      this.player.lives.draw(ctx);
+    }
+    this.endText.draw(ctx);
     super.draw(ctx, deltaTime);
   }
 

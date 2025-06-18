@@ -48,7 +48,7 @@ export class CollisionSystem {
 
           groupNames.forEach((groupName) => {
             const onCollide = this.#getOnCollide(groupName, collider);
-            source.collisionCallbacks.push(onCollide);
+            source.collisionCallbacks.push([onCollide, otherCollider.parent]);
           })
         // If the collider is a trigger
         } else {

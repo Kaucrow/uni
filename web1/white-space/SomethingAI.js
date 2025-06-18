@@ -34,15 +34,17 @@ export class SomethingAI {
           const vx = dx / distance;
           const vy = dy / distance;
           
-          this.something.speed = Math.max(distance * 0.02, 3);
+          this.something.speed = Math.max(distance * 1.5, 150);
 
           if (this.something.room.vignette) {
             this.something.room.vignette.radius = Math.max(distance * 0.005, 0.4);
+            this.something.room.vignette.intensity = Math.min(distance * 0.05, 1);
           }
 
           // Move towards the target
-          this.something.x += vx * this.something.speed;
-          this.something.y += vy * this.something.speed;
+          this.something.move(vx, vy, deltaTime);
+          //this.something.x += vx * this.something.speed;
+          //this.something.y += vy * this.something.speed;
         }
 
         // Optional: face the direction of movement

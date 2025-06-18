@@ -9,6 +9,7 @@ export class Room {
     this.camera = config.camera || undefined;
     this.dialogueBox = new DialogueBox(this);
     this.dialogues = config.dialogues || null;
+    this.isCutsceneActive = false;
   }
 
   draw(ctx, deltaTime) {

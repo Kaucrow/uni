@@ -1,5 +1,5 @@
 export class Vignette {
-  constructor(width, height, flicker = false, intensity = 1.9, radius = 0.4) {
+  constructor(width, height, flicker = false, intensity = 0.8, radius = 0.4) {
     this.height = height;
     this.width = width;
     this.centerX = width / 2;
@@ -16,6 +16,8 @@ export class Vignette {
   }
 
   update(deltaTime) {
+    if (!this.flicker) return;
+
     this._flickerIntervalCounter += deltaTime;
 
     if (this._flickerIntervalCounter >= this._flickerInterval) {
