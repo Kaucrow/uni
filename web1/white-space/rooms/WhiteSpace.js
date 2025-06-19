@@ -14,6 +14,7 @@ import { Vignette } from "../Vignette.js";
 import { Flash } from "../Flash.js";
 import { Lives } from "../Lives.js";
 import { TextFade } from "../FadeText.js";
+import { audioPlayer } from "../Game.js";
 
 export class WhiteSpace extends Room {
   constructor() {
@@ -33,6 +34,8 @@ export class WhiteSpace extends Room {
           new Dialogue("Your sketchbook.", Dialogue.SPEED.NORMAL, (room) => {
             if (!room.something) {
               room.spawnSomething = true;
+              audioPlayer.stopAll();
+              audioPlayer.playOrQueue('anxiety', { loop: true });
             }
           }),
         ],
@@ -44,6 +47,10 @@ export class WhiteSpace extends Room {
         ]
       }
     });
+
+    audioPlayer.load('white-space', './assets/sfx/bgm/white_space.mp3');
+    audioPlayer.load('anxiety', './assets/sfx/bgm/anxiety.mp3');
+    audioPlayer.playOrQueue('white-space');
 
     const rectWidth = 128;
     const rectHeight = 96;

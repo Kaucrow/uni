@@ -1,4 +1,5 @@
 import { Dialogue } from "./Dialogue.js";
+import { audioPlayer } from "./Game.js";
 
 export class DialogueBox {
   constructor(room, options = {}) {
@@ -23,6 +24,8 @@ export class DialogueBox {
     this._isAnimating = false;
     this._animationTimer = 0;
     this._speed = null;
+
+    audioPlayer.load('text', './assets/sfx/se/text.mp3');
   }
 
   set text(val) {
@@ -201,5 +204,7 @@ export class DialogueBox {
     
     this._displayText = this._fullText.substring(0, this._textIndex);
     this._isAnimating = this._textIndex < this._fullText.length;
+
+    audioPlayer.play('text');
   }
 }
