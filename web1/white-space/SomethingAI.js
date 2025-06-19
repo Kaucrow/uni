@@ -37,14 +37,12 @@ export class SomethingAI {
           this.something.speed = Math.max(distance * 1.5, 150);
 
           if (this.something.room.vignette) {
-            this.something.room.vignette.radius = Math.max(distance * 0.005, 0.4);
-            this.something.room.vignette.intensity = Math.min(distance * 0.05, 1);
+            this.something.room.vignette.radius = Math.min(Math.max(distance * 0.005, 0.4), 0.8);
+            console.log(this.something.room.vignette.intensity);
           }
 
           // Move towards the target
           this.something.move(vx, vy, deltaTime);
-          //this.something.x += vx * this.something.speed;
-          //this.something.y += vy * this.something.speed;
         }
 
         // Optional: face the direction of movement

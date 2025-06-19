@@ -2,6 +2,7 @@ import { CollisionSystem } from "./CollisionSystem.js";
 import { GameObject } from "./GameObject.js";
 import { SomethingAI } from "./SomethingAI.js";
 import { Vector2 } from "./Vector.js";
+import { audioPlayer } from "./Game.js";
 
 export class Something extends GameObject {
   constructor(x, y, room) {
@@ -54,9 +55,11 @@ export class Something extends GameObject {
                     something.room.vignette.radius = Math.max(distance * 0.005, 0.4);
                     something.room.vignette.intensity = Math.min(distance * 0.05, 1);
                   }
+                  audioPlayer.play('health-fade');
                   player.lives.fadeIn(2);
                   await wait(2000);
 
+                  audioPlayer.play('damage');
                   player.lives.decrement();
                   await wait(1000);
 

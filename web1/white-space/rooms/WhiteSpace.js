@@ -23,34 +23,40 @@ export class WhiteSpace extends Room {
       height: 3000,
       dialogues: {
         'mewo': [
-          new Dialogue('Meow? (duerman frameworks)', Dialogue.SPEED.NORMAL),
-          new Dialogue('. . .', Dialogue.SPEED.ULTRASLOW),
-          new Dialogue('Duermanlo ya por favor', Dialogue.SPEED.FAST),
+          new Dialogue('Miau? (Esperando a que algo suceda?)', Dialogue.SPEED.NORMAL),
         ],
         'laptop': [
-          new Dialogue("It's a laptop.", Dialogue.SPEED.NORMAL),
+          new Dialogue("Es tu laptop. No hay mas que estatica en la pantalla.", Dialogue.SPEED.NORMAL),
         ],
         'sketchbook': [
-          new Dialogue("Your sketchbook.", Dialogue.SPEED.NORMAL, (room) => {
+          new Dialogue("Le echas un vistazo a las paginas de tu cuaderno de dibujo...", Dialogue.SPEED.NORMAL),
+          new Dialogue("Entre tus bocetos, descubres un dibujo que no recuerdas haber hecho.", Dialogue.SPEED.NORMAL),
+          new Dialogue(". . .", Dialogue.SPEED.ULTRASLOW, () => {
+            audioPlayer.stopAll();
+            audioPlayer.playOrQueue('anxiety', { loop: true });
+            this.vignette.transitionTo({ intensity: 1, radius: 0.8, duration: 1 });
+          }),
+          new Dialogue("Sientes una inquietante presencia acercarse.", Dialogue.SPEED.SLOW, (room) => {
             if (!room.something) {
               room.spawnSomething = true;
-              audioPlayer.stopAll();
-              audioPlayer.playOrQueue('anxiety', { loop: true });
             }
           }),
         ],
         'tissuebox': [
-          new Dialogue("A tissuebox.", Dialogue.SPEED.NORMAL),
+          new Dialogue("Una caja con papel desechable para secar tus penas.", Dialogue.SPEED.NORMAL),
         ],
         'door': [
-          new Dialogue("This white door casts a faint shadow.", Dialogue.SPEED.NORMAL),
+          new Dialogue("Esta puerta blanca proyecta una tenue sombra.", Dialogue.SPEED.NORMAL),
+          new Dialogue("No parece abrirse.", Dialogue.SPEED.NORMAL),
         ]
       }
     });
 
     audioPlayer.load('white-space', './assets/sfx/bgm/white_space.mp3');
     audioPlayer.load('anxiety', './assets/sfx/bgm/anxiety.mp3');
-    audioPlayer.playOrQueue('white-space');
+    audioPlayer.load('health-fade', './assets/sfx/se/health_fade.mp3');
+    audioPlayer.load('damage', './assets/sfx/se/damage.mp3');
+    audioPlayer.playOrQueue('white-space', { loop: true, loopEnd: 27.9 });
 
     const rectWidth = 128;
     const rectHeight = 96;
@@ -336,7 +342,7 @@ export class WhiteSpace extends Room {
     };
 
     this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height, false);
-    this.vignette = new Vignette(canvas.width, canvas.height, false, 0);
+    this.vignette = new Vignette(canvas.width, canvas.height, false, 0, 1);
     this.blackFlash = new Flash(canvas.width, canvas.height);
     this.endText = new TextFade();
 
