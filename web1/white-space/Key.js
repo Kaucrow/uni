@@ -16,7 +16,6 @@ export class Key extends GameObject {
 
       triggers: [
         {
-          draw: {},
           group: 'key',
           interactsWith: 'player',
           edges: [

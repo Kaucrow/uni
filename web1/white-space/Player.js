@@ -105,7 +105,6 @@ export class Player extends GameObject {
       collisionSystem: room.collisionSystem,
       colliders: [
         {
-          draw: {},
           group: 'solid',
           interactions: [
             {
