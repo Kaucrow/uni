@@ -76,7 +76,6 @@ export class AudioPlayer {
     // Execute pending play operations
     for (const op of operationsToProcess) {
       try {
-        console.log(op);
         await op.callback();
       } catch (error) {
         console.error("Pending operation failed:", error);
@@ -127,8 +126,6 @@ export class AudioPlayer {
 
   async load(key, url) {
     if (this.buffers.has(key)) return;
-
-    console.log(`loading ${key} on ${url}`);
 
     try {
       const response = await fetch(url);
@@ -219,7 +216,6 @@ export class AudioPlayer {
 
   stop(key) {
     // Stop active playback
-    console.log('called stop');
     const sources = this.activeSources.get(key);
     if (sources) {
       try {

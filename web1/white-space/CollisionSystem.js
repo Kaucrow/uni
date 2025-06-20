@@ -22,6 +22,28 @@ export class CollisionSystem {
     this.colliders.push(collider); 
   }
 
+  removeObject(gameObject) {
+    // Remove all colliders associated with this object
+    this.colliders = this.colliders.filter(collider => {
+      if (collider.parent === gameObject) {
+        collider.onDestroy?.(); // Call cleanup hook if exists
+        return false; // Remove from array
+      }
+      return true; // Keep in array
+    });
+
+    // Remove all triggers associated with this object
+    if (this.triggers) {
+      this.triggers = this.triggers.filter(trigger => {
+        if (trigger.parent === gameObject) {
+          trigger.onDestroy?.(); // Call cleanup hook if exists
+          return false; // Remove from array
+        }
+        return true; // Keep in array
+      });
+    }
+  }
+
   checkCollisions(source) {
     let collisions = [];
     {

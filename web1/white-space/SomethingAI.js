@@ -38,7 +38,6 @@ export class SomethingAI {
 
           if (this.something.room.vignette) {
             this.something.room.vignette.radius = Math.min(Math.max(distance * 0.005, 0.4), 0.8);
-            console.log(this.something.room.vignette.intensity);
           }
 
           // Move towards the target

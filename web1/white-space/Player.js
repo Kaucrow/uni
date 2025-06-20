@@ -3,6 +3,7 @@ import { Animator } from "./Animator.js";
 import { CollisionSystem } from "./CollisionSystem.js";
 import { Vector2 } from "./Vector.js";
 import { KeyEvent } from "./KeyEvent.js";
+import { audioPlayer } from "./Game.js";
 
 export class Player extends GameObject {
   constructor(x, y, z, room) {
@@ -108,10 +109,21 @@ export class Player extends GameObject {
           interactions: [
             {
               group: 'solid',
-              onCollide: (source) => CollisionSystem.FUNCS.STOP(source) 
+              onCollide: (player) => CollisionSystem.FUNCS.STOP(player) 
             },
             {
               group: 'dialogue',
+            },
+            {
+              group: 'key',
+              onCollide: (player, key) => {
+                player.keysCollected++;
+                if (player.keysCollected >= 8) {
+                  audioPlayer.stopAll();
+                  audioPlayer.playOrQueue('victory');
+                }
+                key.Destroy();
+              }
             },
           ],
           edges: [
@@ -157,6 +169,8 @@ export class Player extends GameObject {
         }
       }
     }));
+
+    this.keysCollected = 0;
   }
 
   update(deltaTime) {

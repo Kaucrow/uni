@@ -1,6 +1,7 @@
 import { Player } from "../Player.js";
 import { RedHand } from "../RedHand.js";
 import { Something } from "../Something.js";
+import { Key } from "../Key.js";
 import { Rect } from "../Rect.js";
 import { GameObject } from "../GameObject.js";
 import { GameCamera } from "../GameCamera.js";
@@ -14,6 +15,7 @@ import { Vignette } from "../Vignette.js";
 import { Flash } from "../Flash.js";
 import { Lives } from "../Lives.js";
 import { TextFade } from "../FadeText.js";
+import { RandomSpawner } from "../RandomSpawner.js";
 import { audioPlayer } from "../Game.js";
 
 export class WhiteSpace extends Room {
@@ -23,7 +25,7 @@ export class WhiteSpace extends Room {
       height: 3000,
       dialogues: {
         'mewo': [
-          new Dialogue('Miau? (Esperando a que algo suceda?)', Dialogue.SPEED.NORMAL),
+          new Dialogue('Miau? (Esperando a que algo suceda?)', Dialogue.SPEED.NORMAL, () => {}),
         ],
         'laptop': [
           new Dialogue("Es tu laptop. No hay mas que estatica en la pantalla.", Dialogue.SPEED.NORMAL),
@@ -39,6 +41,8 @@ export class WhiteSpace extends Room {
           new Dialogue("Sientes una inquietante presencia acercarse.", Dialogue.SPEED.SLOW, (room) => {
             if (!room.something) {
               room.spawnSomething = true;
+              const keySpawner = new RandomSpawner(this.width, this.height);
+              this.keys = keySpawner.spawnObjects(8, (x, y) => new Key(x, y, this));
             }
           }),
         ],
@@ -54,6 +58,7 @@ export class WhiteSpace extends Room {
 
     audioPlayer.load('white-space', './assets/sfx/bgm/white_space.mp3');
     audioPlayer.load('anxiety', './assets/sfx/bgm/anxiety.mp3');
+    audioPlayer.load('victory', './assets/sfx/bgm/victory.mp3');
     audioPlayer.load('health-fade', './assets/sfx/se/health_fade.mp3');
     audioPlayer.load('damage', './assets/sfx/se/damage.mp3');
     audioPlayer.playOrQueue('white-space', { loop: true, loopEnd: 27.9 });
@@ -69,31 +74,8 @@ export class WhiteSpace extends Room {
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
 
-    const redHandCount = Math.round(Math.random() * 4) + 8;
-    this.redHands = [];
-    for (let i = 0; i < redHandCount; i++) {
-      // Allow x-axis alignment
-      if (Math.random() < 0.5) {
-        const randomX = Math.random() < 0.5 
-          ? Math.round(Math.random() * (this.width / 2 - 1000) + 500) 
-          : Math.round(Math.random() * (this.width / 2 - 1000) + this.width / 2 + 500);
-
-        const randomY = Math.round(Math.random() * (this.height - 1000) + 500);
-
-        const redHand = new RedHand(randomX, randomY, this.collisionSystem);
-        this.redHands.push(redHand);
-      // Allow y-axis alignment
-      } else {
-        const randomX = Math.round(Math.random() * (this.width - 1000) + 500);
-
-        const randomY = Math.random() < 0.5 
-          ? Math.round(Math.random() * (this.height/2 - 1000) + 500) 
-          : Math.round(Math.random() * (this.height/2 - 1000) + this.height /2 + 500);
-
-        const redHand = new RedHand(randomX, randomY, this.collisionSystem);
-        this.redHands.push(redHand);
-      }
-    }
+    const redHandSpawner = new RandomSpawner(this.width, this.height);
+    this.redHands = redHandSpawner.spawnObjects(12, (x, y) => new RedHand(x, y, this.collisionSystem));
 
     const lightbulb = new GameObject({
       id: 'lightbulb',
@@ -327,20 +309,14 @@ export class WhiteSpace extends Room {
       this.tissuebox = tissuebox,
       this.door = door,
       this.lightbulbShadow = lightbulbShadow,
-      this.lightbulb = lightbulb,
       this.mewo = mewo,
       this.laptop = laptop,
-      this.player = player,
-      ...this.redHands
     ];
 
     this.objects.sort((a, b) => a.z - b.z);
 
-    this.bgMusic = {
-      url: 'assets/music/bg_white_space.mp3',
-      loopEnd: 27.9
-    };
-
+    this.player = player;
+    this.lightbulb = lightbulb,
     this.camera = new GameCamera(this.player, canvas.width, canvas.height, this.width, this.height, false);
     this.vignette = new Vignette(canvas.width, canvas.height, false, 0, 1);
     this.blackFlash = new Flash(canvas.width, canvas.height);
@@ -353,7 +329,6 @@ export class WhiteSpace extends Room {
   }
 
   update(deltaTime) {
-    console.log(this.blackFlash.isActive);
     this.camera.update(deltaTime);
     this.vignette.update(deltaTime);
     this.blackFlash.update(deltaTime);
@@ -367,16 +342,28 @@ export class WhiteSpace extends Room {
       this.objects.push(this.something);
     }
 
+    // Normal update
     if (!this.isGameOver) {
       this.objects.forEach(obj => {
-        obj.update(deltaTime);
+        obj.update(deltaTime)
       });
-    } else {
+
+      this.redHands.forEach(redHand => redHand.instance.update(deltaTime));
+
+      if(this.keys) this.keys.forEach(keys => keys.instance.light.update(deltaTime));
+
+      this.player.update(deltaTime);
+      this.lightbulb.update(deltaTime);
+    // If it's Game Over
+    } else if (this.isGameOver) {
       if (!this.isEndTextActive) {
         this.endText.configure("Te acoplaron", canvas.width / 2, canvas.height / 2).fadeIn(2);
       }
       this.endText.update(deltaTime);
       this.isEndTextActive = true;
+    // If it's Game Won
+    } else {
+
     }
     
     this.#draw(deltaTime);
@@ -412,54 +399,88 @@ export class WhiteSpace extends Room {
   #draw(deltaTime) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    this.camera.applyTransform(ctx);
+    if (this.player.keysCollected < 8) {
+      this.camera.applyTransform(ctx);
 
-    this.objects.forEach(obj => {
-      obj.draw(ctx); 
-    });
+      this.objects.forEach(obj => obj.draw(ctx));
 
-    ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y + 2);
-    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
-    ctx.strokeStyle = '#000000ff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      this.player.draw(ctx);
 
-    ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
-    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
-    ctx.strokeStyle = '#000000cc';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      this.redHands.forEach(redHand => redHand.instance.draw(ctx));
 
-    ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
-    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
-    ctx.strokeStyle = '#00000099';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      this.lightbulb.draw(ctx);
 
-    ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
-    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
-    ctx.strokeStyle = '#00000066';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      this.camera.resetTransform(ctx);
+      this.vignette.draw(ctx);
+      this.camera.applyTransform(ctx);
 
-    ctx.beginPath();
-    ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
-    ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 256);
-    ctx.strokeStyle = '#00000033';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      if (this.keys) {
+        this.keys.forEach(light => light.instance.light.draw(ctx));
+        this.keys.forEach(obj => obj.instance.draw(ctx));
+      }
 
-    this.camera.resetTransform(ctx);
-    this.vignette.draw(ctx);
-    this.blackFlash.draw(ctx);
-    if (this.player.lives) {
-      this.player.lives.draw(ctx);
+      ctx.beginPath();
+      ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y + 2);
+      ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
+      ctx.strokeStyle = '#000000ff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 128);
+      ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
+      ctx.strokeStyle = '#000000cc';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 160);
+      ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
+      ctx.strokeStyle = '#00000099';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 192);
+      ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
+      ctx.strokeStyle = '#00000066';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(this.lightbulb.x + 17, this.lightbulb.y - 224);
+      ctx.lineTo(this.lightbulb.x + 17, this.lightbulb.y - 256);
+      ctx.strokeStyle = '#00000033';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      this.camera.resetTransform(ctx);
+
+      this.blackFlash.draw(ctx);
+
+      if (this.player.lives) {
+        this.player.lives.draw(ctx);
+      }
+      this.endText.draw(ctx);
+    } else {
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.fill();
+
+      // Set text style
+      ctx.fillStyle = "black";
+      ctx.font = "48px omori-normal";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // Calculate center position
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      // Draw centered text
+      ctx.fillText("Ganaste! :D (profe pongame 20 por favor esto tardo mucho tiempo)", centerX, centerY);
     }
-    this.endText.draw(ctx);
+
     super.draw(ctx, deltaTime);
   }
 

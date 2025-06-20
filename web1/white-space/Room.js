@@ -7,6 +7,7 @@ export class Room {
     this.width = config.width;
     this.height = config.height;
     this.camera = config.camera || undefined;
+    // TODO: this.lightSystem = new LightSystem();
     this.dialogueBox = new DialogueBox(this);
     this.dialogues = config.dialogues || null;
     this.isCutsceneActive = false;
@@ -18,4 +19,6 @@ export class Room {
       this.dialogueBox.draw(ctx, this.camera.viewportWidth, this.camera.viewportHeight, deltaTime);
     }
   }
+
+
 }

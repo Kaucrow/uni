@@ -9,11 +9,11 @@ export class Vignette {
     // Current values
     this.intensity = intensity;
     this.radius = radius;
-    
+
     // Target values for transitions
     this.targetIntensity = intensity;
     this.targetRadius = radius;
-    
+
     // Transition control
     this.transitionSpeed = 0;
     this.isTransitioning = false;
