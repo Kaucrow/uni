@@ -42,7 +42,7 @@ export class WhiteSpace extends Room {
             if (!room.something) {
               room.spawnSomething = true;
               const keySpawner = new RandomSpawner(this.width, this.height);
-              this.keys = keySpawner.spawnObjects(8, (x, y) => new Key(x, y, this));
+              this.keys = keySpawner.spawnObjects(9, (x, y) => new Key(x, y, this));
             }
           }),
         ],

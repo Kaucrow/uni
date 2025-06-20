@@ -61,8 +61,6 @@ export class Something extends GameObject {
 
                   audioPlayer.play('damage');
                   player.lives.decrement();
-                  player.lives.decrement();
-                  player.lives.decrement();
                   await wait(1000);
 
                   player.lives.fadeOut(2);

@@ -14,7 +14,7 @@ export class Input {
     this.walkSpeed = config.walkSpeed || null;
     this.runSpeed = config.runSpeed || null;
 
-    this.cardinalMovement = config.cardinalMovement || true;
+    this.cardinalMovement = config.cardinalMovement || false;
     this.lastHorizontalKeyPress = 0;
     this.lastVerticalKeyPress = 0;
 
@@ -88,10 +88,26 @@ export class Input {
         return { x: 0, y: 0};
       }
     } else {
+      const x = (this.isKeyPressed('ArrowRight') ? 1 : 0) - (this.isKeyPressed('ArrowLeft') ? 1 : 0);
+      const y = (this.isKeyPressed('ArrowDown') ? 1 : 0) - (this.isKeyPressed('ArrowUp') ? 1 : 0);
+
+      if (x !== 0 && y !== 0) {
+        if (this.lastHorizontalKeyPress > this.lastVerticalKeyPress) {
+          return { x: x, y: 0 };
+        } else {
+          return { x: 0, y: y };
+        }
+      }
+
+      return {
+        x: x, y: y
+      };
+
+      /*
       return {
         x: (this.isKeyPressed('ArrowRight') ? 1 : 0) - (this.isKeyPressed('ArrowLeft') ? 1 : 0),
         y: (this.isKeyPressed('ArrowDown') ? 1 : 0) - (this.isKeyPressed('ArrowUp') ? 1 : 0)
-      };
+      };*/
     }
   }
 

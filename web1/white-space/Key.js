@@ -16,13 +16,14 @@ export class Key extends GameObject {
 
       triggers: [
         {
+          draw: {},
           group: 'key',
           interactsWith: 'player',
           edges: [
-            new Vector2([4, 22], [30, 22]),
-            new Vector2([30, 22], [30, 32]),
+            new Vector2([4, 2], [30, 2]),
+            new Vector2([30, 2], [30, 32]),
             new Vector2([30, 32], [4, 32]),
-            new Vector2([4, 32], [4, 22]),
+            new Vector2([4, 32], [4, 2]),
           ],
         }
       ],
