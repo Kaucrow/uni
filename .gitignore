@@ -73,6 +73,7 @@ test/test_runner
 # Rust 
 # ==========
 **/target
+**/Cargo.lock
 
 # ==========
 # VSCode
