@@ -1,0 +1,31 @@
+InitializeDb:
+  Accounts:
+    Table: |
+      CREATE TABLE IF NOT EXISTS accounts (
+        id SERIAL PRIMARY KEY,
+        balance DECIMAL(10,2) NOT NULL
+      )
+    Count: SELECT COUNT(*) FROM accounts
+    Insert: INSERT INTO accounts (id, balance) VALUES (1, 10000), (2, 10000)
+    Reset: UPDATE accounts SET balance = 10000 WHERE id IN (1, 2)
+
+  Transactions:
+    Table: |
+      CREATE TABLE IF NOT EXISTS transactions (
+        id SERIAL PRIMARY KEY,
+        from_account INT NOT NULL,
+        to_account INT NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    Reset: TRUNCATE TABLE transactions
+
+Test:
+  GetBalanceWithLock: SELECT balance FROM accounts WHERE id = @id FOR UPDATE
+  GetBalance: SELECT balance FROM accounts WHERE id = @id
+  Withdraw: UPDATE accounts SET balance = balance - @amount WHERE id = @id
+  Deposit: UPDATE accounts SET balance = balance + @amount WHERE id = @id
+  Transaction:
+    Record: INSERT INTO transactions (from_account, to_account, amount) VALUES (@from, @to, @amount)
+    Count: SELECT COUNT(*) FROM transactions
+  
