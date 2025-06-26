@@ -36,4 +36,9 @@ export class HomeComponent implements OnInit {
   navigateToRegister(): void {
     this.router.navigate(['/register']);
   }
-}
+
+  handleSignOut(): void {
+    this.authService.logout();
+    this.isLoggedIn = false;
+  }
+}``

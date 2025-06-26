@@ -1,0 +1,15 @@
+<div class="clock-face" [style.width.px]="size" [style.height.px]="size">
+  <!-- Clock face with numbers -->
+  <div class="number" *ngFor="let num of [1,2,3,4,5,6,7,8,9,10,11,12]" 
+       [style.transform]="'rotate(' + (num * 30) + 'deg)'">
+    <span [style.transform]="'rotate(' + (-num * 30) + 'deg)'">{{num}}</span>
+  </div>
+  
+  <!-- Clock hands -->
+  <div class="hand hour-hand" [style.transform]="'rotate(' + hourRotation + 'deg)'"></div>
+  <div class="hand minute-hand" [style.transform]="'rotate(' + minuteRotation + 'deg)'"></div>
+  <div class="hand second-hand" [style.transform]="'rotate(' + secondRotation + 'deg)'"></div>
+  
+  <!-- Center cap -->
+  <div class="center-cap"></div>
+</div>

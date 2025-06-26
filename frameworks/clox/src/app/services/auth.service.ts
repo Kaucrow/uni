@@ -35,4 +35,9 @@ export class AuthService {
     console.log(`!! Logging in with email '${email}' and password '${password}'...`);
     return from(promise);
   }
+
+  logout(): Observable<{ error: Error | null }> {
+    const promise = this.supabase.auth.signOut();
+    return from(promise);
+  }
 }
