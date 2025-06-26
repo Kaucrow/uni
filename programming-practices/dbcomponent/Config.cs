@@ -9,24 +9,23 @@ public static class Config
 
     public static dynamic Queries => _queries.Current;
 
+
     static Config()
     {
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), "config/config.toml");
-
         string tomlContent = File.ReadAllText(configPath);
-
         TomlTable tomlTable = Toml.ToModel(tomlContent);
 
-        if (tomlTable["database"] is TomlTable dbTable)
+        if (tomlTable["db-postgres"] is TomlTable postgresTable)
         {
-            Database = new DatabaseConfig(
-                host: (string)dbTable["host"],
-                port: (string)dbTable["port"],
-                user: (string)dbTable["user"],
-                password: (string)dbTable["password"],
-                name: (string)dbTable["name"],
-                table: (string)dbTable["table"],
-                testUsers: (int)(long)dbTable["test-users"]
+            Database = new PostgresConfig(
+                host: (string)postgresTable["host"],
+                port: (string)postgresTable["port"],
+                user: (string)postgresTable["user"],
+                password: (string)postgresTable["password"],
+                name: (string)postgresTable["name"],
+                table: (string)postgresTable["table"],
+                testUsers: (int)(long)postgresTable["test-users"]
             );
         }
 
@@ -38,14 +37,54 @@ public static class Config
                 sizeIncrement: (int)(long)poolTable["size-increment"]
             );
         }
+
+        if (tomlTable["db-mysql"] is TomlTable mysqlTable)
+        {
+            MySql = new MySqlConfig(
+                host: (string)mysqlTable["host"],
+                port: (string)mysqlTable["port"],
+                user: (string)mysqlTable["user"],
+                password: (string)mysqlTable["password"],
+                name: (string)mysqlTable["name"],
+                table: (string)mysqlTable["table"]
+            );
+        }
     }
 
-    public static DatabaseConfig Database { get; }
-    public static PoolConfig Pool { get; }
 
-    public readonly struct DatabaseConfig
+    public static PostgresConfig Database { get; }
+    public static PoolConfig Pool { get; }
+    public static MySqlConfig MySql { get; }
+    public readonly struct MySqlConfig
     {
-        public DatabaseConfig(
+        public MySqlConfig(
+            string host,
+            string port,
+            string user,
+            string password,
+            string name,
+            string table
+        )
+        {
+            Host = host;
+            Port = port;
+            User = user;
+            Password = password;
+            Name = name;
+            Table = table;
+        }
+
+        public string Host { get; }
+        public string Port { get; }
+        public string User { get; }
+        public string Password { get; }
+        public string Name { get; }
+        public string Table { get; }
+    }
+
+    public readonly struct PostgresConfig
+    {
+        public PostgresConfig(
             string host,
             string port,
             string user,
