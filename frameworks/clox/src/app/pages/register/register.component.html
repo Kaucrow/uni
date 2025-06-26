@@ -1,0 +1,57 @@
+<app-centered-div [className]="'register-container'">
+  <div class="register-form-box">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="register">
+        <p class="register-text">Register</p>
+      </div>
+
+      <!-- Separator -->
+      <div class="separator">
+        <p class="separator-text">o</p>
+      </div>
+
+      <app-input
+        [required]="true"
+        label="Email address"
+        id="email-input"
+        formControlName="email"
+        name="email"
+      ></app-input>
+
+      <app-input
+        [required]="true"
+        label="Username"
+        id="username-input"
+        formControlName="username"
+        name="username"
+      ></app-input>
+
+      <app-input
+        [required]="true"
+        label="Password"
+        id="password-input"
+        type="password"
+        formControlName="password"
+        name="password"
+      ></app-input>
+
+      <p *ngIf="err.notFound" class="error-message">{{ err.notFound }}</p>
+
+      <!-- register button -->
+      <div class="text-center">
+        <button type="submit" class="register-btn" [disabled]="isRegistering">
+          Register
+        </button>
+
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+
+        <p class="login-text">
+          Already have an account?
+          <a routerLink="/login" class="login-link">Sign In</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</app-centered-div>

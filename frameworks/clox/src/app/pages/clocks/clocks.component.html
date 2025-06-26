@@ -1,0 +1,44 @@
+<div class="time-controls">
+  <div class="time-inputs">
+    <input type="number" [(ngModel)]="fixedHours" min="0" max="23" placeholder="HH">
+    <span>:</span>
+    <input type="number" [(ngModel)]="fixedMinutes" min="0" max="59" placeholder="MM">
+    <span>:</span>
+    <input type="number" [(ngModel)]="fixedSeconds" min="0" max="59" placeholder="SS">
+  </div>
+  
+  <div class="button-group">
+    <button (click)="getCurrentTime()">Get Current Time</button>
+    <button (click)="setCustomTime()">Set Time</button>
+  </div>
+  
+  <div class="current-time">
+    Display Time: {{ getFormattedTime() }}
+  </div>
+</div>
+
+<mat-grid-list cols="2" rowHeight="2:1" gutterSize="20px">
+  @for (clock of clocks; track $index) {
+    <mat-grid-tile>
+      <mat-card class="clock-card">
+        <mat-card-content>
+          @switch (clock.type) {
+            @case ('analog') {
+              <app-analog-clock [time]="currentTime"></app-analog-clock>
+            }
+            @case ('digital') {
+              <!--
+              <app-digital-clock [time]="currentTime"></app-digital-clock>
+              -->
+            }
+            @case ('binary') {
+              <!--
+              <app-binary-clock [time]="currentTime"></app-binary-clock>
+              -->
+            }
+          }
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  }
+</mat-grid-list>

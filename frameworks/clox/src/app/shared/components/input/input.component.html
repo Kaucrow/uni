@@ -1,0 +1,16 @@
+<div class="input-container">
+  <input
+    class="input-field"
+    [required]="required"
+    [type]="type"
+    [class.input-error]="err"
+    [id]="id"
+    autocomplete="off"
+    [value]="_inputValue" 
+    (input)="updateValue($event)"
+    (blur)="onTouched()"
+    placeholder=" "
+    #inputField
+  />
+  <label [htmlFor]="id" class="input-label">{{ label }}</label>
+</div>
