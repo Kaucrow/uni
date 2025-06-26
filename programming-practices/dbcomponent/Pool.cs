@@ -1,115 +1,117 @@
 using Npgsql;
+using MySql.Data.MySqlClient;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+
+public enum DatabaseType
+{
+    PostgreSQL,
+    MySQL
+}
 
 public sealed class Pool : IDisposable
 {
     private static readonly Lazy<Pool> _instance = new Lazy<Pool>(() => new Pool());
-    private readonly ConcurrentBag<Connection> _availableConnections;
     private readonly CancellationTokenSource _disposeTokenSource = new();
-    private SemaphoreSlim _semaphore = null!;
-    private readonly SemaphoreSlim _creationSemaphore;
-    private int _activeConnections;
-    private string _connectionString = null!;
-    private int _maxConnections;
-    private int _connectionIncrement;
-    private static bool _isInitialized;
+    // Diccionario para pools por tipo de base de datos
+    private readonly Dictionary<DatabaseType, DatabasePool> _dbPools = new();
+
+    // Clase interna para manejar cada tipo de base de datos
+    private class DatabasePool
+    {
+        public string ConnectionString { get; set; } = null!;
+        public int MaxConnections { get; set; }
+        public int ConnectionIncrement { get; set; }
+        public int ActiveConnections;
+        public ConcurrentBag<Connection> AvailableConnections = new();
+        public SemaphoreSlim Semaphore = null!;
+        public SemaphoreSlim CreationSemaphore = new(1, 1);
+    }
 
     public static Pool Instance =>
-        _isInitialized ?
-        _instance.Value :
-        throw new Exception("Pool has not been initialized. Call Initialize() first");
 
+        _instance.Value;
+
+    // Inicializa un pool para un tipo de base de datos
     public static async Task Initialize(
+        DatabaseType dbType, // Usar enum en vez de string
         string connectionString,
         int startupConnections = 10,
         int maxConnections = 100,
         int connectionIncrement = 5
     )
     {
-        if (_isInitialized)
-            throw new InvalidOperationException("Pool is already initialized");
+        if (Instance._dbPools.ContainsKey(dbType))
+            throw new InvalidOperationException($"Pool for '{dbType}' is already initialized");
 
-        _isInitialized = true;
+        var dbPool = new DatabasePool
+        {
+            ConnectionString = connectionString + (dbType == DatabaseType.PostgreSQL ? ";Pooling=false;SSL Mode=Disable;TCP Keepalive=true;Keepalive=60;No Reset On Close=true" : ""),
+            MaxConnections = maxConnections,
+            ConnectionIncrement = connectionIncrement,
+            Semaphore = new SemaphoreSlim(maxConnections, maxConnections)
+        };
 
-        Instance._connectionString = connectionString + ";Pooling=false;SSL Mode=Disable;TCP Keepalive=true;Keepalive=60;No Reset On Close=true";
-        Instance._maxConnections = maxConnections;
-        Instance._connectionIncrement = connectionIncrement;
-        Instance._semaphore = new SemaphoreSlim(maxConnections, maxConnections);
-
-        // Create startup connections
+        // Crear conexiones iniciales
         for (int i = 0; i < startupConnections; i++)
         {
-            Connection conn = await Instance.CreateNewConnectionAsync();
-            Instance._availableConnections.Add(conn);
+            Connection conn = await Instance.CreateNewConnectionAsync(dbType, dbPool.ConnectionString);
+            dbPool.AvailableConnections.Add(conn);
         }
+        Instance._dbPools[dbType] = dbPool;
     }
 
-    private Pool()
-    {
-        _availableConnections = new ConcurrentBag<Connection>();
-        _creationSemaphore = new SemaphoreSlim(1, 1);
-    }
+    private Pool() { }
 
-    public async Task<Connection> GetConnectionAsync(CancellationToken cancellationToken = default)
+    // Obtiene una conexión para el tipo de base de datos
+    public async Task<Connection> GetConnectionAsync(DatabaseType dbType, CancellationToken cancellationToken = default)
     {
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            _disposeTokenSource.Token,
-            cancellationToken
-        );
+        if (!_dbPools.TryGetValue(dbType, out var dbPool))
+            throw new InvalidOperationException($"Pool for '{dbType}' is not initialized");
 
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_disposeTokenSource.Token, cancellationToken);
         try
         {
-            await _semaphore.WaitAsync(linkedCts.Token);
-
+            await dbPool.Semaphore.WaitAsync(linkedCts.Token);
             for (int i = 0; i < 3; i++)
             {
-                if (_availableConnections.TryTake(out var connection))
+                if (dbPool.AvailableConnections.TryTake(out var connection))
                 {
-                    if (await ValidateConnection(connection))
+                    if (await ValidateConnection(dbType, connection))
                     {
-                        Interlocked.Increment(ref _activeConnections);
+                        Interlocked.Increment(ref dbPool.ActiveConnections);
                         return connection;
                     }
                     connection.Close();
                 }
             }
-
-            // No available connections - create new ones if under capacity
-            await _creationSemaphore.WaitAsync(cancellationToken);
+            await dbPool.CreationSemaphore.WaitAsync(cancellationToken);
             try
             {
-                // Double-check after getting creation lock
-                if (_availableConnections.TryTake(out var connection))
+                if (dbPool.AvailableConnections.TryTake(out var connection))
                 {
-                    if (await ValidateConnection(connection))
+                    if (await ValidateConnection(dbType, connection))
                     {
-                        Interlocked.Increment(ref _activeConnections);
+                        Interlocked.Increment(ref dbPool.ActiveConnections);
                         return connection;
                     }
                     connection.Close();
                 }
-
-                var remainingCapacity = _maxConnections - Volatile.Read(ref _activeConnections);
+                var remainingCapacity = dbPool.MaxConnections - Volatile.Read(ref dbPool.ActiveConnections);
                 if (remainingCapacity <= 0)
                     throw new InvalidOperationException("Pool exhausted");
-
-                int newConnectionsToCreate = Math.Min(_connectionIncrement, remainingCapacity);
-
+                int newConnectionsToCreate = Math.Min(dbPool.ConnectionIncrement, remainingCapacity);
                 var newConnections = new List<Connection>();
                 for (int i = 0; i < newConnectionsToCreate; i++)
                 {
-                    var newConn = await CreateNewConnectionAsync();
+                    var newConn = await CreateNewConnectionAsync(dbType, dbPool.ConnectionString);
                     newConnections.Add(newConn);
-
-                    if (i != 0) _availableConnections.Add(newConn);
+                    if (i != 0) dbPool.AvailableConnections.Add(newConn);
                 }
-
-                Interlocked.Increment(ref _activeConnections);
+                Interlocked.Increment(ref dbPool.ActiveConnections);
                 return newConnections[0];
             }
-            finally {
-                _creationSemaphore.Release();
-            }
+            finally { dbPool.CreationSemaphore.Release(); }
         }
         catch (OperationCanceledException)
         {
@@ -117,46 +119,67 @@ public sealed class Pool : IDisposable
         }
     }
 
-    private async Task<bool> ValidateConnection(Connection conn)
+    // Valida la conexión según el tipo de base de datos
+    private async Task<bool> ValidateConnection(DatabaseType dbType, Connection conn)
     {
         try
         {
-            using var cmd = new NpgsqlCommand("SELECT 1", conn.DbConnection);
-            await cmd.ExecuteScalarAsync();
-            return true;
-        }
-        catch
-        {
+            if (dbType == DatabaseType.PostgreSQL)
+            {
+                using var cmd = new NpgsqlCommand("SELECT 1", conn.DbConnection);
+                await cmd.ExecuteScalarAsync();
+                return true;
+            }
+            else if (dbType == DatabaseType.MySQL)
+            {
+                using var cmd = new MySqlCommand("SELECT 1", conn.DbConnection);
+                await cmd.ExecuteScalarAsync();
+                return true;
+            }
             return false;
         }
+        catch { return false; }
     }
 
-    public void ReturnConnection(Connection connection)
+    // Devuelve la conexión al pool correspondiente
+    public void ReturnConnection(DatabaseType dbType, Connection connection)
     {
         if (connection == null) throw new ArgumentNullException(nameof(connection));
-
-        _availableConnections.Add(connection);
-        _semaphore.Release();
-        Interlocked.Decrement(ref _activeConnections);
+        if (!_dbPools.TryGetValue(dbType, out var dbPool))
+            throw new InvalidOperationException($"Pool for '{dbType}' is not initialized");
+        dbPool.AvailableConnections.Add(connection);
+        dbPool.Semaphore.Release();
+        Interlocked.Decrement(ref dbPool.ActiveConnections);
     }
 
-    private async Task<Connection> CreateNewConnectionAsync()
+    // Crea una nueva conexión según el tipo de base de datos
+    private async Task<Connection> CreateNewConnectionAsync(DatabaseType dbType, string connectionString)
     {
-        var conn = new NpgsqlConnection(_connectionString);
-        await conn.OpenAsync();
-        return new Connection(conn);
+        if (dbType == DatabaseType.PostgreSQL)
+        {
+            var conn = new NpgsqlConnection(connectionString);
+            await conn.OpenAsync();
+            return new Connection(conn);
+        }
+        else if (dbType == DatabaseType.MySQL)
+        {
+            var conn = new MySqlConnection(connectionString);
+            await conn.OpenAsync();
+            return new Connection(conn);
+        }
+        throw new NotSupportedException($"Database type '{dbType}' not supported");
     }
 
     public void Dispose()
     {
         _disposeTokenSource.Cancel();
-
-        // Clean up all connections
-        while (_availableConnections.TryTake(out var connection))
+        foreach (var dbPool in _dbPools.Values)
         {
-            connection.Close();
+            while (dbPool.AvailableConnections.TryTake(out var connection))
+            {
+                connection.Close();
+            }
+            dbPool.Semaphore.Dispose();
         }
-
-        _semaphore.Dispose();
     }
 }
