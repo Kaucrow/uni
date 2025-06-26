@@ -1,12 +1,14 @@
 public sealed class PoolManager : IDisposable
 {
     private readonly Pool _sharedPool;
+    private readonly DatabaseType _dbType;
     private Connection? _connection; // Tracks this client's active connection
     private bool _isDisposed;
 
-    public PoolManager(Pool sharedPool) 
+    public PoolManager(Pool sharedPool, DatabaseType dbType)
     {
         _sharedPool = sharedPool ?? throw new ArgumentNullException(nameof(sharedPool));
+        _dbType = dbType;
     }
 
     // Core Method: Get a connection for this client
@@ -20,10 +22,10 @@ public sealed class PoolManager : IDisposable
             throw new InvalidOperationException("Client already has an active connection");
 
         // Get connection from shared pool
-        _connection = await _sharedPool.GetConnectionAsync(cancellationToken);
+        _connection = await _sharedPool.GetConnectionAsync(_dbType, cancellationToken);
         _connection.SetReturnHandler(() =>
         {
-            _sharedPool.ReturnConnection(_connection);
+            _sharedPool.ReturnConnection(_dbType, _connection);
             _connection = null;
         });
 
