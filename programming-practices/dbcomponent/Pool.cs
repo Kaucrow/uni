@@ -1,4 +1,5 @@
 using Npgsql;
+using MySql.Data.MySqlClient;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -129,7 +130,12 @@ public sealed class Pool : IDisposable
                 await cmd.ExecuteScalarAsync();
                 return true;
             }
-            // else if (dbType == DatabaseType.MySQL) { ... }
+            else if (dbType == DatabaseType.MySQL)
+            {
+                using var cmd = new MySqlCommand("SELECT 1", conn.DbConnection);
+                await cmd.ExecuteScalarAsync();
+                return true;
+            }
             return false;
         }
         catch { return false; }
@@ -155,7 +161,12 @@ public sealed class Pool : IDisposable
             await conn.OpenAsync();
             return new Connection(conn);
         }
-        // else if (dbType == DatabaseType.MySQL) { ... }
+        else if (dbType == DatabaseType.MySQL)
+        {
+            var conn = new MySqlConnection(connectionString);
+            await conn.OpenAsync();
+            return new Connection(conn);
+        }
         throw new NotSupportedException($"Database type '{dbType}' not supported");
     }
 
