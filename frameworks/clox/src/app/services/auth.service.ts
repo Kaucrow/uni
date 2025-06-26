@@ -32,6 +32,7 @@ export class AuthService {
       email,
       password
     });
+    console.log(`!! Logging in with email '${email}' and password '${password}'...`);
     return from(promise);
   }
 }

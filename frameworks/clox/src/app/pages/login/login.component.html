@@ -1,0 +1,62 @@
+<app-centered-div [className]="'login-container'">
+  <div class="login-form-box">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Sign in section -->
+      <div class="signin-with">
+        <p class="signin-with-text">Sign in</p>
+      </div>
+
+      <!-- Separator -->
+      <div class="separator">
+        <p class="separator-text">o</p>
+      </div>
+
+      <!-- Assuming you create an Angular InputComponent -->
+      <app-input
+        [required]="true"
+        label="Email address"
+        id="email-input"
+        formControlName="email"
+        name="email"
+      ></app-input>
+
+      <app-input
+        [required]="true"
+        label="Password"
+        id="password-input"
+        type="password"
+        formControlName="password"
+        name="password"
+      ></app-input>
+
+      <p *ngIf="err.notFound" class="error-message">{{ err.notFound }}</p>
+
+      <div class="remember-me">
+        <app-checkbox
+          label="Remember Me"
+          [(checked)]="rememberMe"
+        ></app-checkbox>
+
+        <a routerLink="/forgot-password" class="forgot-password"
+          >Forgot password?</a
+        >
+      </div>
+
+      <!-- Login button -->
+      <div class="text-center">
+        <button type="submit" class="login-btn" [disabled]="isSigningIn">
+          Sign In
+        </button>
+
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+
+        <p class="register-text">
+          New user?
+          <a routerLink="/register" class="register-link">Register</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</app-centered-div>
