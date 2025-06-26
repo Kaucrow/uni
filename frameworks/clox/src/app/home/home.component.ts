@@ -1,0 +1,17 @@
+import { Component, inject, OnInit } from "@angular/core";
+import { AuthService } from "../services/auth.service";
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  standalone: true,
+})
+export class HomeComponent implements OnInit {
+  authService = inject(AuthService);
+  userEmail: string | undefined;
+
+  ngOnInit() {
+    this.userEmail = this.authService.currentUser()?.email;
+    console.log(this.userEmail);
+  }
+}
