@@ -2,6 +2,10 @@ using System.Data.Common;
 using MySql.Data.MySqlClient;
 using Npgsql;
 
+/// <summary>
+/// Provides a high-level database access component that manages connections,
+/// transactions, and command execution for both PostgreSQL and MySQL databases.
+/// </summary>
 public sealed class DbComponent : IDisposable
 {
     private DbTransaction? _transaction;
@@ -9,12 +13,24 @@ public sealed class DbComponent : IDisposable
     private PoolManager? _poolManager;
     private Connection? _connection;
 
+    /// <summary>
+    /// Initializes a new instance of the DbComponent class.
+    /// </summary>
+    /// <param name="connectionPool">The connection pool to use for database operations</param>
+    /// <exception cref="ArgumentNullException">Thrown when connectionPool is null</exception>
     public DbComponent(Pool connectionPool)
     {
-        _connectionPool = connectionPool;
+        _connectionPool = connectionPool ?? throw new ArgumentNullException(nameof(connectionPool));
     }
 
-    // Prepares a command to use the active transaction (if any)
+    /// <summary>
+    /// Prepares a database command with the specified SQL and parameters.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="sql">SQL command text</param>
+    /// <param name="parameters">Array of parameters for the command</param>
+    /// <returns>A configured DbCommand instance</returns>
+    /// <exception cref="NotSupportedException">Thrown when database type is not supported</exception>
     private async Task<DbCommand> PrepareCommand(DbType dbType, string sql, DbParameter[] parameters)
     {
         var connection = await GetConnectionAsync(dbType);
@@ -35,21 +51,43 @@ public sealed class DbComponent : IDisposable
         return cmd;
     }
 
-    // Fetch a single value (scalar)
+    /// <summary>
+    /// Executes a query and returns a single value.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="sql">SQL query text</param>
+    /// <param name="parameters">Parameters for the query</param>
+    /// <returns>The first column of the first row in the result set</returns>
     public async Task<object?> FetchOne(DbType dbType, string sql, params DbParameter[] parameters)
     {
         await using var cmd = await PrepareCommand(dbType, sql, parameters);
         return await cmd.ExecuteScalarAsync();
     }
 
-    // Fetch multiple rows
+    /// <summary>
+    /// Executes a query and returns a data reader for iterating through the results.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="sql">SQL query text</param>
+    /// <param name="parameters">Parameters for the query</param>
+    /// <returns>A DbDataReader for reading the result set</returns>
+    /// <remarks>
+    /// The caller is responsible for disposing the returned DbDataReader.
+    /// </remarks>
     public async Task<DbDataReader> Fetch(DbType dbType, string sql, params DbParameter[] parameters)
     {
         var cmd = await PrepareCommand(dbType, sql, parameters);
         return await cmd.ExecuteReaderAsync();
     }
 
-    // Execute with no results (insert/update/delete)
+    /// <summary>
+    /// Executes a non-query command (INSERT, UPDATE, DELETE).
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="sql">SQL command text</param>
+    /// <param name="parameters">Parameters for the command</param>
+    /// <returns>The number of rows affected</returns>
+    /// <exception cref="NpgsqlException">Thrown when PostgreSQL command execution fails</exception>
     public async Task<int> Execute(DbType dbType, string sql, params DbParameter[] parameters)
     {
         await using var cmd = await PrepareCommand(dbType, sql, parameters);
@@ -66,7 +104,12 @@ public sealed class DbComponent : IDisposable
         }
     }
 
-    // Transaction management
+    /// <summary>
+    /// Begins a new database transaction.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <exception cref="InvalidOperationException">Thrown when a transaction is already active</exception>
+    /// <exception cref="NotSupportedException">Thrown when database type is not supported</exception>
     public async Task Begin(DbType dbType)
     {
         if (_transaction != null)
@@ -82,6 +125,10 @@ public sealed class DbComponent : IDisposable
         };
     }
 
+    /// <summary>
+    /// Commits the current transaction.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no transaction is active</exception>
     public async Task Commit()
     {
         if (_transaction == null)
@@ -91,6 +138,10 @@ public sealed class DbComponent : IDisposable
         await CleanupTransaction();
     }
 
+    /// <summary>
+    /// Rolls back the current transaction.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no transaction is active</exception>
     public async Task Rollback()
     {
         if (_transaction == null)
@@ -100,6 +151,11 @@ public sealed class DbComponent : IDisposable
         await CleanupTransaction();
     }
 
+    /// <summary>
+    /// Gets a database connection, reusing an existing one if available.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <returns>An active database connection</returns>
     private async Task<Connection> GetConnectionAsync(DbType dbType)
     {
         if (_connection != null) return _connection;
@@ -109,6 +165,9 @@ public sealed class DbComponent : IDisposable
         return _connection;
     }
 
+    /// <summary>
+    /// Cleans up the current transaction resources.
+    /// </summary>
     private async Task CleanupTransaction()
     {
         if (_transaction != null)
@@ -118,6 +177,10 @@ public sealed class DbComponent : IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases all resources used by the DbComponent, including
+    /// active transactions, connections, and pool managers.
+    /// </summary>
     public void Dispose()
     {
         _transaction?.Dispose();

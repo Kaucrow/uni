@@ -2,43 +2,93 @@ using Npgsql;
 using MySql.Data.MySqlClient;
 using System.Collections.Concurrent;
 
+/// <summary>
+/// Represents the type of database supported by the connection pool.
+/// </summary>
 public enum DbType
 {
+    /// <summary>
+    /// PostgreSQL database
+    /// </summary>
     Postgres,
+    
+    /// <summary>
+    /// MySQL database
+    /// </summary>
     MySQL
 }
 
+/// <summary>
+/// Thread-safe connection pool implementation for managing database connections.
+/// Supports PostgreSQL and MySQL databases.
+/// </summary>
 public sealed class Pool : IDisposable
 {
     private static readonly Lazy<Pool> _instance = new Lazy<Pool>(() => new Pool());
     private readonly CancellationTokenSource _disposeTokenSource = new();
-    // Diccionario para pools por tipo de base de datos
     private readonly Dictionary<DbType, DatabasePool> _dbPools = new();
 
-    // Clase interna para manejar cada tipo de base de datos
+    /// <summary>
+    /// Internal class representing a pool for a specific database type.
+    /// </summary>
     private class DatabasePool
     {
+        /// <summary>
+        /// Connection string for the database
+        /// </summary>
         public string ConnectionString { get; set; } = null!;
+        
+        /// <summary>
+        /// Maximum number of connections allowed in the pool
+        /// </summary>
         public int MaxConnections { get; set; }
+        
+        /// <summary>
+        /// Number of connections to create when pool needs to grow
+        /// </summary>
         public int ConnectionIncrement { get; set; }
+        
+        /// <summary>
+        /// Count of currently active connections
+        /// </summary>
         public int ActiveConnections;
+        
+        /// <summary>
+        /// Collection of available connections
+        /// </summary>
         public ConcurrentBag<Connection> AvailableConnections = new();
+        
+        /// <summary>
+        /// Semaphore to control access to the pool
+        /// </summary>
         public SemaphoreSlim Semaphore = null!;
+        
+        /// <summary>
+        /// Semaphore to control connection creation
+        /// </summary>
         public SemaphoreSlim CreationSemaphore = new(1, 1);
     }
 
-    public static Pool Instance =>
+    /// <summary>
+    /// Singleton instance of the connection pool
+    /// </summary>
+    public static Pool Instance => _instance.Value;
 
-        _instance.Value;
-
-    // Inicializa un pool para un tipo de base de datos
+    /// <summary>
+    /// Initializes the connection pool for a specific database type.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="connectionString">Connection string for the database</param>
+    /// <param name="startupConnections">Initial number of connections to create</param>
+    /// <param name="maxConnections">Maximum number of connections allowed</param>
+    /// <param name="connectionIncrement">Number of connections to add when pool needs to grow</param>
+    /// <exception cref="InvalidOperationException">Thrown when pool is already initialized for the database type</exception>
     public static async Task Initialize(
-        DbType dbType, // Usar enum en vez de string
+        DbType dbType,
         string connectionString,
         int startupConnections = 10,
         int maxConnections = 100,
-        int connectionIncrement = 5
-    )
+        int connectionIncrement = 5)
     {
         if (Instance._dbPools.ContainsKey(dbType))
             throw new InvalidOperationException($"Pool for '{dbType}' is already initialized");
@@ -51,7 +101,7 @@ public sealed class Pool : IDisposable
             Semaphore = new SemaphoreSlim(maxConnections, maxConnections)
         };
 
-        // Crear conexiones iniciales
+        // Create initial connections
         for (int i = 0; i < startupConnections; i++)
         {
             Connection conn = await Instance.CreateNewConnectionAsync(dbType, dbPool.ConnectionString);
@@ -62,7 +112,14 @@ public sealed class Pool : IDisposable
 
     private Pool() { }
 
-    // Obtiene una conexión para el tipo de base de datos
+    /// <summary>
+    /// Gets a connection from the pool for the specified database type.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A valid database connection</returns>
+    /// <exception cref="InvalidOperationException">Thrown when pool is not initialized or exhausted</exception>
+    /// <exception cref="TimeoutException">Thrown when connection request is canceled</exception>
     public async Task<Connection> GetConnectionAsync(DbType dbType, CancellationToken cancellationToken = default)
     {
         if (!_dbPools.TryGetValue(dbType, out var dbPool))
@@ -118,7 +175,12 @@ public sealed class Pool : IDisposable
         }
     }
 
-    // Valida la conexión según el tipo de base de datos
+    /// <summary>
+    /// Validates that a connection is still alive and usable.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="conn">Connection to validate</param>
+    /// <returns>True if connection is valid, false otherwise</returns>
     private async Task<bool> ValidateConnection(DbType dbType, Connection conn)
     {
         try
@@ -140,7 +202,13 @@ public sealed class Pool : IDisposable
         catch { return false; }
     }
 
-    // Devuelve la conexión al pool correspondiente
+    /// <summary>
+    /// Returns a connection to the pool.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="connection">Connection to return</param>
+    /// <exception cref="ArgumentNullException">Thrown when connection is null</exception>
+    /// <exception cref="InvalidOperationException">Thrown when pool is not initialized</exception>
     public void ReturnConnection(DbType dbType, Connection connection)
     {
         if (connection == null) throw new ArgumentNullException(nameof(connection));
@@ -151,7 +219,13 @@ public sealed class Pool : IDisposable
         Interlocked.Decrement(ref dbPool.ActiveConnections);
     }
 
-    // Crea una nueva conexión según el tipo de base de datos
+    /// <summary>
+    /// Creates a new database connection.
+    /// </summary>
+    /// <param name="dbType">Type of database</param>
+    /// <param name="connectionString">Connection string</param>
+    /// <returns>A new database connection</returns>
+    /// <exception cref="NotSupportedException">Thrown when database type is not supported</exception>
     private async Task<Connection> CreateNewConnectionAsync(DbType dbType, string connectionString)
     {
         if (dbType == DbType.Postgres)
@@ -169,6 +243,9 @@ public sealed class Pool : IDisposable
         throw new NotSupportedException($"Database type '{dbType}' not supported");
     }
 
+    /// <summary>
+    /// Disposes the connection pool and all its resources.
+    /// </summary>
     public void Dispose()
     {
         _disposeTokenSource.Cancel();

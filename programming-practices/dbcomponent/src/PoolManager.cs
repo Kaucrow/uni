@@ -1,3 +1,7 @@
+/// <summary>
+/// Manages a single client's connection to a database pool, ensuring proper acquisition
+/// and disposal of connections. This class is thread-safe for individual instances.
+/// </summary>
 public sealed class PoolManager : IDisposable
 {
     private readonly Pool _sharedPool;
@@ -5,13 +9,28 @@ public sealed class PoolManager : IDisposable
     private Connection? _connection; // Tracks this client's active connection
     private bool _isDisposed;
 
+    /// <summary>
+    /// Initializes a new instance of the PoolManager class.
+    /// </summary>
+    /// <param name="sharedPool">The shared connection pool to use</param>
+    /// <param name="dbType">Type of database this manager will handle</param>
+    /// <exception cref="ArgumentNullException">Thrown when sharedPool is null</exception>
     public PoolManager(Pool sharedPool, DbType dbType)
     {
         _sharedPool = sharedPool ?? throw new ArgumentNullException(nameof(sharedPool));
         _dbType = dbType;
     }
 
-    // Core Method: Get a connection for this client
+    /// <summary>
+    /// Gets a database connection from the shared pool for exclusive use by this client.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to abort the connection request</param>
+    /// <returns>A valid database connection</returns>
+    /// <exception cref="ObjectDisposedException">Thrown when PoolManager is disposed</exception>
+    /// <exception cref="InvalidOperationException">Thrown when client already has an active connection</exception>
+    /// <remarks>
+    /// The connection will automatically return to the pool when disposed or when the PoolManager is disposed.
+    /// </remarks>
     public async Task<Connection> GetConnectionAsync(
         CancellationToken cancellationToken = default)
     {
@@ -32,7 +51,13 @@ public sealed class PoolManager : IDisposable
         return _connection;
     }
 
-    // Return the connection to the shared pool
+    /// <summary>
+    /// Returns the current connection to the shared pool if one exists.
+    /// </summary>
+    /// <remarks>
+    /// This method is idempotent - it's safe to call multiple times.
+    /// The connection is automatically returned when PoolManager is disposed.
+    /// </remarks>
     public void ReturnConnection()
     {
         if (_connection == null || _isDisposed) return;
@@ -40,6 +65,9 @@ public sealed class PoolManager : IDisposable
         _connection = null;
     }
 
+    /// <summary>
+    /// Releases all resources used by the PoolManager, including returning any active connection.
+    /// </summary>
     public void Dispose()
     {
         if (_isDisposed) return;
