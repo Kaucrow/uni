@@ -1,10 +1,4 @@
-[database]
-host = "localhost"
-port = "5432"
-user = "postgres"
-password = "postgrespass"
-name = "bank"
-table = "mockdata"
+[test]
 test-users = 1000
 
 [pool]
@@ -15,11 +9,10 @@ size-increment = 5
 [db-mysql]
 host = "localhost"
 port = "3306"
-user = "mysql"
+user = "root"
 password = "mysqlpass"
 name = "bank"
 table = "mockdata"
-
 
 [db-postgres]
 host = "localhost"
@@ -28,5 +21,3 @@ user = "postgres"
 password = "postgrespass"
 name = "bank"
 table = "mockdata"
-test-users = 1000
-

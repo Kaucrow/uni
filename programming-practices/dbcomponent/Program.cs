@@ -1,21 +1,30 @@
-﻿using Npgsql;
+﻿using System.Data.Common;
+using Npgsql;
+using MySql;
 using Spectre.Console;
+using MySql.Data.MySqlClient;
 
 class Program
 {
     static async Task Main(string[] args)
     {
-        Console.WriteLine(Config.Queries.Test.Transaction.Record);
-
-        string connectionString = string.Format(
+        /*string postgresConnString = string.Format(
             "Host={0};Username={1};Password={2};Database={3}",
             Config.Database.Host,
             Config.Database.User,
             Config.Database.Password,
             Config.Database.Name
+        );*/
+
+        string mySqlConnString = string.Format(
+            "Server={0};Uid={1};Pwd={2};Database={3};",
+            Config.MySql.Host,
+            Config.MySql.User,
+            Config.MySql.Password,
+            Config.MySql.Name
         );
 
-        await Pool.Initialize(connectionString, Config.Pool.StartupSize, Config.Pool.MaxSize, Config.Pool.SizeIncrement);
+        await Pool.Initialize(DbType.MySQL, mySqlConnString, Config.Pool.StartupSize, Config.Pool.MaxSize, Config.Pool.SizeIncrement);
         var pool = Pool.Instance;
 
         // Create test table if not exists
@@ -25,26 +34,27 @@ class Program
         var transferAmount = 100m;
         var successCount = 0;
         var failureCount = 0;
-        var tasks = new Task[Config.Database.TestUsers];
+        var tasks = new Task[Config.Test.TestUsers];
 
         AnsiConsole.MarkupLine("[yellow]Starting transaction demo...[/]");
-        AnsiConsole.MarkupLine($"[green]Simulating {Config.Database.TestUsers} concurrent transfers of {transferAmount}[/]");
+        AnsiConsole.MarkupLine($"[green]Simulating {Config.Test.TestUsers} concurrent transfers of {transferAmount}[/]");
 
         // Simulate concurrent bank transfers
-        for (int i = 0; i < Config.Database.TestUsers; i++)
+        for (int i = 0; i < Config.Test.TestUsers; i++)
         {
             int userId = i;
             tasks[i] = Task.Run(async () =>
             {
-                using var db = new DBComponent(pool);
+                using var db = new DbComponent(pool);
                 try
                 {
-                    await db.Begin();
+                    await db.Begin(DbType.MySQL);
 
                     // 1. Check source account balance
                     var balance = (decimal?)await db.FetchOne(
+                        DbType.MySQL,
                         Config.Queries.Test.GetBalanceWithLock,
-                        new NpgsqlParameter("@id", userId % 2 + 1) // Alternate between accounts 1 and 2
+                        new MySqlParameter("@id", userId % 2 + 1) // Alternate between accounts 1 and 2
                     );
 
                     if (!balance.HasValue || balance < transferAmount)
@@ -54,24 +64,27 @@ class Program
 
                     // 2. Withdraw from source
                     await db.Execute(
+                        DbType.MySQL,
                         Config.Queries.Test.Withdraw,
-                        new NpgsqlParameter("@amount", transferAmount),
-                        new NpgsqlParameter("@id", userId % 2 + 1)
+                        new MySqlParameter("@amount", transferAmount),
+                        new MySqlParameter("@id", userId % 2 + 1)
                     );
 
                     // 3. Deposit to target
                     await db.Execute(
+                        DbType.MySQL,
                         Config.Queries.Test.Deposit,
-                        new NpgsqlParameter("@amount", transferAmount),
-                        new NpgsqlParameter("@id", (userId % 2) + 2) // Alternate between accounts 2 and 1
+                        new MySqlParameter("@amount", transferAmount),
+                        new MySqlParameter("@id", (userId % 2) + 2) // Alternate between accounts 2 and 1
                     );
 
                     // 4. Record transaction
                     await db.Execute(
+                        DbType.MySQL,
                         Config.Queries.Test.Transaction.Record,
-                        new NpgsqlParameter("@from", userId % 2 + 1),
-                        new NpgsqlParameter("@to", (userId % 2) + 2),
-                        new NpgsqlParameter("@amount", transferAmount)
+                        new MySqlParameter("@from", userId % 2 + 1),
+                        new MySqlParameter("@to", (userId % 2) + 2),
+                        new MySqlParameter("@amount", transferAmount)
                     );
 
                     await db.Commit();
@@ -90,17 +103,19 @@ class Program
         await Task.WhenAll(tasks);
 
         // Verify final balances
-        using (var db = new DBComponent(pool))
+        using (var db = new DbComponent(pool))
         {
             var account1 = await db.FetchOne(
+                DbType.MySQL,
                 Config.Queries.Test.GetBalance,
-                new NpgsqlParameter("@id", 1)
+                new MySqlParameter("@id", 1)
             );
             var account2 = await db.FetchOne(
+                DbType.MySQL,
                 Config.Queries.Test.GetBalance,
-                new NpgsqlParameter("@id", 2)
+                new MySqlParameter("@id", 2)
             );
-            var transactionCount = await db.FetchOne(Config.Queries.Test.Transaction.Count);
+            var transactionCount = await db.FetchOne(DbType.MySQL, Config.Queries.Test.Transaction.Count);
 
             AnsiConsole.MarkupLine("\n[underline]Final Balances:[/]");
             AnsiConsole.MarkupLine($"Account 1: [green]{account1}[/]");
@@ -120,14 +135,14 @@ class Program
 
     static async Task InitializeTestDatabase(Pool pool)
     {
-        using var db = new DBComponent(pool);
+        using var db = new DbComponent(pool);
 
-        await db.Execute(Config.Queries.InitializeDb.Accounts.Table);
+        await db.Execute(DbType.MySQL, Config.Queries.InitializeDb.Accounts.Table);
 
-        await db.Execute(Config.Queries.InitializeDb.Transactions.Table);
+        await db.Execute(DbType.MySQL, Config.Queries.InitializeDb.Transactions.Table);
 
         // Initialize test accounts if empty
-        var countResult = await db.FetchOne(Config.Queries.InitializeDb.Accounts.Count);
+        var countResult = await db.FetchOne(DbType.MySQL, Config.Queries.InitializeDb.Accounts.Count);
 
         int count = 0;
         if (countResult != null && !(countResult is DBNull))
@@ -137,15 +152,15 @@ class Program
 
         if (count == 0)
         {
-            await db.Execute(Config.Queries.InitializeDb.Accounts.Insert);
+            await db.Execute(DbType.MySQL, Config.Queries.InitializeDb.Accounts.Insert);
         }
         else
         {
             // Reset balances for demo
-            await db.Execute(Config.Queries.InitializeDb.Accounts.Reset);
+            await db.Execute(DbType.MySQL, Config.Queries.InitializeDb.Accounts.Reset);
         }
-        
+
         // Clear previous transactions
-        await db.Execute(Config.Queries.InitializeDb.Transactions.Reset);
+        await db.Execute(DbType.MySQL, Config.Queries.InitializeDb.Transactions.Reset);
     }
 }

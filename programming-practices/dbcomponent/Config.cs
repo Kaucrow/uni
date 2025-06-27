@@ -6,9 +6,11 @@ using System.Dynamic;
 public static class Config
 {
     private static readonly QueriesManager _queries = new QueriesManager("config/queries.yaml");
-
     public static dynamic Queries => _queries.Current;
-
+    public static TestConfig Test { get; }
+    public static PoolConfig Pool { get; }
+    public static PostgresConfig Postgres { get; }
+    public static MySqlConfig MySql { get; }
 
     static Config()
     {
@@ -16,16 +18,10 @@ public static class Config
         string tomlContent = File.ReadAllText(configPath);
         TomlTable tomlTable = Toml.ToModel(tomlContent);
 
-        if (tomlTable["db-postgres"] is TomlTable postgresTable)
+        if (tomlTable["test"] is TomlTable testTable)
         {
-            Database = new PostgresConfig(
-                host: (string)postgresTable["host"],
-                port: (string)postgresTable["port"],
-                user: (string)postgresTable["user"],
-                password: (string)postgresTable["password"],
-                name: (string)postgresTable["name"],
-                table: (string)postgresTable["table"],
-                testUsers: (int)(long)postgresTable["test-users"]
+            Test = new TestConfig(
+                testUsers: (int)(long)testTable["test-users"]
             );
         }
 
@@ -35,6 +31,18 @@ public static class Config
                 startupSize: (int)(long)poolTable["default-size"],
                 maxSize: (int)(long)poolTable["max-size"],
                 sizeIncrement: (int)(long)poolTable["size-increment"]
+            );
+        }
+
+        if (tomlTable["db-postgres"] is TomlTable postgresTable)
+        {
+            Postgres = new PostgresConfig(
+                host: (string)postgresTable["host"],
+                port: (string)postgresTable["port"],
+                user: (string)postgresTable["user"],
+                password: (string)postgresTable["password"],
+                name: (string)postgresTable["name"],
+                table: (string)postgresTable["table"]
             );
         }
 
@@ -51,12 +59,72 @@ public static class Config
         }
     }
 
+    public readonly struct TestConfig
+    {
+        public int TestUsers { get; }
 
-    public static PostgresConfig Database { get; }
-    public static PoolConfig Pool { get; }
-    public static MySqlConfig MySql { get; }
+        public TestConfig(
+            int testUsers
+        )
+        {
+            TestUsers = testUsers;
+        }
+    }
+
+    public readonly struct PoolConfig
+    {
+        public int StartupSize { get; }
+        public int MaxSize { get; }
+        public int SizeIncrement { get; }
+
+        public PoolConfig(
+            int startupSize,
+            int maxSize,
+            int sizeIncrement
+        )
+        {
+            StartupSize = startupSize;
+            MaxSize = maxSize;
+            SizeIncrement = sizeIncrement;
+        }
+    }
+
+    public readonly struct PostgresConfig
+    {
+        public string Host { get; }
+        public string Port { get; }
+        public string User { get; }
+        public string Password { get; }
+        public string Name { get; }
+        public string Table { get; }
+
+        public PostgresConfig(
+            string host,
+            string port,
+            string user,
+            string password,
+            string name,
+            string table
+        )
+        {
+            Host = host;
+            Port = port;
+            User = user;
+            Password = password;
+            Name = name;
+            Table = table;
+        }
+    }
+
     public readonly struct MySqlConfig
     {
+        public string Host { get; }
+        public string Port { get; }
+        public string User { get; }
+        public string Password { get; }
+        public string Name { get; }
+        public string Table { get; }
+
         public MySqlConfig(
             string host,
             string port,
@@ -73,61 +141,6 @@ public static class Config
             Name = name;
             Table = table;
         }
-
-        public string Host { get; }
-        public string Port { get; }
-        public string User { get; }
-        public string Password { get; }
-        public string Name { get; }
-        public string Table { get; }
-    }
-
-    public readonly struct PostgresConfig
-    {
-        public PostgresConfig(
-            string host,
-            string port,
-            string user,
-            string password,
-            string name,
-            string table,
-            int testUsers
-        )
-        {
-            Host = host;
-            Port = port;
-            User = user;
-            Password = password;
-            Name = name;
-            Table = table;
-            TestUsers = testUsers;
-        }
-
-        public string Host { get; }
-        public string Port { get; }
-        public string User { get; }
-        public string Password { get; }
-        public string Name { get; }
-        public string Table { get; }
-        public int TestUsers { get; }
-    }
-
-    public readonly struct PoolConfig
-    {
-        public PoolConfig(
-            int startupSize,
-            int maxSize,
-            int sizeIncrement
-        )
-        {
-            StartupSize = startupSize;
-            MaxSize = maxSize;
-            SizeIncrement = sizeIncrement;
-        }
-
-        public int StartupSize { get; }
-        public int MaxSize { get; }
-        public int SizeIncrement { get; }
     }
 
     private sealed class QueriesManager : IDisposable

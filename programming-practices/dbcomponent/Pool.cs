@@ -1,11 +1,10 @@
 using Npgsql;
 using MySql.Data.MySqlClient;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
-public enum DatabaseType
+public enum DbType
 {
-    PostgreSQL,
+    Postgres,
     MySQL
 }
 
@@ -14,7 +13,7 @@ public sealed class Pool : IDisposable
     private static readonly Lazy<Pool> _instance = new Lazy<Pool>(() => new Pool());
     private readonly CancellationTokenSource _disposeTokenSource = new();
     // Diccionario para pools por tipo de base de datos
-    private readonly Dictionary<DatabaseType, DatabasePool> _dbPools = new();
+    private readonly Dictionary<DbType, DatabasePool> _dbPools = new();
 
     // Clase interna para manejar cada tipo de base de datos
     private class DatabasePool
@@ -34,7 +33,7 @@ public sealed class Pool : IDisposable
 
     // Inicializa un pool para un tipo de base de datos
     public static async Task Initialize(
-        DatabaseType dbType, // Usar enum en vez de string
+        DbType dbType, // Usar enum en vez de string
         string connectionString,
         int startupConnections = 10,
         int maxConnections = 100,
@@ -46,7 +45,7 @@ public sealed class Pool : IDisposable
 
         var dbPool = new DatabasePool
         {
-            ConnectionString = connectionString + (dbType == DatabaseType.PostgreSQL ? ";Pooling=false;SSL Mode=Disable;TCP Keepalive=true;Keepalive=60;No Reset On Close=true" : ""),
+            ConnectionString = connectionString + (dbType == DbType.Postgres ? ";Pooling=false;SSL Mode=Disable;TCP Keepalive=true;Keepalive=60;No Reset On Close=true" : ""),
             MaxConnections = maxConnections,
             ConnectionIncrement = connectionIncrement,
             Semaphore = new SemaphoreSlim(maxConnections, maxConnections)
@@ -64,7 +63,7 @@ public sealed class Pool : IDisposable
     private Pool() { }
 
     // Obtiene una conexión para el tipo de base de datos
-    public async Task<Connection> GetConnectionAsync(DatabaseType dbType, CancellationToken cancellationToken = default)
+    public async Task<Connection> GetConnectionAsync(DbType dbType, CancellationToken cancellationToken = default)
     {
         if (!_dbPools.TryGetValue(dbType, out var dbPool))
             throw new InvalidOperationException($"Pool for '{dbType}' is not initialized");
@@ -120,19 +119,19 @@ public sealed class Pool : IDisposable
     }
 
     // Valida la conexión según el tipo de base de datos
-    private async Task<bool> ValidateConnection(DatabaseType dbType, Connection conn)
+    private async Task<bool> ValidateConnection(DbType dbType, Connection conn)
     {
         try
         {
-            if (dbType == DatabaseType.PostgreSQL)
+            if (dbType == DbType.Postgres)
             {
-                using var cmd = new NpgsqlCommand("SELECT 1", conn.DbConnection);
+                using var cmd = new NpgsqlCommand("SELECT 1", conn.DbConnection as NpgsqlConnection);
                 await cmd.ExecuteScalarAsync();
                 return true;
             }
-            else if (dbType == DatabaseType.MySQL)
+            else if (dbType == DbType.MySQL)
             {
-                using var cmd = new MySqlCommand("SELECT 1", conn.DbConnection);
+                using var cmd = new MySqlCommand("SELECT 1", conn.DbConnection as MySqlConnection);
                 await cmd.ExecuteScalarAsync();
                 return true;
             }
@@ -142,7 +141,7 @@ public sealed class Pool : IDisposable
     }
 
     // Devuelve la conexión al pool correspondiente
-    public void ReturnConnection(DatabaseType dbType, Connection connection)
+    public void ReturnConnection(DbType dbType, Connection connection)
     {
         if (connection == null) throw new ArgumentNullException(nameof(connection));
         if (!_dbPools.TryGetValue(dbType, out var dbPool))
@@ -153,15 +152,15 @@ public sealed class Pool : IDisposable
     }
 
     // Crea una nueva conexión según el tipo de base de datos
-    private async Task<Connection> CreateNewConnectionAsync(DatabaseType dbType, string connectionString)
+    private async Task<Connection> CreateNewConnectionAsync(DbType dbType, string connectionString)
     {
-        if (dbType == DatabaseType.PostgreSQL)
+        if (dbType == DbType.Postgres)
         {
             var conn = new NpgsqlConnection(connectionString);
             await conn.OpenAsync();
             return new Connection(conn);
         }
-        else if (dbType == DatabaseType.MySQL)
+        else if (dbType == DbType.MySQL)
         {
             var conn = new MySqlConnection(connectionString);
             await conn.OpenAsync();

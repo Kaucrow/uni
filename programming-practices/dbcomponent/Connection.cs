@@ -1,14 +1,16 @@
-using Npgsql;
+//using Npgsql;
+using System.Data.Common;
 
+/// <summary>
+/// A disposable wrapper for idk elatla
+/// </summary>
 public sealed class Connection : IDisposable
 {
-    private readonly NpgsqlConnection _dbConnection;
-
+    private readonly DbConnection _dbConnection;
     private Action? _returnHandler;
+    public DbConnection DbConnection => _dbConnection;
 
-    public NpgsqlConnection DbConnection => _dbConnection;
-
-    public Connection(NpgsqlConnection dbConnection)
+    public Connection(DbConnection dbConnection)
     {
         _dbConnection = dbConnection ?? throw new ArgumentNullException(nameof(dbConnection));
     }

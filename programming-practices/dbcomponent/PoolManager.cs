@@ -1,11 +1,11 @@
 public sealed class PoolManager : IDisposable
 {
     private readonly Pool _sharedPool;
-    private readonly DatabaseType _dbType;
+    private readonly DbType _dbType;
     private Connection? _connection; // Tracks this client's active connection
     private bool _isDisposed;
 
-    public PoolManager(Pool sharedPool, DatabaseType dbType)
+    public PoolManager(Pool sharedPool, DbType dbType)
     {
         _sharedPool = sharedPool ?? throw new ArgumentNullException(nameof(sharedPool));
         _dbType = dbType;
