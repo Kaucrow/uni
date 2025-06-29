@@ -1,0 +1,32 @@
+<div class="plant-clock">
+  <div class="pot"></div>
+  <div class="stem" [style.height.px]="plantState.height * 5 + 50"></div>
+  
+  <!-- Branches (alternating left/right) -->
+<div class="branch" *ngFor="let branch of plantState.branches; trackBy: trackByFn"
+     [style.left.%]="branch.side === 'left' ? 45 : 55"
+     [style.bottom.%]="branch.position * 100"
+     [style.width.px]="branch.length"
+     [style.transform]="'translateX(-50%) rotate(' + branch.angle + 'deg)'"></div>
+  
+  <!-- Leaves (on branches) -->
+  <div class="leaf" *ngFor="let leaf of plantState.leaves; trackBy: trackByFn"
+    [style.left.%]="leaf.x"
+    [style.top.%]="leaf.y"
+    [style.width.px]="leaf.size"
+    [style.height.px]="leaf.size"
+    [style.transform]="'translate(-50%, 700%) rotate(' + leaf.rotation + 'deg)'">
+  </div>
+  
+  <!-- Fruits (on branches) -->
+  <div class="fruit" *ngFor="let fruit of plantState.fruits; trackBy: trackByFn"
+    [style.left.%]="fruit.x"
+    [style.top.%]="fruit.y"
+    [style.width.px]="fruit.size"
+    [style.height.px]="fruit.size">
+  </div>
+  
+  <div class="time-display">
+    {{ plantState.currentHour | number:'2.0' }}:{{ plantState.currentMinutes | number:'2.0' }}:{{ plantState.currentSeconds | number:'2.0' }}
+  </div>
+</div>

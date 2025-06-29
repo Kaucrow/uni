@@ -1,0 +1,15 @@
+.letters-clock {
+  font-family: 'Arial', sans-serif;
+  font-size: 1.5rem;
+  color: #333;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.letters-clock p {
+  margin: 0;
+  line-height: 1.5;
+}

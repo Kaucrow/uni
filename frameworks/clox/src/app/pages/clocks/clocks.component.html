@@ -27,14 +27,19 @@
               <app-analog-clock [time]="currentTime"></app-analog-clock>
             }
             @case ('digital') {
-              <!--
               <app-digital-clock [time]="currentTime"></app-digital-clock>
-              -->
+            }
+            @case ('letters') {
+              <app-letters-clock [time]="currentTime"></app-letters-clock>
             }
             @case ('binary') {
-              <!--
               <app-binary-clock [time]="currentTime"></app-binary-clock>
-              -->
+            }
+            @case ('hex') {
+              <app-hex-clock [time]="currentTime"></app-hex-clock>
+            }
+            @case ('plant') {
+              <app-plant-clock [time]="currentTime"></app-plant-clock>
             }
           }
         </mat-card-content>

@@ -1,0 +1,21 @@
+.hex-clock {
+  font-family: 'Courier New', monospace;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #e74c3c;
+  background-color: #111;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  display: inline-block;
+  text-shadow: 0 0 5px #e74c3c;
+}
+
+.hex-digit {
+  letter-spacing: 0.1em;
+}
+
+.hex-separator {
+  color: #e74c3c;
+  opacity: 0.7;
+  margin: 0 0.1em;
+}

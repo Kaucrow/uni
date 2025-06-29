@@ -1,0 +1,23 @@
+.digital-clock {
+  font-family: 'Segment7Standard', monospace;
+  font-size: 3rem;
+  color: #e74c3c;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Fallback font for browsers without Segment7 */
+@font-face {
+  font-family: 'Segment7Standard';
+  src: url('data:font/woff2;charset=utf-8;base64,/* base64 encoded font here */') format('woff2');
+  font-weight: normal;
+  font-style: italic;
+}
+
+/* If you don't want to use Segment7, use this alternative style */
+.digital-clock:not(.segment7) {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.2em;
+}

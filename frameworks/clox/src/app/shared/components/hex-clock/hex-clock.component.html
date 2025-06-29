@@ -1,0 +1,11 @@
+<div class="hex-clock">
+  <span class="hex-digit">{{ hexTime.hours }}</span>
+  <span class="hex-separator" *ngIf="showColons">:</span>
+  <span class="hex-separator" *ngIf="!showColons">&nbsp;</span>
+  <span class="hex-digit">{{ hexTime.minutes }}</span>
+  <span *ngIf="showSeconds">
+    <span class="hex-separator" *ngIf="showColons">:</span>
+    <span class="hex-separator" *ngIf="!showColons">&nbsp;</span>
+    <span class="hex-digit">{{ hexTime.seconds }}</span>
+  </span>
+</div>

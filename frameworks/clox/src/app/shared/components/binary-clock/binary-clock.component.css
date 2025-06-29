@@ -1,0 +1,41 @@
+.binary-clock {
+  font-family: 'Courier New', monospace;
+  background-color: #111;
+  color: #333;
+  padding: 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.binary-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.binary-row:last-child {
+  margin-bottom: 0;
+}
+
+.binary-label {
+  color: #e74c3c;
+  margin-right: 0.5rem;
+  width: 1.5rem;
+}
+
+.binary-digit {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.3rem;
+  text-align: center;
+  line-height: 1.2rem;
+  background-color: #222;
+  border-radius: 2px;
+}
+
+.binary-digit.active {
+  background-color: #e74c3c;
+  color: #000;
+  font-weight: bold;
+}

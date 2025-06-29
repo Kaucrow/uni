@@ -1,0 +1,14 @@
+<div class="binary-clock">
+  <div class="binary-row">
+    <span class="binary-label">H:</span>
+    <span class="binary-digit" *ngFor="let bit of binaryTime.hours.split('')" [class.active]="bit === '1'">1</span>
+  </div>
+  <div class="binary-row">
+    <span class="binary-label">M:</span>
+    <span class="binary-digit" *ngFor="let bit of binaryTime.minutes.split('')" [class.active]="bit === '1'">1</span>
+  </div>
+  <div *ngIf="showSeconds" class="binary-row">
+    <span class="binary-label">S:</span>
+    <span class="binary-digit" *ngFor="let bit of binaryTime.seconds.split('')" [class.active]="bit === '1'">1</span>
+  </div>
+</div>

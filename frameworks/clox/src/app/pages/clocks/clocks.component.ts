@@ -6,6 +6,11 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { AnalogClockComponent } from '../../shared/components/analog-clock/analog-clock.component';
+import { DigitalClockComponent } from '../../shared/components/digital-clock/digital-clock.component';
+import { LettersClockComponent } from '../../shared/components/letters-clock/letters-clock.component';
+import { BinaryClockComponent } from '../../shared/components/binary-clock/binary-clock.component';
+import { HexClockComponent } from '../../shared/components/hex-clock/hex-clock.component';
+import { PlantClockComponent } from '../../shared/components/plant-clock/plant-clock.component';
 
 @Component({
   selector: 'app-clocks',
@@ -17,13 +22,18 @@ import { AnalogClockComponent } from '../../shared/components/analog-clock/analo
     MatGridListModule,
     MatButtonModule,
     MatInputModule,
-    AnalogClockComponent
+    AnalogClockComponent,
+    DigitalClockComponent,
+    LettersClockComponent,
+    BinaryClockComponent,
+    HexClockComponent,
+    PlantClockComponent
   ],
   templateUrl: './clocks.component.html',
   styleUrls: ['./clocks.component.scss']
 })
 export class ClocksComponent implements OnInit, OnDestroy {
-  @Input() clockCount: number = 4;
+  @Input() clockCount: number = 6;
   currentTime: Date = new Date();
   hours: number = this.currentTime.getHours();
   minutes: number = this.currentTime.getMinutes();
@@ -34,7 +44,7 @@ export class ClocksComponent implements OnInit, OnDestroy {
   isShowingCustomTime: boolean = false;
   private intervalId: any;
 
-  clockTypes: string[] = ['analog', 'digital', 'binary'];
+  clockTypes: string[] = ['analog', 'digital', 'letters', 'binary', 'hex', 'plant'];
   clocks: { type: string }[] = [];
 
   ngOnInit(): void {
