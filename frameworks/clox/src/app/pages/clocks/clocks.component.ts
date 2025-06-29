@@ -1,10 +1,12 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../../services/auth.service';
 import { AnalogClockComponent } from '../../shared/components/analog-clock/analog-clock.component';
 import { DigitalClockComponent } from '../../shared/components/digital-clock/digital-clock.component';
 import { LettersClockComponent } from '../../shared/components/letters-clock/letters-clock.component';
@@ -30,7 +32,7 @@ import { PlantClockComponent } from '../../shared/components/plant-clock/plant-c
     PlantClockComponent
   ],
   templateUrl: './clocks.component.html',
-  styleUrls: ['./clocks.component.scss']
+  styleUrls: ['./clocks.component.css']
 })
 export class ClocksComponent implements OnInit, OnDestroy {
   @Input() clockCount: number = 6;
@@ -42,12 +44,20 @@ export class ClocksComponent implements OnInit, OnDestroy {
   fixedMinutes: number = this.currentTime.getMinutes();
   fixedSeconds: number = this.currentTime.getSeconds();
   isShowingCustomTime: boolean = false;
+  authService = inject(AuthService);
+  router = inject(Router);
   private intervalId: any;
 
   clockTypes: string[] = ['analog', 'digital', 'letters', 'binary', 'hex', 'plant'];
   clocks: { type: string }[] = [];
 
   ngOnInit(): void {
+    setTimeout(() => {
+      if (!this.authService.currentUser()) {
+        this.router.navigateByUrl('/');
+      }
+    }, 0);
+
     this.initializeClocks();
     this.startClock();
   }

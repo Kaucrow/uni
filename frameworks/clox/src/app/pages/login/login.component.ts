@@ -58,6 +58,7 @@ export class LoginComponent implements OnInit {
       ).subscribe(result => {
         if (result.error) {
           this.errorMessage = result.error.message;
+          this.isSigningIn = false;
         } else {
           this.router.navigateByUrl('/');
         }
