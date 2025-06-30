@@ -1,9 +1,8 @@
 mod utils;
 
-extern crate js_sys;
-
 use wasm_bindgen::prelude::*;
 use std::fmt;
+use js_sys;
 
 #[wasm_bindgen]
 extern "C" {
