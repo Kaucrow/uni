@@ -2,7 +2,14 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use js_sys;
+use web_sys;
 use fixedbitset::FixedBitSet;
+
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    };
+}
 
 #[wasm_bindgen]
 pub struct Universe {
@@ -15,6 +22,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
+        utils::set_panic_hook();
+
         let width = 64;
         let height = 64;
 
@@ -24,7 +33,7 @@ impl Universe {
         for i in 0..size {
             cells.set(i, js_sys::Math::random() < 0.5);
         }
-    
+
         Universe {
             width,
             height,
@@ -94,7 +103,15 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
-                next.set(idx, match (cell, live_neighbors) {
+                log!(
+                    "cell[{}, {}] is initially {:?} and has {} live neighbors",
+                    row,
+                    col,
+                    cell,
+                    live_neighbors
+                );
+
+                let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours
                     // dies, as if caused by underpopulation
                     (true, x) if x < 2 => false,
@@ -109,7 +126,11 @@ impl Universe {
                     (false, 3) => true,
                     // All other cells remain in the same state
                     (otherwise, _) => otherwise
-                });
+                };
+
+                log!("It becomes {:?}", next_cell);
+
+                next.set(idx, next_cell);
             }
         }
 
