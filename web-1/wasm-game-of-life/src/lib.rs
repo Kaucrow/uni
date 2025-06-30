@@ -35,9 +35,29 @@ impl Universe {
     pub fn width(&self) -> u32 {
         self.width
     }
+
+    /// Set the width of the universe
+    ///
+    /// Resets all cells to the dead state
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        let new_size = (width * self.height) as usize;
+        self.cells = FixedBitSet::with_capacity(new_size);
+        self.cells.set_range(..new_size, false); // Ensure all bits are cleared
+    }
     
     pub fn height(&self) -> u32 {
         self.height
+    }
+
+    /// Set the height of the universe
+    ///
+    /// Resets all cells to the dead state
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        let new_size = (self.width * height) as usize;
+        self.cells = FixedBitSet::with_capacity(new_size);
+        self.cells.set_range(..new_size, false); // Ensure all bits are cleared
     }
 
     pub fn cells(&self) -> *const usize {
@@ -94,5 +114,21 @@ impl Universe {
         }
 
         self.cells = next;
+    }
+}
+
+impl Universe {
+    /// Get the dead and alive values of the entire universe
+    pub fn get_cells(&self) -> &FixedBitSet {
+        &self.cells
+    }
+
+    /// Set cells to be alive in a universe by passing the row and column
+    /// of each cell as an array
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter().cloned() {
+            let idx = self.get_index(row, col);
+            self.cells.set(idx, true);
+        }
     }
 }
