@@ -1,9 +1,11 @@
 mod utils;
+mod time_profiling;
 
 use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
 use fixedbitset::FixedBitSet;
+use time_profiling::Timer;
 
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -24,8 +26,8 @@ impl Universe {
     pub fn new() -> Self {
         utils::set_panic_hook();
 
-        let width = 64;
-        let height = 64;
+        let width = 128;
+        let height = 128;
 
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
@@ -69,6 +71,12 @@ impl Universe {
         self.cells.set_range(..new_size, false); // Ensure all bits are cleared
     }
 
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        let cell = self.cells[idx];
+        self.cells.set(idx, !cell);
+    }
+
     pub fn cells(&self) -> *const usize {
         self.cells.as_slice().as_ptr()
     }
@@ -95,6 +103,8 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
+        let _timer = Timer::new("Universe::tick");
+
         let mut next = self.cells.clone();
 
         for row in 0..self.height {
@@ -103,13 +113,13 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
-                log!(
+                /*log!(
                     "cell[{}, {}] is initially {:?} and has {} live neighbors",
                     row,
                     col,
                     cell,
                     live_neighbors
-                );
+                );*/
 
                 let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours
@@ -128,7 +138,7 @@ impl Universe {
                     (otherwise, _) => otherwise
                 };
 
-                log!("It becomes {:?}", next_cell);
+                //log!("It becomes {:?}", next_cell);
 
                 next.set(idx, next_cell);
             }
