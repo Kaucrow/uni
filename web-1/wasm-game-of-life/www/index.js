@@ -1,5 +1,5 @@
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg.wasm";
-import { Universe } from "wasm-game-of-life";
+import { Universe, Cell } from "wasm-game-of-life";
 import { fps } from "./time-profiling";
 
 const CELL_SIZE = 5; // px
@@ -22,15 +22,12 @@ let animationId = null;
 const playPauseButton = document.getElementById("play-pause");
 
 const renderLoop = () => {
-  //debugger;
-
-  fps.render()
-
+  console.time("frame");
+  fps.render();
   universe.tick();
-
   drawGrid();
   drawCells();
-
+  console.timeEnd("frame"); // Should be << 40ms
   animationId = requestAnimationFrame(renderLoop);
 };
 
@@ -80,15 +77,9 @@ const getIndex = (row, column) => {
   return row * width + column;
 };
 
-const bitIsSet = (n, arr) => {
-  const byte = Math.floor(n / 8);
-  const mask = 1 << (n % 8);
-  return (arr[byte] & mask) === mask;
-};
-
 const drawCells = () => {
   const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height / 8);
+  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
   ctx.beginPath();
 
@@ -110,7 +101,7 @@ const drawCells = () => {
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const idx = getIndex(row, col);
-      if (!bitIsSet(idx, cells)) {
+      if (cells[idx] !== Cell.Alive) {
         continue;
       }
 
@@ -122,7 +113,6 @@ const drawCells = () => {
       );
     }
   }
-
 };
 
 canvas.addEventListener("click", event => {

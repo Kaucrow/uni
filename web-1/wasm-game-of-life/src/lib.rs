@@ -4,7 +4,6 @@ mod time_profiling;
 use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
-use fixedbitset::FixedBitSet;
 use time_profiling::Timer;
 
 macro_rules! log {
@@ -14,10 +13,27 @@ macro_rules! log {
 }
 
 #[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cell {
+    Dead = 0,
+    Alive = 1,
+}
+
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        }
+    }
+}
+
+#[wasm_bindgen]
 pub struct Universe {
     width: u32,
     height: u32,
-    cells: FixedBitSet,
+    cells: Vec<Cell>,
 }
 
 // Public methods get exported to JavaScript
@@ -29,12 +45,15 @@ impl Universe {
         let width = 128;
         let height = 128;
 
-        let size = (width * height) as usize;
-        let mut cells = FixedBitSet::with_capacity(size);
-
-        for i in 0..size {
-            cells.set(i, js_sys::Math::random() < 0.5);
-        }
+        let cells = (0..width * height)
+            .map(|_i| {
+                if js_sys::Math::random() < 0.5 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
 
         Universe {
             width,
@@ -52,9 +71,7 @@ impl Universe {
     /// Resets all cells to the dead state
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
-        let new_size = (width * self.height) as usize;
-        self.cells = FixedBitSet::with_capacity(new_size);
-        self.cells.set_range(..new_size, false); // Ensure all bits are cleared
+        self.cells = (0..width * self.height).map(|_i| Cell::Dead).collect();
     }
     
     pub fn height(&self) -> u32 {
@@ -66,19 +83,16 @@ impl Universe {
     /// Resets all cells to the dead state
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
-        let new_size = (self.width * height) as usize;
-        self.cells = FixedBitSet::with_capacity(new_size);
-        self.cells.set_range(..new_size, false); // Ensure all bits are cleared
+        self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
     }
 
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
-        let cell = self.cells[idx];
-        self.cells.set(idx, !cell);
+        self.cells[idx].toggle();
     }
 
-    pub fn cells(&self) -> *const usize {
-        self.cells.as_slice().as_ptr()
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
     }
 
     fn get_index(&self, row: u32, column: u32) -> usize {
@@ -124,23 +138,23 @@ impl Universe {
                 let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours
                     // dies, as if caused by underpopulation
-                    (true, x) if x < 2 => false,
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
                     // Rule 2: Any live cell with two or three live neighbours
                     // lives on to the next generation
-                    (true, 2) | (true, 3) => true,
+                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
                     // Rule 3: Any live cell with more than three live
                     // neighbours dies, as if by overpopulation
-                    (true, x) if x > 3 => false,
+                    (Cell::Alive, x) if x > 3 => Cell::Dead,
                     // Rule 4: Any dead cell with exactly three live neighbours
                     // becomes a live cell, as if by reproduction
-                    (false, 3) => true,
+                    (Cell::Dead, 3) => Cell::Alive,
                     // All other cells remain in the same state
                     (otherwise, _) => otherwise
                 };
 
                 //log!("It becomes {:?}", next_cell);
 
-                next.set(idx, next_cell);
+                next[idx] = next_cell;
             }
         }
 
@@ -150,7 +164,7 @@ impl Universe {
 
 impl Universe {
     /// Get the dead and alive values of the entire universe
-    pub fn get_cells(&self) -> &FixedBitSet {
+    pub fn get_cells(&self) -> &[Cell] {
         &self.cells
     }
 
@@ -159,7 +173,7 @@ impl Universe {
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
         for (row, col) in cells.iter().cloned() {
             let idx = self.get_index(row, col);
-            self.cells.set(idx, true);
+            self.cells[idx] = Cell::Alive;
         }
     }
 }
