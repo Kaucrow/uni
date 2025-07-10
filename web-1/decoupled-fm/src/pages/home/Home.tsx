@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import ThemeToggle from '@/components/ThemeToggle';
 import DroppablePlaylist from '@/components/DroppablePlaylist';
 import DraggableSong from '@/components/DraggableSong';
-import { type Song } from '@/database/database';
+import { addSongToDB, getSongsFromDB, type Song } from '@/database/database';
+
+// Music metadata
+import { parseBlob, type IAudioMetadata } from 'music-metadata';
 
 // FontAwesome icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -18,6 +21,7 @@ import {
   faMagnifyingGlass,
   faPlus,
   faHouse,
+  faMusic,
 } from '@fortawesome/free-solid-svg-icons'
 
 // Shadcn UI components
@@ -48,20 +52,6 @@ interface Playlist {
   songIds: number[];
 }
 
-// --- Mock Data (Typed) ---
-const mockSongs: Song[] = [
-  { id: 1, title: 'Analog Dreams', artist: 'Synthwave Savior', duration: 3, name: 'a', data: new ArrayBuffer(), addedAt: new Date() },
-  { id: 2, title: 'Cybernetic Heartbeat', artist: 'Data Echo', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date() },
-  { id: 3, title: 'Neon Highway', artist: 'Retro Rider', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date() },
-  { id: 4, title: 'Ghost in the Machine', artist: 'Virtual Virtuoso', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date() },
-  { id: 5, title: 'Echoes of Tomorrow', artist: 'Future Funk', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-  { id: 6, title: 'Electric Serenity', artist: 'Dream Weaver', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-  { id: 7, title: 'Pixelated Paradise', artist: 'Game Core', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-  { id: 8, title: 'Binary Bliss', artist: 'Code Harmony', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-  { id: 9, title: 'Circuit Symphony', artist: 'Logic Loop', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-  { id: 10, title: 'Neural Network Blues', artist: 'AI Artist', duration: 1, name: 'a', data: new ArrayBuffer(), addedAt: new Date()},
-];
-
 const initialPlaylists: Playlist[] = [
   { id: 'p1', name: 'Chillwave Vibes', songIds: [1, 3] },
   { id: 'p2', name: 'Deep Cyberpunk', songIds: [2, 4] },
@@ -69,34 +59,104 @@ const initialPlaylists: Playlist[] = [
 ];
 
 const Home: React.FC = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [storedSongs, setStoredSongs] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(50);
-  const [searchResults, setSearchResults] = useState<Song[]>(mockSongs);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<Song[]>(storedSongs);
   const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [activeTab, setActiveTab] = useState<string>("songs"); // State to manage active tab
+  const audioRef = useRef<HTMLAudioElement>(new Audio()); // Audio element for playback
 
-  const draggedSong = activeId ? mockSongs.find(s => s.id === activeId) : null;
+  const draggedSong = activeId ? storedSongs.find(s => s.id === activeId) : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    const filteredSongs = mockSongs.filter(song =>
-      song.title.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query)
-    );
-    setSearchResults(filteredSongs);
+  // Function to load and display songs from IndexedDB
+  const loadSongs = useCallback(async () => {
+    try {
+      const songs: Song[] = await getSongsFromDB();
+      setStoredSongs(songs);
+
+      // Conditionally update searchResults based on searchQuery
+      if (searchQuery) {
+        const filtered = songs.filter(song =>
+          (song.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.album?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+        setSearchResults(filtered);
+      } else {
+        // If no search query, display all songs
+        setSearchResults(songs);
+      }
+    } catch (error: any) {
+      console.error(`Error loading songs: ${error}`);
+    }
+  }, []); // Dependency on searchQuery to re-run filtering if query changes
+
+  useEffect(() => {
+    loadSongs();
+  }, [loadSongs]);
+
+  // Handles the click on the "Add a Song" button
+  const handleAddSongButtonClick = (): void => {
+    fileInputRef.current?.click(); // Programmatically click the hidden file input
   };
 
-  const playSong = (song: Song) => {
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query) {
+      const filtered = storedSongs.filter(song =>
+        (song.title?.toLowerCase().includes(query.toLowerCase()) ||
+        song.artist?.toLowerCase().includes(query.toLowerCase()) ||
+        song.album?.toLowerCase().includes(query.toLowerCase()))
+      );
+      setSearchResults(filtered);
+    } else {
+      // If search query is empty, show all stored songs
+      setSearchResults(storedSongs);
+    }
+  };
+
+  const handlePlaySong = (song: Song): void => {
     setCurrentSong(song);
     setIsPlaying(true);
-    console.log(`Playing: ${song.title} by ${song.artist}`);
+
+    if (currentSong && currentSong.id === song.id) {
+      // If the same song is playing, pause it
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      // Create a Blob from the ArrayBuffer and then a URL
+      const audioBlob: Blob = new Blob([song.data], { type: 'audio/mpeg' }); // Adjust MIME type if necessary
+      const audioUrl: string = URL.createObjectURL(audioBlob);
+
+      audioRef.current.src = audioUrl;
+      setCurrentSong(song); // Set current playing song before play()
+      audioRef.current.play();
+
+      audioRef.current.onended = () => {
+        setCurrentSong(null);
+        URL.revokeObjectURL(audioUrl); // Clean up the URL after playback
+      };
+
+      audioRef.current.onerror = (e: string | Event) => {
+        console.error('Audio playback error:', e);
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+    }
   };
 
   const togglePlayPause = () => {
@@ -146,6 +206,122 @@ const Home: React.FC = () => {
 
         console.log(`Dropped song "${draggedSongData.title}" onto playlist "${targetPlaylistId}"`);
       }
+    }
+  };
+
+  // Handles the file selection from the input
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file: File | undefined = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    // Check if the file is an audio file
+    if (!file.type.startsWith('audio/')) {
+      //setMessage('Please select an audio file.');
+      return;
+    }
+
+    //setLoading(true);
+    //setMessage(`Adding "${file.name}"...`);
+
+    const reader: FileReader = new FileReader();
+
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
+      try {
+        const arrayBuffer: ArrayBuffer = e.target?.result as ArrayBuffer; // The audio data as ArrayBuffer
+        console.log('ArrayBuffer obtained from FileReader:', arrayBuffer);
+        console.log('ArrayBuffer byteLength:', arrayBuffer.byteLength);
+        let songTitle: string | undefined = file.name; // Default to filename
+        let songArtist: string | undefined;
+        let songAlbum: string | undefined;
+        let songDuration: number | undefined;
+        let songImageUrl: string | undefined; // New state for image URL
+
+        try {
+          // Attempt to parse metadata using music-metadata
+          const metadata: IAudioMetadata = await parseBlob(file);
+          if (metadata.common.title) {
+            songTitle = metadata.common.title;
+          }
+          if (metadata.common.artist) {
+            songArtist = metadata.common.artist;
+          }
+          if (metadata.common.album) {
+            songAlbum = metadata.common.album;
+          }
+          if (metadata.format.duration) {
+            songDuration = metadata.format.duration;
+          }
+
+          // Extract album art
+          if (metadata.common.picture && metadata.common.picture.length > 0) {
+            const picture = metadata.common.picture[0];
+            // music-metadata provides data as Uint8Array, convert to Blob then Data URL
+            const imageBlob = new Blob([picture.data], { type: picture.format });
+            const imageDataUrl = await new Promise<string>((resolve, reject) => {
+              const imageReader = new FileReader();
+              imageReader.onloadend = () => resolve(imageReader.result as string);
+              imageReader.onerror = reject;
+              imageReader.readAsDataURL(imageBlob);
+            });
+            songImageUrl = imageDataUrl;
+          }
+
+          //setMessage(`Extracted metadata for "${songTitle || file.name}".`);
+        } catch (metadataError) {
+          console.warn('Could not extract metadata from file:', metadataError);
+          //setMessage(`Could not extract metadata from "${file.name}". Adding with filename.`);
+        }
+
+        const songDataToStore: Omit<Song, 'id' | 'addedAt'> = {
+          name: file.name, // Keep original filename
+          data: arrayBuffer,
+          title: songTitle,
+          artist: songArtist ?? 'Unknown Artist',
+          album: songAlbum,
+          duration: songDuration,
+          imageUrl: songImageUrl, // Store the extracted image URL
+        };
+
+        await addSongToDB(songDataToStore);
+        //setMessage(`"${songTitle || file.name}" added successfully!`);
+        loadSongs(); // Reload the list of songs, which will now re-filter searchResults
+      } catch (error: any) {
+        //setMessage(`Failed to add "${file.name}": ${error}`);
+      } finally {
+        //setLoading(false);
+        // Clear the file input to allow selecting the same file again if needed
+        event.target.value = ''; // Reset file input
+      }
+    };
+
+    reader.onerror = () => {
+      //setMessage('Error reading file.');
+      //setLoading(false);
+      event.target.value = ''; // Reset file input
+    };
+
+    reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
+  };
+
+  // --- Utility Function for Duration Formatting ---
+  const formatDuration = (seconds?: number): string => {
+    if (seconds === undefined || isNaN(seconds) || seconds < 0) {
+      return 'N/A';
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+
+    const formattedMinutes = minutes < 10 && hours > 0 ? `0${minutes}` : `${minutes}`;
+    const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
+
+    if (hours > 0) {
+      return `${hours}:${formattedMinutes}:${formattedSeconds}`;
+    } else {
+      return `${minutes}:${formattedSeconds}`;
     }
   };
 
@@ -274,9 +450,16 @@ const Home: React.FC = () => {
                   <TabsContent value="songs" className="flex flex-col h-full">
                     <CardTitle className="flex-shrink-0">Available Songs</CardTitle>
                     <CardDescription className="flex-shrink-0">Drag a song into a playlist on the left.</CardDescription>
+                    <input
+                      type="file"
+                      accept="audio/*" // Accepts any audio file type
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden" // Hide the input visually
+                    />
                     {/* Add a Song*/ }
                     <div className="flex w-full">
-                      <Button className="mt-4">
+                      <Button onClick={handleAddSongButtonClick} className="mt-4">
                         <FontAwesomeIcon icon={faPlus} />
                         Add a Song
                       </Button>
@@ -292,8 +475,8 @@ const Home: React.FC = () => {
                                 <p className="text-sm text-neutral-600 dark:text-neutral-400">{song.artist}</p>
                               </div>
                               <div className="flex items-center space-x-3">
-                                <span className="text-sm text-neutral-500 dark:text-neutral-400">{song.duration}</span>
-                                <Button size="sm" onClick={() => playSong(song)}>
+                                <span className="text-sm text-neutral-500 dark:text-neutral-400">{formatDuration(song.duration)}</span>
+                                <Button size="sm" onClick={() => handlePlaySong(song)}>
                                   <FontAwesomeIcon icon={faPlay} />
                                 </Button>
                               </div>
@@ -313,7 +496,7 @@ const Home: React.FC = () => {
                         <CardDescription className="flex-shrink-0">{selectedPlaylist.songIds.length} songs</CardDescription>
                         <ScrollArea className="flex-grow pr-2 mt-4">
                           {selectedPlaylist.songIds.map((songId) => {
-                            const song = mockSongs.find(s => s.id === songId);
+                            const song = storedSongs.find(s => s.id === songId);
                             if (!song) return null;
 
                             return (
@@ -322,7 +505,7 @@ const Home: React.FC = () => {
                                   <p className="font-medium">{song.title}</p>
                                   <p className="text-sm text-neutral-600 dark:text-neutral-400">{song.artist}</p>
                                 </div>
-                                <Button size="sm" onClick={() => playSong(song)}>
+                                <Button size="sm" onClick={() => handlePlaySong(song)}>
                                   <FontAwesomeIcon icon={faPlay} />
                                 </Button>
                               </div>
@@ -359,13 +542,25 @@ const Home: React.FC = () => {
             flex-shrink-0
           "
         >
-          <div className="flex items-center space-x-4 w-1/3">
+          <div className="flex items-center space-x-4 w-1/3 ml-4">
             {currentSong ? (
               <>
                 <div className="w-12 h-12 bg-neutral-200 dark:bg-neutral-700 rounded-md flex-shrink-0 flex items-center justify-center">
-                  <span className="text-neutral-500 dark:text-neutral-400">🎶</span>
+                  {currentSong.imageUrl ? (
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
+                      <img
+                        src={currentSong.imageUrl}
+                        alt="Album Art"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-md bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center flex-shrink-0 shadow-md">
+                      <FontAwesomeIcon icon={faMusic} className="text-3xl text-neutral-500 dark:text-neutral-400" />
+                    </div>
+                  )}
                 </div>
-                <div>
+                <div className="ml-4 text-left">
                   <p className="font-semibold">{currentSong.title}</p>
                   <p className="text-sm text-neutral-600 dark:text-neutral-400">{currentSong.artist}</p>
                 </div>
@@ -400,7 +595,7 @@ const Home: React.FC = () => {
             />
             <div className="flex justify-between w-full text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               <span>0:00</span>
-              <span>{currentSong ? currentSong.duration : '0:00'}</span>
+              <span>{currentSong ? formatDuration(currentSong.duration) : '0:00'}</span>
             </div>
           </div>
 

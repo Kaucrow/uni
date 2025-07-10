@@ -9,6 +9,7 @@ export interface Song {
   artist: string; // Extracted artist
   album?: string; // Extracted album
   duration?: number; // Duration in seconds
+  imageUrl?: string;
   data: ArrayBuffer;
   addedAt: Date;
 }
