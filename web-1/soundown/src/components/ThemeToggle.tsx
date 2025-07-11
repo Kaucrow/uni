@@ -37,10 +37,8 @@ const ThemeToggle = () => {
       "
     >
       {theme === 'light' ? (
-        // Moon icon for light mode (to switch to dark)
         <FontAwesomeIcon icon={faMoon} />
       ) : (
-        // Sun icon for dark mode (to switch to light)
         <FontAwesomeIcon icon={faSun} />
       )}
     </Button>

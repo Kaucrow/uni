@@ -1,7 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 
 interface DroppablePlaylistProps {
-  id: string;
+  id: number;
   children: React.ReactNode;
 }
 
@@ -16,7 +16,7 @@ const DroppablePlaylist: React.FC<DroppablePlaylistProps> = ({ id, children }) =
   return (
     <div
       ref={setNodeRef}
-      className={`relative p-2 rounded-md transition-all duration-200 ${
+      className={`relative flex flex-row p-2 rounded-md transition-all duration-200 items-center ${
         isCurrentlyOver
           ? 'bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500'
           : 'hover:bg-neutral-100 dark:hover:bg-neutral-700'
