@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import ThemeToggle from '@/components/ThemeToggle';
 import DroppablePlaylist from '@/components/DroppablePlaylist';
 import DraggableSong from '@/components/DraggableSong';
+import LogoIcon from '@/components/LogoIcon';
 
 // IndexedDB
 import {
@@ -88,7 +89,6 @@ const Home: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Song[]>(storedSongs);
 
   // Playback progress
-  const [currentTime, setCurrentTime] = useState<number>(0);
   const [sliderValue, setSliderValue] = useState<number>(0);
 
   // Checkbox selection
@@ -109,7 +109,14 @@ const Home: React.FC = () => {
       const updatedPlaylist = playlists.find(p => p.id === selectedPlaylist.id);
       setSelectedPlaylist(updatedPlaylist || null);
     }
-  }, [playlists]); 
+  }, [playlists]);
+
+  // Sync audio volume when volume state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 150;
+    }
+  }, [volume]);
 
   // Function to load and display songs from IndexedDB
   const loadSongs = useCallback(async () => {
@@ -154,19 +161,16 @@ const Home: React.FC = () => {
   // --- Audio Playback Event Handlers ---
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current.duration > 0) {
-      setCurrentTime(audioRef.current.currentTime);
       const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
       setSliderValue(progress);
     }
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
-    setCurrentTime(0);
     setSliderValue(0);
   }, []);
 
   const handleAudioEnded = useCallback(() => {
-    console.log("!! DEBUG");
     console.log(isPlaylistMode);
     console.log(playingPlaylist);
     console.log(currentSongIndex);
@@ -189,7 +193,6 @@ const Home: React.FC = () => {
   const endPlayback = () => {
     setCurrentSong(null);
     setIsPlaying(false);
-    setCurrentTime(0);
     setSliderValue(0);
     // Clean up Blob URL if it was created
     if (audioRef.current.src.startsWith('blob:')) {
@@ -242,7 +245,6 @@ const Home: React.FC = () => {
     // Set playlist context if provided
     if (playlist) {
       setIsPlaylistMode(true);
-      console.log("!! SET PLAYLIST MODE");
     } else {
       setIsPlaylistMode(false); // Single-song mode
     }
@@ -269,7 +271,6 @@ const Home: React.FC = () => {
     const songsInPlaylist = getSongsFromPlaylist(playlist, storedSongs);
     if (songsInPlaylist.length === 0) return;
     
-    console.log("!! SONGS NUM: " + songsInPlaylist.length);
     setPlayingPlaylist(songsInPlaylist);
     setCurrentSongIndex(0);
     handlePlaySong(songsInPlaylist[0], playlist);
@@ -566,36 +567,7 @@ const Home: React.FC = () => {
           "
         >
           <div className="flex flex-row items-center gap-2">
-            <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-              width="50.000000pt" height="50.000000pt" viewBox="0 0 200.000000 200.000000"
-              preserveAspectRatio="xMidYMid meet">
-              <metadata>
-                Created by potrace 1.10, written by Peter Selinger 2001-2011
-              </metadata>
-              <g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)"
-                fill="#fca800" stroke="none">
-                <path d="M705 1710 c4 -30 15 -122 26 -204 10 -82 19 -157 19 -166 0 -10 -18
-                -24 -48 -36 l-49 -21 -55 66 c-31 36 -66 77 -78 91 -11 14 2 -21 30 -78 30
-                -62 48 -110 45 -120 -4 -9 -21 -29 -39 -44 l-33 -28 -89 48 c-192 104 -309
-                164 -299 155 6 -6 62 -56 125 -112 63 -57 134 -121 158 -143 l43 -40 -25 -61
-                c-24 -63 -45 -169 -29 -154 4 5 8 12 9 15 7 70 71 181 146 254 159 156 393
-                189 593 84 88 -46 181 -151 223 -253 53 -125 47 -293 -15 -416 -13 -26 -21
-                -53 -17 -60 4 -7 4 -9 -1 -5 -10 9 -37 -11 -30 -22 2 -4 -14 -22 -36 -40 -22
-                -17 -38 -34 -35 -37 3 -3 16 6 30 20 14 14 41 38 60 52 20 15 38 36 42 47 8
-                25 39 20 144 -23 41 -17 102 -41 135 -54 33 -12 85 -32 115 -43 30 -12 47 -16
-                37 -9 -325 223 -359 249 -352 272 3 11 8 32 11 48 l7 27 111 1 111 1 -107 31
-                -108 30 0 57 0 56 209 79 c116 44 209 81 207 82 -1 2 -38 -2 -82 -7 -399 -52
-                -363 -54 -393 15 l-24 55 79 76 79 75 -80 -42 c-44 -23 -88 -47 -97 -53 -13
-                -8 -26 -2 -61 30 -25 21 -46 43 -46 48 -1 5 19 52 43 105 52 113 136 292 144
-                306 11 20 -10 -4 -99 -116 -50 -63 -113 -142 -140 -176 l-50 -61 -61 21 -60
-                22 5 115 5 115 -36 -113 -36 -113 -64 3 -64 3 -74 195 c-42 107 -77 197 -80
-                200 -3 2 -2 -20 1 -50z"/>
-                <path d="M402 800 c0 -14 2 -19 5 -12 2 6 2 18 0 25 -3 6 -5 1 -5 -13z"/>
-                <path d="M400 750 c0 -7 3 -10 7 -7 3 4 3 10 0 14 -4 3 -7 0 -7 -7z"/>
-                <path d="M1174 338 c-4 -7 -3 -8 4 -4 7 4 12 9 12 12 0 8 -9 4 -16 -8z"/>
-                <path d="M1114 308 c-4 -7 -3 -8 4 -4 7 4 12 9 12 12 0 8 -9 4 -16 -8z"/>
-              </g>
-            </svg>
+            {LogoIcon} 
             <h1 className="text-4xl font-bold tracking-tight select-none">
               Soundown
             </h1>
