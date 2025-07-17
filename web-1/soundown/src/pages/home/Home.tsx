@@ -36,6 +36,7 @@ import {
   faHouse,
   faMusic,
   faTrash,
+  faCompactDisc,
 } from '@fortawesome/free-solid-svg-icons'
 
 // Shadcn UI components
@@ -568,11 +569,12 @@ const Home: React.FC = () => {
         >
           <div className="flex flex-row items-center gap-2">
             {LogoIcon} 
-            <h1 className="text-4xl font-bold tracking-tight select-none">
+            <h1 className="title pt-2 text-4xl font-bold tracking-tight select-none">
               Soundown
             </h1>
           </div>
           <nav className="flex items-center space-x-4">
+            {/*}
             <a
               href="/"
               className="
@@ -583,85 +585,110 @@ const Home: React.FC = () => {
             >
               Home
             </a>
+            */}
             <ThemeToggle />
           </nav>
         </header>
 
         {/* Main Content Area */}
         <main className="flex flex-1 overflow-hidden p-6 gap-6">
-          {/* Left Sidebar - Navigation & Playlists */}
-          <Card className="w-1/4 flex flex-col p-4 flex-shrink-0">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle>Navigation</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col space-y-3 items-start">
-              <a className="w-full" href="/">
-                <Button className="min-w-full justify-start text-left" variant="ghost">
-                  <FontAwesomeIcon icon={faHouse} />
-                  Home
-                </Button>
-              </a>
-              <Separator className="flex-shrink-0" />
-              <div className="h-4 flex mt-4 mb-4 items-center gap-3">
-                <CardTitle className="text-left">Playlists</CardTitle>
-                {checkedPlaylists.length > 0 && (
-                  <Button onClick={handleDeleteSelectedPlaylists} variant="ghost" className="h-12">
-                    <FontAwesomeIcon icon={faTrash} size="2x"/>
-                  </Button>
-                )}
+          {/* Left Sidebar - Current Song Info, Navigation & Playlists */}
+          <div className="w-1/4 flex flex-col flex-shrink-0 gap-6">
+            {/* Playing Song Info */}
+            <Card className="flex flex-col flex-shrink-0 gap-0 p-4 min-h-92">
+              <div className="aspect-square w-full border-1 flex flex-col items-center justify-center">
+                {!currentSong || !currentSong.imageUrl ?
+                  <FontAwesomeIcon icon={faCompactDisc} size="4x" className="text-neutral-300 dark:text-neutral-800"/>
+                  :
+                  <img
+                    src={currentSong.imageUrl}
+                    alt="Album Art"
+                    className="w-full h-full object-contain"
+                  />
+                }
               </div>
-              <div className="w-full">
-                {playlists.map((playlist) => (
-                  <div key={playlist.id} className="flex flex-row max-h-full w-full items-center">
-                    <Checkbox
-                      id={`checkbox-${playlist.id}`}
-                      checked={checkedPlaylists.includes(playlist.id!)} // Use non-null assertion as id will exist
-                      onCheckedChange={(checked) => handlePlaylistCheckboxChange(playlist.id!, checked as boolean)}
-                      className="mr-3"
-                    />
-                    <div className="w-full">
-                    <DroppablePlaylist key={playlist.id} id={playlist.id}>
-                      <Button
-                        variant="ghost"
-                        className="justify-start w-full"
-                        onClick={() => {
-                          setSelectedPlaylist(playlist);
-                          setActiveTab("playlists"); // Automatically switch to playlists tab
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faCircle} size="2xs" className="mt-[0.25rem]"/>
-                        <p className="truncate font-medium text-base">
-                          {playlist.name}
-                        </p>
-                      </Button>
-                    </DroppablePlaylist>
-                    </div>
-                  </div>
-                ))}
-              </div >
+              {currentSong &&
+                <div>
+                  <p className="mt-2">{currentSong.title}</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">{currentSong.artist}</p>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400">{currentSong.album}</p>
+                </div>
+              }
+            </Card>
 
-              <div className="flex justify-center w-full flex-shrink-0 mt-4 mb-4">
-                {!isCreatingPlaylist ? (
-                  <Button onClick={() => setIsCreatingPlaylist(true)}>
-                    <FontAwesomeIcon icon={faPlus}/>
-                    Create New Playlist
+            <Card className="h-full">
+              <CardHeader className="flex-shrink-0">
+                <CardTitle>Navigation</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col space-y-3 items-start">
+                <a className="w-full" href="/">
+                  <Button className="min-w-full justify-start text-left" variant="ghost">
+                    <FontAwesomeIcon icon={faHouse} />
+                    Home
                   </Button>
-                ) : (
-                  <div className="text-left">
-                    <Input
-                      id="playlist-name"
-                      type="text"
-                      placeholder="Playlist name"
-                      value={newPlaylistName}
-                      onChange={(e) => setNewPlaylistName(e.target.value)}
-                      onBlur={handleCreatePlaylist}
-                      className="flex-grow"
-                    />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </a>
+                <Separator className="flex-shrink-0" />
+                <div className="h-4 flex mt-4 mb-4 items-center gap-3">
+                  <CardTitle className="text-left">Playlists</CardTitle>
+                  {checkedPlaylists.length > 0 && (
+                    <Button onClick={handleDeleteSelectedPlaylists} variant="ghost" className="h-12">
+                      <FontAwesomeIcon icon={faTrash} size="2x"/>
+                    </Button>
+                  )}
+                </div>
+                <div className="w-full">
+                  {playlists.map((playlist) => (
+                    <div key={playlist.id} className="flex flex-row max-h-full w-full items-center">
+                      <Checkbox
+                        id={`checkbox-${playlist.id}`}
+                        checked={checkedPlaylists.includes(playlist.id!)} // Use non-null assertion as id will exist
+                        onCheckedChange={(checked) => handlePlaylistCheckboxChange(playlist.id!, checked as boolean)}
+                        className="mr-3"
+                      />
+                      <div className="w-full">
+                      <DroppablePlaylist key={playlist.id} id={playlist.id}>
+                        <Button
+                          variant="ghost"
+                          className="justify-start w-full"
+                          onClick={() => {
+                            setSelectedPlaylist(playlist);
+                            setActiveTab("playlists"); // Automatically switch to playlists tab
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faCircle} size="2xs" className="mt-[0.25rem]"/>
+                          <p className="truncate font-medium text-base">
+                            {playlist.name}
+                          </p>
+                        </Button>
+                      </DroppablePlaylist>
+                      </div>
+                    </div>
+                  ))}
+                </div >
+
+                <div className="flex justify-center w-full flex-shrink-0 mt-4 mb-4">
+                  {!isCreatingPlaylist ? (
+                    <Button onClick={() => setIsCreatingPlaylist(true)}>
+                      <FontAwesomeIcon icon={faPlus}/>
+                      Create New Playlist
+                    </Button>
+                  ) : (
+                    <div className="text-left">
+                      <Input
+                        id="playlist-name"
+                        type="text"
+                        placeholder="Playlist name"
+                        value={newPlaylistName}
+                        onChange={(e) => setNewPlaylistName(e.target.value)}
+                        onBlur={handleCreatePlaylist}
+                        className="flex-grow"
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Main Content - Search & Playlists */}
           <div className="flex-1 flex flex-col gap-6 overflow-hidden">
@@ -700,25 +727,7 @@ const Home: React.FC = () => {
                   <TabsContent value="songs" className="flex flex-col h-full">
                     <CardTitle className="flex-shrink-0">Available Songs</CardTitle>
                     <CardDescription className="flex-shrink-0">Drag a song into a playlist on the left.</CardDescription>
-                    <input
-                      type="file"
-                      accept="audio/*" // Accepts any audio file type
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden" // Hide the input visually
-                    />
-                    {/* Add a Song*/ }
-                    <div className="flex flex-row items-center justify-start gap-3 mt-4">
-                      <Button onClick={handleAddSongButtonClick}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        Add a Song
-                      </Button>
-                      {checkedSongs.length > 0 &&
-                        <Button onClick={handleDeleteSelectedSongs} variant="ghost">
-                          <FontAwesomeIcon size="2x" icon={faTrash}/>
-                        </Button>
-                      }
-                    </div>
+
                     {/* Available Songs */}
                     <div className="flex-grow max-h-full mt-4">
                       {searchResults.length > 0 ? (
@@ -753,6 +762,27 @@ const Home: React.FC = () => {
                       ) : (
                         <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8">No songs found.</p>
                       )}
+                    </div>
+                    {/* Song Actions Row */ }
+                    <div className="flex flex-row items-center justify-start gap-3 mt-4">
+                      {/* Invisible File Selector */}
+                      <input
+                        type="file"
+                        accept="audio/*" // Accepts any audio file type
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden" // Hide the input visually
+                      />
+                      {/* Add Song Button */}
+                      <Button onClick={handleAddSongButtonClick}>
+                        <FontAwesomeIcon icon={faPlus} />
+                        Add a Song
+                      </Button>
+                      {/* Delete Song Button */}
+                      <Button onClick={handleDeleteSelectedSongs} variant="ghost">
+                        <FontAwesomeIcon size="2x" icon={faTrash} color="var(--destructive)"/>
+                        <span className="text-[var(--destructive)]">Delete Selected</span>
+                      </Button>
                     </div>
                   </TabsContent>
 
