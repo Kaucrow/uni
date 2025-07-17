@@ -37,6 +37,7 @@ import {
   faMusic,
   faTrash,
   faCompactDisc,
+  faBars,
 } from '@fortawesome/free-solid-svg-icons'
 
 // Shadcn UI components
@@ -567,14 +568,17 @@ const Home: React.FC = () => {
             flex-shrink-0
           "
         >
-          <div className="flex flex-row items-center gap-2">
+          <div className="ml-2 flex flex-row items-center gap-0">
+            <h1 className="title pt-2 mr-[-0.15em] text-4xl font-bold tracking-tight select-none text-custom-accent">
+              S
+            </h1>
             {LogoIcon} 
-            <h1 className="title pt-2 text-4xl font-bold tracking-tight select-none">
-              Soundown
+            <h1 className="title pt-2 ml-[-0.15em] text-4xl font-bold tracking-tight select-none text-custom-accent">
+              undown
             </h1>
           </div>
           <nav className="flex items-center space-x-4">
-            {/*}
+            {/*
             <a
               href="/"
               className="
@@ -617,10 +621,11 @@ const Home: React.FC = () => {
             </Card>
 
             <Card className="h-full">
-              <CardHeader className="flex-shrink-0">
-                <CardTitle>Navigation</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col space-y-3 items-start">
+              <CardContent className="flex flex-col space-y-3 items-left">
+                <div className="flex text-left pl-4 mb-6 text-custom-accent gap-2">
+                  <FontAwesomeIcon icon={faBars}/>
+                  <CardTitle>Navigation</CardTitle>
+                </div>
                 <a className="w-full" href="/">
                   <Button className="min-w-full justify-start text-left" variant="ghost">
                     <FontAwesomeIcon icon={faHouse} />
@@ -628,13 +633,9 @@ const Home: React.FC = () => {
                   </Button>
                 </a>
                 <Separator className="flex-shrink-0" />
-                <div className="h-4 flex mt-4 mb-4 items-center gap-3">
-                  <CardTitle className="text-left">Playlists</CardTitle>
-                  {checkedPlaylists.length > 0 && (
-                    <Button onClick={handleDeleteSelectedPlaylists} variant="ghost" className="h-12">
-                      <FontAwesomeIcon icon={faTrash} size="2x"/>
-                    </Button>
-                  )}
+                <div className="flex text-left pl-4 mt-2 mb-4 text-custom-accent gap-2">
+                  <FontAwesomeIcon icon={faCompactDisc}/>
+                  <CardTitle>Playlists</CardTitle>
                 </div>
                 <div className="w-full">
                   {playlists.map((playlist) => (
@@ -666,12 +667,20 @@ const Home: React.FC = () => {
                   ))}
                 </div >
 
-                <div className="flex justify-center w-full flex-shrink-0 mt-4 mb-4">
+                <div className="flex justify-center w-full flex-shrink-0 mt-2 mb-2">
                   {!isCreatingPlaylist ? (
-                    <Button onClick={() => setIsCreatingPlaylist(true)}>
-                      <FontAwesomeIcon icon={faPlus}/>
-                      Create New Playlist
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                      <Button onClick={() => setIsCreatingPlaylist(true)}>
+                        <FontAwesomeIcon icon={faPlus}/>
+                        Create New Playlist
+                      </Button>
+                      {checkedPlaylists.length > 0 &&
+                        <Button variant="ghost" onClick={handleDeleteSelectedPlaylists}>
+                          <FontAwesomeIcon className="text-destructive" icon={faTrash} size="2x"/>
+                          <span className="text-destructive">Delete Selected</span>
+                        </Button>
+                      }
+                    </div>
                   ) : (
                     <div className="text-left">
                       <Input
@@ -699,16 +708,17 @@ const Home: React.FC = () => {
                 <CardDescription>Find your next favorite track.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex space-x-2">
+                <div className="relative flex space-x-2">
+                  <FontAwesomeIcon
+                    className="absolute left-3 top-2.5 text-custom-accent pointer-events-none"
+                    icon={faMagnifyingGlass}
+                  />
                   <Input
                     type="text"
                     placeholder="Search songs, artists..."
                     onChange={handleSearch}
-                    className="flex-grow"
+                    className="pl-10"
                   />
-                  <Button>
-                    <FontAwesomeIcon icon={faMagnifyingGlass} className="w-5 h-5"/>
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -725,7 +735,7 @@ const Home: React.FC = () => {
 
                 <CardContent className="flex-grow pt-0 pb-4 overflow-hidden">
                   <TabsContent value="songs" className="flex flex-col h-full">
-                    <CardTitle className="flex-shrink-0">Available Songs</CardTitle>
+                    <CardTitle>Available Songs</CardTitle>
                     <CardDescription className="flex-shrink-0">Drag a song into a playlist on the left.</CardDescription>
 
                     {/* Available Songs */}
@@ -750,7 +760,7 @@ const Home: React.FC = () => {
                                     <span className="text-sm text-neutral-500 dark:text-neutral-400">
                                       {formatDuration(song.duration)}
                                     </span>
-                                    <Button size="sm" onClick={() => handlePlaySong(song)} className="flex-shrink-0">
+                                    <Button bgColor="custom-accent" size="sm" onClick={() => handlePlaySong(song)} className="flex-shrink-0">
                                       <FontAwesomeIcon icon={faPlay} />
                                     </Button>
                                   </div>
@@ -779,10 +789,12 @@ const Home: React.FC = () => {
                         Add a Song
                       </Button>
                       {/* Delete Song Button */}
-                      <Button onClick={handleDeleteSelectedSongs} variant="ghost">
-                        <FontAwesomeIcon size="2x" icon={faTrash} color="var(--destructive)"/>
-                        <span className="text-[var(--destructive)]">Delete Selected</span>
-                      </Button>
+                      {checkedSongs.length > 0 &&
+                        <Button onClick={handleDeleteSelectedSongs} variant="ghost">
+                          <FontAwesomeIcon size="2x" icon={faTrash} className="text-destructive"/>
+                          <span className="text-destructive">Delete Selected</span>
+                        </Button>
+                      }
                     </div>
                   </TabsContent>
 
@@ -802,7 +814,7 @@ const Home: React.FC = () => {
                                   <p className="font-medium">{song.title}</p>
                                   <p className="text-sm text-neutral-600 dark:text-neutral-400">{song.artist}</p>
                                 </div>
-                                <Button size="sm" onClick={() => handlePlaySong(song)}>
+                                <Button bgColor="custom-accent" size="sm" onClick={() => handlePlaySong(song)}>
                                   <FontAwesomeIcon icon={faPlay} />
                                 </Button>
                               </div>
@@ -812,7 +824,8 @@ const Home: React.FC = () => {
                             <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8">Drag songs into the playlist to add them!</p>
                           )}
                         </ScrollArea>
-                        <Button onClick={() => handlePlayPlaylist(selectedPlaylist)} className="mt-4 w-full flex-shrink-0">
+                        <Button bgColor="custom-accent" onClick={() => handlePlayPlaylist(selectedPlaylist)} className="mt-4 w-full flex-shrink-0">
+                          <FontAwesomeIcon icon={faPlay}/>
                           Play All
                         </Button>
                       </>
@@ -872,17 +885,17 @@ const Home: React.FC = () => {
 
           <div className="flex-1 flex flex-col items-center max-w-lg">
             <div className="flex items-center space-x-4 mb-2">
-              <Button variant="ghost" size="icon">
+              <Button color="custom-accent" variant="ghost" size="icon">
                 <FontAwesomeIcon icon={faBackwardStep} />
               </Button>
-              <Button size="lg" onClick={togglePlayPause}>
+              <Button bgColor="custom-accent" size="lg" onClick={togglePlayPause}>
                 {isPlaying ? (
                   <FontAwesomeIcon icon={faPause} />
                 ) : (
                   <FontAwesomeIcon icon={faPlay} />
                 )}
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button color="custom-accent" variant="ghost" size="icon">
                 <FontAwesomeIcon icon={faForwardStep} />
               </Button>
             </div>
@@ -894,6 +907,8 @@ const Home: React.FC = () => {
               onValueChange={handleSliderChange}
               className="w-full"
               aria-label="Progress"
+              rangeClassName='bg-custom-accent'
+              thumbClassName='bg-custom-accent border-transparent'
             />
             <div className="flex justify-between w-full text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               <span>
@@ -909,7 +924,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3 w-1/3 justify-end">
-            <Button variant="ghost" size="icon">
+            <Button color="custom-accent" variant="ghost" size="icon">
               <FontAwesomeIcon icon={faVolumeHigh} />
             </Button>
             <Slider
@@ -919,6 +934,8 @@ const Home: React.FC = () => {
               onValueChange={(val: number[]) => setVolume(val[0])}
               className="w-24"
               aria-label="Volume"
+              rangeClassName="bg-custom-accent"
+              thumbClassName="bg-custom-accent border-transparent"
             />
             <Button variant="ghost" size="icon">
               <FontAwesomeIcon icon={faShuffle} />
@@ -933,8 +950,12 @@ const Home: React.FC = () => {
       <DragOverlay>
         {draggedSong ? (
           <div className="bg-white dark:bg-neutral-800 rounded-md shadow-lg p-3 flex items-center space-x-3 border border-blue-500 dark:border-blue-400">
-            <div className="w-8 h-8 bg-neutral-200 dark:bg-neutral-700 rounded-sm flex-shrink-0 flex items-center justify-center">
-              <span className="text-neutral-500 dark:text-neutral-400 text-lg">🎵</span>
+            <div className="w-8 h-8 bg-neutral-200 dark:bg-neutral-700 rounded-sm flex-shrink-0 flex items-center justify-center overflow-hidden">
+              <img
+                src={draggedSong.imageUrl}
+                alt="Album Art"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="text-left">
               <p className="font-medium text-neutral-900 dark:text-neutral-50">{draggedSong.title}</p>

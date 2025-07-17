@@ -35,22 +35,33 @@ const buttonVariants = cva(
   }
 )
 
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+  color?: string
+  bgColor?: string
+}
+
 function Button({
   className,
   variant,
   size,
   asChild = false,
+  color,
+  bgColor,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
+}: ButtonProps) {
   const Comp = asChild ? Slot : "button"
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size }),
+          color && `text-${color} hover:text-${color}/90`,
+          bgColor && `bg-${bgColor} hover:bg-${bgColor}/90`,
+          className
+        )}
       {...props}
     />
   )
