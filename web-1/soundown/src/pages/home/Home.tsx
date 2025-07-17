@@ -173,9 +173,6 @@ const Home: React.FC = () => {
   }, []);
 
   const handleAudioEnded = useCallback(() => {
-    console.log(isPlaylistMode);
-    console.log(playingPlaylist);
-    console.log(currentSongIndex);
     if (isPlaylistMode && playingPlaylist && currentSongIndex !== null) {
       const nextIndex = currentSongIndex + 1;
 
@@ -193,15 +190,19 @@ const Home: React.FC = () => {
   }, [isPlaylistMode, playingPlaylist, currentSongIndex]); 
 
   const endPlayback = () => {
+    audioRef.current.pause();
+
     setCurrentSong(null);
     setIsPlaying(false);
     setSliderValue(0);
     // Clean up Blob URL if it was created
     if (audioRef.current.src.startsWith('blob:')) {
       URL.revokeObjectURL(audioRef.current.src);
+      audioRef.current.removeAttribute('src');
     }
-    audioRef.current.src = ''; // Clear source
-  }
+
+    audioRef.current.currentTime = 0;
+  };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -239,11 +240,6 @@ const Home: React.FC = () => {
   };
 
   const handlePlaySong = (song: Song, playlist?: Playlist): void => {
-    // Clean up previous Blob URL if any
-    if (audioRef.current.src.startsWith('blob:')) {
-      URL.revokeObjectURL(audioRef.current.src);
-    }
-
     // Set playlist context if provided
     if (playlist) {
       setIsPlaylistMode(true);
@@ -276,6 +272,24 @@ const Home: React.FC = () => {
     setPlayingPlaylist(songsInPlaylist);
     setCurrentSongIndex(0);
     handlePlaySong(songsInPlaylist[0], playlist);
+  };
+
+  const handlePrevSong = () => {
+    if (!currentSongIndex) {
+      endPlayback();
+    } else {
+      if (playingPlaylist) {
+        const prevSongIndex = currentSongIndex - 1;
+
+        // Update state and play the previous song
+        setCurrentSongIndex(prevSongIndex);
+        handlePlaySong(playingPlaylist[prevSongIndex], selectedPlaylist ?? undefined);
+      }
+    }
+  };
+
+  const handleNextSong = () => {
+    handleAudioEnded();
   };
 
   // Handles slider value change (seeking)
@@ -622,7 +636,7 @@ const Home: React.FC = () => {
 
             <Card className="h-full">
               <CardContent className="flex flex-col space-y-3 items-left">
-                <div className="flex text-left pl-4 mb-6 text-custom-accent gap-2">
+                <div className="flex text-left pl-4 mb-6 text-custom-accent gap-2 select-none">
                   <FontAwesomeIcon icon={faBars}/>
                   <CardTitle>Navigation</CardTitle>
                 </div>
@@ -633,7 +647,7 @@ const Home: React.FC = () => {
                   </Button>
                 </a>
                 <Separator className="flex-shrink-0" />
-                <div className="flex text-left pl-4 mt-2 mb-4 text-custom-accent gap-2">
+                <div className="flex text-left pl-4 mt-2 mb-4 text-custom-accent gap-2 select-none">
                   <FontAwesomeIcon icon={faCompactDisc}/>
                   <CardTitle>Playlists</CardTitle>
                 </div>
@@ -703,7 +717,7 @@ const Home: React.FC = () => {
           <div className="flex-1 flex flex-col gap-6 overflow-hidden">
             {/* Search Bar */}
             <Card className="p-4 w-full">
-              <CardHeader>
+              <CardHeader className="select-none">
                 <CardTitle>Search for Music</CardTitle>
                 <CardDescription>Find your next favorite track.</CardDescription>
               </CardHeader>
@@ -728,15 +742,17 @@ const Home: React.FC = () => {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 overflow-hidden">
                 <CardHeader className="flex-shrink-0 pb-0">
                   <TabsList>
-                    <TabsTrigger value="songs">Songs</TabsTrigger>
-                    <TabsTrigger value="playlists">View Playlist</TabsTrigger>
+                    <TabsTrigger value="songs" className="cursor-pointer">Songs</TabsTrigger>
+                    <TabsTrigger value="playlists" className="cursor-pointer">View Playlist</TabsTrigger>
                   </TabsList>
                 </CardHeader>
 
                 <CardContent className="flex-grow pt-0 pb-4 overflow-hidden">
                   <TabsContent value="songs" className="flex flex-col h-full">
-                    <CardTitle>Available Songs</CardTitle>
-                    <CardDescription className="flex-shrink-0">Drag a song into a playlist on the left.</CardDescription>
+                    <div className="select-none">
+                      <CardTitle>Available Songs</CardTitle>
+                      <CardDescription className="flex-shrink-0">Drag a song into a playlist on the left.</CardDescription>
+                    </div>
 
                     {/* Available Songs */}
                     <div className="flex-grow max-h-full mt-4">
@@ -770,7 +786,7 @@ const Home: React.FC = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8">No songs found.</p>
+                        <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8 select-none">No songs found.</p>
                       )}
                     </div>
                     {/* Song Actions Row */ }
@@ -821,7 +837,7 @@ const Home: React.FC = () => {
                             )
                           })}
                           {selectedPlaylist.songIds.length === 0 && (
-                            <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8">Drag songs into the playlist to add them!</p>
+                            <p className="text-center text-neutral-500 dark:text-neutral-400 mt-8 select-none">Drag songs into the playlist to add them!</p>
                           )}
                         </ScrollArea>
                         <Button bgColor="custom-accent" onClick={() => handlePlayPlaylist(selectedPlaylist)} className="mt-4 w-full flex-shrink-0">
@@ -879,13 +895,13 @@ const Home: React.FC = () => {
                 </div>
               </>
             ) : (
-              <p className="text-neutral-500 dark:text-neutral-400">No song playing</p>
+              <p className="text-neutral-500 dark:text-neutral-400 select-none">No song playing</p>
             )}
           </div>
 
           <div className="flex-1 flex flex-col items-center max-w-lg">
             <div className="flex items-center space-x-4 mb-2">
-              <Button color="custom-accent" variant="ghost" size="icon">
+              <Button color="custom-accent" variant="ghost" size="icon" onClick={handlePrevSong}>
                 <FontAwesomeIcon icon={faBackwardStep} />
               </Button>
               <Button bgColor="custom-accent" size="lg" onClick={togglePlayPause}>
@@ -895,7 +911,7 @@ const Home: React.FC = () => {
                   <FontAwesomeIcon icon={faPlay} />
                 )}
               </Button>
-              <Button color="custom-accent" variant="ghost" size="icon">
+              <Button color="custom-accent" variant="ghost" size="icon" onClick={handleNextSong}>
                 <FontAwesomeIcon icon={faForwardStep} />
               </Button>
             </div>
