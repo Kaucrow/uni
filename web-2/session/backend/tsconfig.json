@@ -9,6 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "esModuleInterop": true,
     "target": "esnext",
     "types": [],
     // For nodejs:
@@ -43,11 +44,12 @@
     "skipLibCheck": true,
 
     // Other
-    "baseUrl": "./src",
     "paths": {
-        "$routes/*": ["./src/routes/*"],
-        "$config/*": ["./src/config/*"],
-        "$types/*": ["./src/types/*"]
-    }
+        "@/*": ["./src/*"],
+        "@routes/*": ["./src/routes/*"],
+        "@server-types/*": ["./src/types/*"],
+        "@const/*": ["./src/constants/*"],
+        "@config/*": ["./src/config/*"],
+    },
   }
 }

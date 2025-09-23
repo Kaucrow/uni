@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { UserData } from '../types/user.d.js';
+import type { UserData } from '@server-types/user.js';
 
 const router = Router();
 

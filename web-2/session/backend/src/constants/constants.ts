@@ -1,7 +1,7 @@
 import fs from 'fs';
 import toml from 'toml';
 
-import type { Config, Server, Frontend, Session } from '../types/config.js';
+import type { Config, Server, Frontend, Session } from '@server-types/config.js';
 
 const config: Config = toml.parse(fs.readFileSync('./src/config/config.toml', 'utf-8'));
 

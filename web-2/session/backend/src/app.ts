@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import sessionMiddleware from './config/session.js';
+import sessionMiddleware from '@config/session.js';
 
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/user.js';
+import authRoutes from '@routes/auth.js';
+import userRoutes from '@routes/user.js';
 
-import { frontend } from './constants/constants.js';
+import { frontend } from '@const/constants.js';
 
 const app = express();
 
