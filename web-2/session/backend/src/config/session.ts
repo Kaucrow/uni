@@ -1,8 +1,8 @@
 import session from 'express-session';
-import { SESSION_SECRET } from './constants.ts';
+import { session as sessionFileConfig } from '../constants/constants.js';
 
 export const sessionConfig = {
-  secret: SESSION_SECRET,
+  secret: sessionFileConfig.secret,
   resave: false,
   saveUninitialized: false,
   cookie: {

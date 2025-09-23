@@ -1,6 +1,11 @@
 import express from 'express';
-import sessionMiddleware from './config/session.ts';
-import authRoutes from './routes/auth.ts';
+import cors from 'cors';
+import sessionMiddleware from './config/session.js';
+
+import authRoutes from './routes/auth.js';
+import userRoutes from './routes/user.js';
+
+import { frontend } from './constants/constants.js';
 
 const app = express();
 
@@ -10,8 +15,17 @@ app.use(sessionMiddleware);
 // Middleware to parse JSON from request body
 app.use(express.json());
 
+// CORS
+app.use(cors({
+  origin: frontend.url,
+  credentials: true
+}));
+
 // Auth routes
 app.use('/auth', authRoutes);
+
+// User routes
+app.use('/', userRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
