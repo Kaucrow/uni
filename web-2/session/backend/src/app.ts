@@ -1,16 +1,17 @@
 import express from 'express';
 import cors from 'cors';
-import sessionMiddleware from '@config/session.js';
 
 import authRoutes from '@routes/auth/auth.js';
 import userRoutes from '@routes/user/user.js';
 
 import { frontend } from '@const/constants.js';
 
+import { session } from '@components/session.js';
+
 const app = express();
 
 // Session middleware
-app.use(sessionMiddleware);
+session.enable(app, 'paseto');
 
 // Middleware to parse JSON from request body
 app.use(express.json());

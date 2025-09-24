@@ -1,8 +1,8 @@
 -- Users
 INSERT INTO security.user (email, passwd, "name", surname) VALUES
-    ('user1@example.com', 'hashed_password_1', 'Miles', 'Edgeworth'),
-    ('user2@example.com', 'hashed_password_2', 'Nick', 'Wright'),
-    ('user3@example.com', 'hashed_password_3', 'Maya', 'Fey')
+    ('user1@example.com', 'hashed_password_1', 'Nick', 'Wright'),
+    ('user2@example.com', 'hashed_password_2', 'Maya', 'Fey'),
+    ('user3@example.com', 'hashed_password_3', 'Miles', 'Edgeworth')
 ON CONFLICT (email) DO NOTHING;
 
 -- Profiles

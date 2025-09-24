@@ -12,9 +12,12 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.9",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "paseto-ts": "^2.0.5",
     "pg": "^8.16.3",
     "toml": "^3.0.0",
     "yaml": "^2.8.1",

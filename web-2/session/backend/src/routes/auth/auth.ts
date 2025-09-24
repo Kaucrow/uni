@@ -3,6 +3,7 @@ import { dbPool } from '@global/database.js';
 import { queries } from '@const/constants.js';
 import { userSchema } from '@schemas/db/security.js';
 import type { UUID } from 'crypto';
+import { session } from '@components/session.js';
 
 const router = Router();
 
@@ -19,10 +20,9 @@ router.post('/login', (req, res) => {
 
       // If the password matches, create the session
       if (user.passwd === password) {
-        // Create a session with the DB user id
-        req.session.userId = user.user_id as UUID;
+        // Create a session with the DB user ID
+        session.create(req, res, user.user_id as UUID);
 
-        // Set the session cookie
         return res.status(200).json({ message: 'Login successful' });
       }
     }
@@ -33,16 +33,15 @@ router.post('/login', (req, res) => {
 });
 
 // Logout endpoint
-router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    // Logout failed
-    if (err) {
-      return res.status(500).json({ message: 'Could not log out' });
-    }
-
+router.post('/logout', async (req, res) => {
+  try {
+    await session.destroy(req, res);
     // Logout succeeded
     res.status(200).json({ message: 'Logout successful' });
-  });
+  } catch (err) {
+    // Logout failed
+    return res.status(500).json({ message: 'Could not log out' });
+  }
 });
 
 export default router;
