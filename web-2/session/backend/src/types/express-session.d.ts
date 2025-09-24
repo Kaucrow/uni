@@ -3,6 +3,6 @@ import type { UUID } from 'crypto';
 
 declare module 'express-session' {
   interface SessionData {
-    sessionId: UUID;
+    userId: UUID;
   };
 };

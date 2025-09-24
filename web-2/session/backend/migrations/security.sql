@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS security.user (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(50) UNIQUE NOT NULL,
-    passwd TEXT NOT NULL
+    passwd TEXT NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS security.profile (

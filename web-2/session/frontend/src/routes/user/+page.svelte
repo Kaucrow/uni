@@ -11,6 +11,7 @@
   import type { UserData } from "$types/responses/user";
 
   let userName: string | null = $state(null);
+  let userSurname: string | null = $state(null);
 
   onMount(async () => {
     console.log('Getting user data...');
@@ -37,6 +38,7 @@
 
     const userData: UserData = await res.json();
     userName = userData.name;
+    userSurname = userData.surname;
   });
 
   async function logOut() {

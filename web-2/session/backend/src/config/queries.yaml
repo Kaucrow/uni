@@ -1,3 +1,5 @@
 user:
   getUserByEmail: |
     SELECT * FROM security.user WHERE email = $1
+  getUserById: |
+    SELECT * FROM security.user WHERE user_id = $1

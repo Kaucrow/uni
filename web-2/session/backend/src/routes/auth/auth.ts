@@ -2,8 +2,7 @@ import { Router } from 'express';
 import { dbPool } from '@global/database.js';
 import { queries } from '@const/constants.js';
 import { userSchema } from '@schemas/db/security.js';
-import { sessions } from '@global/session.js';
-import crypto, { type UUID } from 'crypto';
+import type { UUID } from 'crypto';
 
 const router = Router();
 
@@ -20,12 +19,10 @@ router.post('/login', (req, res) => {
 
       // If the password matches, create the session
       if (user.passwd === password) {
-        // Create a session ID and store it as the key to our database user ID
-        const sessionId = crypto.randomUUID();
-        sessions.set(sessionId, user.user_id as UUID);
+        // Create a session with the DB user id
+        req.session.userId = user.user_id as UUID;
 
         // Set the session cookie
-        req.session.sessionId = sessionId;
         return res.status(200).json({ message: 'Login successful' });
       }
     }
@@ -38,9 +35,12 @@ router.post('/login', (req, res) => {
 // Logout endpoint
 router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
+    // Logout failed
     if (err) {
       return res.status(500).json({ message: 'Could not log out' });
     }
+
+    // Logout succeeded
     res.status(200).json({ message: 'Logout successful' });
   });
 });

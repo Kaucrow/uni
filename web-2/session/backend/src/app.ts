@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import sessionMiddleware from '@config/session.js';
 
-import authRoutes from '@routes/auth.js';
-import userRoutes from '@routes/user.js';
+import authRoutes from '@routes/auth/auth.js';
+import userRoutes from '@routes/user/user.js';
 
 import { frontend } from '@const/constants.js';
 
