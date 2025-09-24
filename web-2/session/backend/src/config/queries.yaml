@@ -1,0 +1,3 @@
+user:
+  getUserByEmail: |
+    SELECT * FROM security.user WHERE email = $1

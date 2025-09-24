@@ -4,7 +4,14 @@ export interface Config {
     host: string,
     port: number
   },
-  session: Session
+  session: Session,
+  database: {
+    host: string,
+    port: number,
+    name: string,
+    user: string,
+    password: string
+  },
 };
 
 export interface Server {
@@ -19,4 +26,13 @@ export interface Frontend {
 
 export interface Session {
   secret: string
+};
+
+export interface Database {
+  host: string,
+  port: number,
+  name: string,
+  user: string,
+  password: string,
+  url: string
 };

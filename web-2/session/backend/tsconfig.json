@@ -50,6 +50,8 @@
         "@server-types/*": ["./src/types/*"],
         "@const/*": ["./src/constants/*"],
         "@config/*": ["./src/config/*"],
+        "@global/*": ["./src/global/*"],
+        "@schemas/*": ["./src/schemas/*"],
     },
   }
 }

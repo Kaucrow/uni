@@ -4,7 +4,7 @@ import type { UserData } from '@server-types/user.js';
 const router = Router();
 
 router.get('/user-data', (req, res) => {
-  if (req.session.userId) {
+  if (req.session.id) {
     let userData: UserData = {
       name: "Elatla"
     };

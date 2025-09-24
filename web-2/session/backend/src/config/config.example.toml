@@ -1,0 +1,16 @@
+[server]
+port = 8000
+
+[frontend]
+host = 'localhost'
+port = 5173
+
+[session]
+secret = '' # Session cookie signing key
+
+[database]
+host = 'localhost'
+port = 5432
+name = ''
+user = ''
+password = ''
