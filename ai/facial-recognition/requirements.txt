@@ -1,0 +1,10 @@
+streamlit
+psycopg2-binary 
+opencv-python 
+numpy 
+pillow
+pandas
+plotly-express
+deepface
+tf-keras
+scikit-learn
