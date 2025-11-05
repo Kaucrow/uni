@@ -1,0 +1,53 @@
+# Ignore local environment and secret files
+# Local env files (do not commit secrets)
+.env
+*.env
+.env.*
+
+# Specific whatsapp config
+whatsapp_config.env
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated data files (do not commit)
+data/*.xlsx
+data/*.csv
+data/*.parquet
+!data/.gitkeep
+
+# Outputs
+outputs/
+!outputs/.gitkeep
+PyWhatKit_DB.txt
+outputs/simulation_log.txt
+outputs/simulation_message.txt
+outputs/graphs/
+outputs/wa_error_*.png
+
+# Selenium
+whatsapp_profile/
+chromedriver.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.code-workspace
+
+# Virtual environments
+.venv/
+venv/
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Logs
+*.log
+logs/
